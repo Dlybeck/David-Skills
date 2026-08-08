@@ -4,21 +4,21 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/block-dangerous-git.py" },
-          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/require-committed-claim.py" }
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/block-dangerous-git.py\"" },
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/require-committed-claim.py\"" }
         ]
       },
       {
-        "matcher": "Workflow",
+        "matcher": "Workflow|Agent",
         "hooks": [
-          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/require-committed-claim.py" }
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/require-committed-claim.py\"" }
         ]
       }
     ],
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/delegate-recommend.py" }
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/delegate-recommend.py\"" }
         ]
       }
     ]

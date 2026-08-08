@@ -17,10 +17,12 @@ the plugin:
   before delegate dispatch.
 - `delegate-recommend.py` may recommend the delegate workflow for a matching router model.
 
-Claude Code auto-discovers `hooks/hooks.json` at the plugin root. Do not also declare the same
-hooks file in the plugin manifest; doing both can load it twice and make the plugin fail.
+Claude Code and Codex auto-discover `hooks/hooks.json` at the plugin root. Do not also declare the
+same hooks file in either plugin manifest; doing both can load it twice. Codex requires the user
+to review and trust plugin hooks before they run.
 
 These are intentionally global personal defaults. A project that should not inherit them should
-not enable the plugin wholesale; use skills.sh to install selected skills instead.
+not enable the plugin wholesale; use skills.sh to install selected skills instead. A skills-only
+copy deliberately carries no hooks.
 
 Every hook change must add or update table-driven coverage in `hooks/test_hooks.py`.

@@ -70,13 +70,14 @@ Let them edit before writing.
 
 ### 4. Write
 
-**Pick the file to edit:**
+**Pick the file the active harness reads:**
 
-- If `CLAUDE.md` exists, edit it.
-- Else if `AGENTS.md` exists, edit it.
-- If neither exists, ask the user which one to create — don't pick for them.
+- In Codex, prefer `AGENTS.md`.
+- In Claude Code, prefer `CLAUDE.md`.
+- If the active harness is not identifiable, use the only one of those files that exists; if both or neither exist, ask the user which should be canonical.
+- If the active harness's preferred file is missing but the other file exists, show the user what you found and ask whether to edit the existing file or create the preferred one. Do not silently write instructions for the wrong harness.
 
-Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) — always edit the one that's already there.
+A symlink counts as the file it names. Never replace a symlink with a regular file, and never write the same block to both files.
 
 If an `## Agent skills` block already exists in the chosen file, update its contents in-place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
 

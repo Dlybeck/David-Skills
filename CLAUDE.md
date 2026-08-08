@@ -1,7 +1,7 @@
 ## Identity
 
 David Skills is the private personal distribution of this skills collection. The package,
-Claude Code plugin, marketplace, repository links, and installation commands all use the
+Claude Code and Codex plugins, marketplaces, repository links, and installation commands all use the
 `david-skills` / `Dlybeck/David-Skills` identity. ADR 0006 records the personal-practice
 boundary. External work-only adapters and rollout/session artifacts are intentionally excluded.
 
@@ -15,9 +15,9 @@ Skills are organized into bucket folders under `skills/`:
 - `in-progress/` — beta: available for direct installation and testing, not shipped in the plugin
 - `deprecated/` — no longer used
 
-Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array (the Claude Code plugin ships exactly the promoted set). Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either.
+Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array. The Codex manifest ships the portable promoted subset: everything except `ask-claude`, `autopilot`, and `yolopilot`, whose naming or continuation mechanics are Claude-specific. Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either plugin.
 
-Install commands are copied verbatim from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` makes the repo its own single-plugin marketplace and is the canonical private-plugin route. Run `claude plugin validate . --strict` after touching either manifest. Why a Claude plugin but not (yet) a Codex one lives in [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+Install commands are copied from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` make this repository a private single-plugin marketplace for each harness. Run `npm test` after changing a manifest, catalog, skill path, or hook; also run `claude plugin validate . --strict` when Claude Code is available. The distribution decision lives in [.agents/adr/0002](./.agents/adr/0002-ship-as-private-agent-plugins.md).
 
 Each skill entry in the top-level `README.md` must link the skill name to its `SKILL.md`.
 
@@ -29,7 +29,7 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 
 [`ask-claude`](./skills/engineering/ask-claude/SKILL.md) is the router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `ask-claude`'s `SKILL.md` and update it so the map stays accurate — a new skill it never mentions, or a stale one it still routes to, is a router that lies.
 
-To (re)link every skill into the local harness skill directories (`~/.claude/skills`, `~/.agents/skills`), run `scripts/link-skills.sh`. Each entry is a symlink into this repo, so a `git pull` keeps installed skills current; re-run the script after adding, removing, or renaming a skill.
+`scripts/link-skills.sh` is a maintainer-only development convenience, never the installation route shown to users. It links only promoted skills and must refuse to replace a real directory on collision. Production installs come from the private GitHub remote through the relevant plugin marketplace.
 
 ## Agent skills
 

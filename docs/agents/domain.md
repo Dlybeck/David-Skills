@@ -19,7 +19,7 @@ Single-context repo (this one, and most repos):
 ├── CONTEXT.md
 ├── .agents/adr/
 │   ├── 0001-explicit-setup-pointer-only-for-hard-dependencies.md
-│   ├── 0002-ship-as-a-claude-code-plugin.md
+│   ├── 0002-ship-as-private-agent-plugins.md
 │   └── 0003-plugin-root-hook-for-personal-git-workflow.md
 └── skills/
 ```

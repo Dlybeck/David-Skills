@@ -24,7 +24,7 @@ The line between `research` and `grill-with-docs` is the **shelf life of what co
 
 The defining move is that the reading runs as a **background agent**. You keep working; it goes off, follows each claim to its primary source, writes one Markdown file, and reports back. Research is legwork you delegate, not thinking you outsource — you get a document to grill, plan, or design against, and you still make the call.
 
-The delegation is unguarded, and the background agent can spawn a further background agent of its own. This is the skill's best-documented rough edge.
+Delegation is one level deep. The first agent spawns exactly one worker; a worker that detects it is already delegated performs the reading directly and is explicitly forbidden from invoking `research` or spawning again.
 
 Where the file lands is decided by the repo, not by the skill: it matches whatever convention already exists for notes, and if there is none it picks somewhere sensible and tells you where. It writes one file per run.
 
@@ -32,9 +32,7 @@ Where the file lands is decided by the repo, not by the skill: it matches whatev
 
 **It spawned a second research agent — is that meant to happen?**
 
-No. This is an open bug, [issue #530](https://github.com/mattpocock/skills/issues/530). The skill tells its caller to spin up a background agent but does not restrict the agent type, so the agent it spawns is a `general-purpose` one that holds the `Agent` tool and the same instructions — and fires them again. One reporter measured a single research task costing roughly 450k [tokens](https://www.aihero.dev/ai-coding-dictionary/token) across three overlapping runs, with the duplicate finishing half an hour later entirely out of view. It reproduces outside Claude Code too; the same nesting was confirmed in Codex with GPT-5.6-sol. There is no shipped fix. Users have patched their own installed copy with a line telling an agent that is already a [subagent](https://www.aihero.dev/ai-coding-dictionary/subagent) to do the work itself, which helps but is instruction-level, not structural. Watch your background task list after invoking, and stop the duplicate.
-
-The opposite failure exists as well: if your own global instructions forbid an agent from re-delegating work, the background agent will politely decline the task and the skill quietly does nothing.
+No. Upstream [issue #530](https://github.com/mattpocock/skills/issues/530) documented recursive fan-out, including one run measured at roughly 450k [tokens](https://www.aihero.dev/ai-coding-dictionary/token). David Skills carries the instruction-level fix: an agent that is already a [subagent](https://www.aihero.dev/ai-coding-dictionary/subagent) must research directly and must not delegate again. If you still see more than one worker, stop the duplicate and report the harness and model so the guard can be tightened.
 
 **Where should the file live — and should I commit it?**
 

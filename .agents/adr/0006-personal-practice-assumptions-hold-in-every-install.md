@@ -11,8 +11,8 @@ tier (`autopilot`, `yolopilot`) and plugin-root hooks assumed the second.
 assumptions such as:
 
 - The branch model `main ← dev ← feature/**`, with `main` human-gated.
-- Always-on plugin-root hooks (ADR 0003) enforcing the two rules that prose alone failed to
-  protect.
+- Plugin-root hooks (ADR 0003), active after the harness's trust step, enforcing the two rules
+  that prose alone failed to protect.
 - Personal defaults for issue tracking, triage, and documentation.
 
 It does not permit assumptions that are true only in this development checkout. The bounding

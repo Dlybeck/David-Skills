@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 REQUIRE COMMITTED CLAIM: block dispatch into an isolated worktree or background
-session -- a `claude --bg` launch, or a call to the `Workflow` tool -- while
-the local markdown tracker (anything under `.scratch/`) has uncommitted
-changes.
+session -- a `claude --bg` launch, a Claude `Workflow` call, or a Codex
+`Agent`/`spawn_agent` call -- while the local markdown tracker (anything under
+`.scratch/`) has uncommitted changes.
 
 Why this exists: dispatched work starts from the last *commit*, not from this
 checkout's working tree -- see `docs/agents/issue-tracker.md`'s "claim the
@@ -14,12 +14,12 @@ mechanized backstop, same philosophy as `block-dangerous-git.py` applied to
 git branch safety: a hook that can't forget beats an agent that has to
 remember correctly every single time.
 
-Scoped to the two dispatch mechanisms this plugin's skills actually use:
-a Bash command that looks like a `claude --bg` launch, and any call of the
-`Workflow` tool. Only fires when this repo's tracker is local markdown
-(`.scratch/` exists) -- a real tracker (GitHub, Linear) claims via an API
-call that's already visible everywhere the moment it's made, so this class of
-bug can't happen there.
+Scoped to the dispatch mechanisms this plugin's skills use: a Bash command
+that looks like a `claude --bg` launch, a Claude `Workflow` call, or a Codex
+agent dispatch. Only fires when this repo's tracker is local markdown
+(`.scratch/` exists) -- a real tracker (GitHub, Linear) claims via an API call
+that's already visible everywhere the moment it's made, so this class of bug
+can't happen there.
 
 Heuristic on command text and a plain `git status`, not a real dispatch-
 mechanism parser. Slight over-blocking (refusing a Workflow call that never
@@ -74,8 +74,8 @@ def main():
         command = tool_input.get("command") or ""
         if not BG_LAUNCH.search(command):
             return 0
-    elif tool_name == "Workflow":
-        pass  # any Workflow call can dispatch into an isolated worktree
+    elif tool_name in {"Workflow", "Agent", "spawn_agent"}:
+        pass  # any agent dispatch can enter an isolated worktree
     else:
         return 0
 
@@ -90,8 +90,8 @@ def main():
         "BLOCKED: about to dispatch into a separate worktree/session "
         f"({tool_name}) while these tracker files have uncommitted changes:\n"
         + "\n".join(f"  {f}" for f in dirty)
-        + "\n\nA claude --bg job and a Workflow agent's own worktree are both created "
-        "from the last commit, not from this checkout's working tree -- an uncommitted "
+        + "\n\nA claude --bg job or delegated agent worktree is created from the "
+        "last commit, not from this checkout's working tree -- an uncommitted "
         "'Status: claimed' (or 'resolved') is invisible to whatever you're about to "
         "dispatch, no matter how recent the change is. Commit (and push, if the worker "
         "won't share this checkout) the tracker change first, then retry.\n"
