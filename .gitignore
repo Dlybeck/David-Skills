@@ -1,1 +1,15 @@
 node_modules
+__pycache__/
+*.pyc
+
+# claude --bg's auto-created worktrees (per-job scratch checkouts) — tool state, never repo content
+/.claude/worktrees/
+
+# /teach workspace (root-level) — personal learning material, not repo content
+/MISSION.md
+/RESOURCES.md
+/NOTES.md
+/lessons/
+/reference/
+/assets/
+/learning-records/

@@ -1,11 +1,11 @@
 {
-  "name": "mattpocock-skills",
-  "version": "1.2.3",
+  "name": "david-skills",
+  "version": "1.5.0",
   "private": true,
-  "description": "Matt Pocock's agent skills for real engineering",
+  "description": "David's personal agent skills for real engineering, forked from mattpocock/skills",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mattpocock/skills"
+    "url": "https://github.com/Dlybeck/David-Skills"
   },
   "license": "MIT",
   "scripts": {

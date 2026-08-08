@@ -1,47 +1,58 @@
 # The canonical install block
 
-One install story, one wording. `README.md`, `.changeset/*`, and every page under `docs/` must say **this** and nothing else. Change it here first, then propagate.
+One install story, one wording. `README.md`, `.changeset/*`, and any other installation
+instructions must say this and nothing else. Change it here first, then propagate.
 
-`mattpocock-skills` is listed in **Claude Code's official marketplace** — configured name `claude-plugins-official`, source repo `anthropics/claude-plugins-official` — which every Claude Code install has out of the box. There is no marketplace to add first. Official Anthropic marketplaces have auto-update enabled by default ([discover-plugins](https://code.claude.com/docs/en/discover-plugins)), so "updates arrive automatically" is a true claim, not a hope.
+David Skills is David's private, personal fork of
+[mattpocock/skills](https://github.com/mattpocock/skills), shipped as the `david-skills`
+plugin from the single-plugin marketplace in this repository. It is not the
+`mattpocock-skills` package in Claude Code's official marketplace; that is Matt's original,
+unmodified upstream.
 
 ## Claude Code — the plugin
 
 <canonical-block name="claude-code">
 
-```bash
-claude plugins install mattpocock-skills
 ```
-
-Or, from inside a session:
-
+/plugin marketplace add Dlybeck/David-Skills
+/plugin install david-skills@david-skills
 ```
-/plugin install mattpocock-skills
-```
-
-It's in Claude Code's official marketplace, so there's nothing to add first, and updates arrive automatically.
 
 </canonical-block>
 
-## Codex, and other agents — skills.sh
+Because this repository is private, GitHub authentication must already be available on the
+machine. Add the marketplace once. To update a later release, refresh the catalog and then update
+the qualified plugin:
 
-The plugin is Claude Code only. Everywhere else, [skills.sh](https://skills.sh/mattpocock/skills) copies editable skill files into the project. Use the whole-set form on `README.md`:
+```
+/plugin marketplace update david-skills
+/plugin update david-skills@david-skills
+```
+
+## Codex and other agents — skills.sh
+
+The plugin is Claude Code only. Everywhere else,
+[skills.sh](https://skills.sh) copies editable skill files into the project. Use the whole-set
+form in `README.md`:
 
 <canonical-block name="skills-sh-whole-set">
 
 ```bash
-npx skills@latest add mattpocock/skills
+npx skills@latest add Dlybeck/David-Skills
 ```
 
-Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take — make sure `setup-matt-pocock-skills` is one of them.**
+Pick the skills and target agents you want. Make sure `setup` is included. Since the
+repository is private, run `gh auth setup-git` first when the machine is not already
+authenticated.
 
 </canonical-block>
 
-…and the single-skill form wherever one skill is named on its own. Note that **`docs/` pages are not a consumer of this block**: ai-hero renders the install widget above the body, so a page that writes the commands out duplicates it. See [writing-docs.md](./writing-docs.md).
+Use the single-skill form wherever one skill is named on its own:
 
 <canonical-block name="skills-sh-one-skill">
 
 ```bash
-npx skills@latest add mattpocock/skills --skill=<name>
+npx skills@latest add Dlybeck/David-Skills --skill <name>
 ```
 
 ```bash
@@ -50,12 +61,16 @@ npx skills@latest update <name>
 
 </canonical-block>
 
-`skills@latest` is the pinned spelling in all three. The pages under `docs/` used to carry their own copy of these commands; those blocks are now deleted rather than corrected, because the site renders the install commands itself.
+The flag is `--skill <name>` with a space. The `--skill=<name>` form may be ignored by the
+installer.
 
 ## The two routes are exclusive
 
-The plugin is a managed, read-only bundle you subscribe to. skills.sh writes files you own and edit. Installing both leaves the user with every skill twice — always say "pick one".
+The plugin is a managed, read-only bundle. skills.sh writes ordinary files the user owns and
+edits. Installing both duplicates every selected skill, so always tell users to pick one.
 
-## Not the install story
+## Upstream
 
-`.claude-plugin/marketplace.json` makes the repo its own single-plugin marketplace (`/plugin marketplace add mattpocock/skills`, then `/plugin install mattpocock-skills@mattpocock`). The official listing supersedes it. It is kept as a fallback for installing the repo directly — an unreleased commit, or a fork — and is **not** documented to users.
+[mattpocock/skills](https://github.com/mattpocock/skills) remains the methodology source and is
+configured as the read-only `upstream` Git remote. It is mentioned for attribution and upstream
+syncs, not as the installation target for David Skills.

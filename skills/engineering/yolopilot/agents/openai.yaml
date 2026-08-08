@@ -1,0 +1,5 @@
+interface:
+  display_name: "Yolopilot"
+  short_description: "No-grilling unattended work, never auto-merged"
+policy:
+  allow_implicit_invocation: false

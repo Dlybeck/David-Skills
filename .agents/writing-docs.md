@@ -1,14 +1,14 @@
 # Writing docs pages
 
-Every skill in `engineering/` and `productivity/` has a human-facing **docs page** at `docs/<bucket>/<skill-name>.md` — the docs tree mirrors those two bucket folders under `skills/`. It is published at `https://aihero.dev/skills-<skill-name>`; the URL is always `skills-<skill-name>` regardless of bucket, so the docs path is repo organisation only. The page is not the skill and not a copy of `SKILL.md`. Only these two buckets are promoted; the rest (`misc/`, `in-progress/`, `deprecated/`) ship no docs page.
+Every skill in `engineering/` and `productivity/` has a human-facing **docs page** at `docs/<bucket>/<skill-name>.md` — the docs tree mirrors those two bucket folders under `skills/`. This docs tree is internal to this fork: it is not published anywhere, and the `docs/<bucket>/<name>.md` layout is repo organisation only (ADR 0006). The page format itself originates from Matt Pocock's `aihero.dev/skills-<name>` page template — that history is worth knowing, but it is not a publishing pipeline this fork has. The page is not the skill and not a copy of `SKILL.md`. Only these two buckets are promoted; the rest (`misc/`, `in-progress/`, `deprecated/`) ship no docs page.
 
 Most of these skills are **user-invoked**: the agent will never fire them for you, so *you* are the index that has to remember they exist and when to reach for them. That memory is **cognitive load**. The job of a docs page is to relieve it — to orient one reader around one skill so they can hold it in their head, know when to reach for it, and see where it sits in the system. The pages are collectively a distributed router; each is a node.
 
-Act whenever a promoted skill is added, renamed, or has its behaviour changed: create or re-sync its docs page. A rename moves the file too (`docs/<bucket>/<old>.md` → `docs/<bucket>/<new>.md`), because the published URL tracks the name; a skill that moves between `engineering/` and `productivity/` moves its docs file to the matching folder. Skills in `misc/`, `in-progress/`, and `deprecated/` get no page — none of those buckets is promoted. A skill moving *out* of one of them into `engineering/` or `productivity/` gains a page; one moving the other way loses it.
+Act whenever a promoted skill is added, renamed, or has its behaviour changed: create or re-sync its docs page. A rename moves the file too (`docs/<bucket>/<old>.md` → `docs/<bucket>/<new>.md`), because every other page's repo-relative link to it tracks the name; a skill that moves between `engineering/` and `productivity/` moves its docs file to the matching folder. Skills in `misc/`, `in-progress/`, and `deprecated/` get no page — none of those buckets is promoted. A skill moving *out* of one of them into `engineering/` or `productivity/` gains a page; one moving the other way loses it.
 
-Because these pages are published on `aihero.dev`, **every link is absolute** — never a repo-relative path. A link to another skill points at `https://aihero.dev/skills-<name>`; a link into the repo points at its full `https://github.com/mattpocock/skills/...` URL. A relative link that works in the repo breaks once published.
+Because this docs tree is internal, **cross-links between this repo's docs pages are repo-relative** — `./<name>.md` to another page in the same bucket, `../<bucket>/<name>.md` across buckets — and each one must actually resolve to a file in the repo; verify the target path exists from the linking file's location before committing it. Links that genuinely refer to Matt's published writing — his original, un-renamed skills' `aihero.dev/skills-<name>` pages, an `aihero.dev` article, the AI Coding Dictionary — may stay absolute where the page really exists; the test is "does this URL serve this content", and when unsure, prefer the repo-relative link to this repo's own page. A renamed skill (`ask-claude`, `re-architect`, `setup`) or a fork-added one (`delegate`, `autopilot`, `yolopilot`) has no `aihero.dev` page at all — those links are always repo-relative.
 
-There is no H1 — the published page takes its title from the slug.
+There is no H1 — a holdover from the `aihero.dev` template this page format originates from, which takes its title from the slug; this fork keeps the convention even though it publishes nowhere.
 
 ## Page structure
 
@@ -29,11 +29,11 @@ One or two plain-language paragraphs. Lead with the skill's one-sentence job, th
 How and when you reach for the skill — two beats, both effectively always present:
 
 - **Invocation mode.** State whether you type it or the agent fires it. A user-invoked skill: "You invoke this by typing `/<name>` — the agent won't reach for it on its own." A model-invoked skill: "Type `/<name>`, or the agent reaches for it automatically when a task fits."
-- **Trigger boundary.** The index entry: "reach for this when …". Where the skill is confusable with a sibling, add the other half — "for <X> instead, use [<sibling>](https://aihero.dev/skills-<sibling>)."
+- **Trigger boundary.** The index entry: "reach for this when …". Where the skill is confusable with a sibling, add the other half — "for <X> instead, use [<sibling>](./<sibling>.md)" (repo-relative; `../<bucket>/<sibling>.md` if the sibling lives in the other bucket).
 
 ## Prerequisites
 
-Optional — include only when the skill needs something in place to be functional; omit the heading entirely otherwise. Covers: a **workspace it writes into** (a stateful skill like `grill-with-docs` writes `CONTEXT.md` and ADRs; `teach` builds a whole directory — say what it writes and where), **prior setup** (`triage`/`to-spec`/`to-tickets` need `setup-matt-pocock-skills` to have configured an issue tracker), or **repo-specific tooling**. A stateless skill that runs anywhere has no prerequisites — drop the section.
+Optional — include only when the skill needs something in place to be functional; omit the heading entirely otherwise. Covers: a **workspace it writes into** (a stateful skill like `grill-with-docs` writes `CONTEXT.md` and ADRs; `teach` builds a whole directory — say what it writes and where), **prior setup** (`triage`/`to-spec`/`to-tickets` need `setup` to have configured an issue tracker), or **repo-specific tooling**. A stateless skill that runs anywhere has no prerequisites — drop the section.
 
 ## <free-form middle>
 
@@ -63,9 +63,9 @@ A few bullets naming what the reader sees when the skill is doing its job. The b
 
 Always present. Situate the skill in the system in a sentence or two:
 
-- **Role.** Name it: a **chain step** (`grill-with-docs → to-spec → to-tickets → implement → code-review`), a **run-once setup** (`setup-matt-pocock-skills`), **periodic maintenance** (`improve-codebase-architecture`, "every few days"), or a **reach-for-it-anytime standalone** (`diagnosing-bugs`, `prototype`, `handoff`). A standalone's map is one honest sentence — far better than omitting the section.
-- **Neighbours.** The one or two siblings that matter, each with a because-clause, linked absolutely.
-- **The map.** Point to [ask-matt](https://aihero.dev/skills-ask-matt), the router over the whole set, so this page stays a node and never has to redraw the graph.
+- **Role.** Name it: a **chain step** (`grill-with-docs → to-spec → to-tickets → implement → code-review`), a **run-once setup** (`setup`), **periodic maintenance** (`re-architect`, "every few days"), or a **reach-for-it-anytime standalone** (`diagnosing-bugs`, `prototype`, `handoff`). A standalone's map is one honest sentence — far better than omitting the section.
+- **Neighbours.** The one or two siblings that matter, each with a because-clause, linked repo-relative (or absolute, per the rule above, when the sibling is one of Matt's genuinely published, un-renamed pages).
+- **The map.** Point to `ask-claude` (`./ask-claude.md` from an `engineering/` page, `../engineering/ask-claude.md` from a `productivity/` page), the router over the whole set, so this page stays a node and never has to redraw the graph.
 
 </page-template>
 
@@ -85,7 +85,7 @@ Always present. Situate the skill in the system in a sentence or two:
 - `## What it does` states the defining constraint, as plain prose rather than a labelled aside.
 - The page names no author and quotes no author — every claim stands on its own.
 - `## When to reach for it` states invocation mode and the trigger boundary.
-- `## Where it fits` names the role and links to `ask-matt`.
+- `## Where it fits` names the role and links to `ask-claude`.
 - A prerequisite (workspace, prior setup, tooling) is stated where one exists, and the section is absent where none does.
 - The middle surfaces the leading word.
 - Every AI Coding Dictionary term the page uses is spelt the dictionary's way, and its first use — and only its first use — links to the dictionary entry.
@@ -93,4 +93,4 @@ Always present. Situate the skill in the system in a sentence or two:
 - The hunt for real questions ran — the wiki, the issues, the changelog — and `## Common questions` is sized to what it found, not padded to match a richer skill's page.
 - Every `## It's working if` bullet is checkable without opening `SKILL.md`.
 - The sections appear in the template's order.
-- Every link is absolute, and every one resolves.
+- Every cross-link between this repo's docs pages is repo-relative; a link kept absolute genuinely serves Matt's published writing. Every link resolves.

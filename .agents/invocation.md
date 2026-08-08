@@ -18,3 +18,9 @@ Dependencies are expressed as **`/skill`-style prose invocation** ("Run the `/gr
 ## Passive vs active domain work
 
 Merely _reading_ `CONTEXT.md` for vocabulary is a one-line prose pointer, not the `domain-modeling` skill. Only the active build/sharpen discipline (challenge terms, edge-case scenarios, write ADRs, update `CONTEXT.md` inline) is `domain-modeling`.
+
+## Delegated continuation of a user-invoked skill's own process
+
+A user-invoked skill sometimes needs a dispatched worker — a subagent, or a separate backgrounded session — to carry out a process a user-invoked skill describes, whether that's a *different* skill's process or its own: `delegate` dispatching ticket work the way `/implement` describes it; `autopilot` continuing unattended work the way its own pre-departure grilling locked it down; `autopilot` scanning for tech debt the way `/re-architect`'s exploration steps do. This is not that worker *invoking* the user-invoked skill — nothing about who can reach one changes. The worker follows the process directly, seeded with whatever it needs to know, because the human's one deliberate act of triggering the outer skill is the trigger the rule requires. It substitutes for retyping the inner skill's name per unit of work; it does not route around who's allowed to trigger it.
+
+Name this pattern explicitly wherever it's used — point back to this section — rather than leaving it as an unexamined mechanism a future reader has to puzzle out for themselves.

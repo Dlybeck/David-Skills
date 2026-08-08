@@ -1,15 +1,14 @@
 {
-  "name": "mattpocock",
+  "name": "david-skills",
   "owner": {
-    "name": "Matt Pocock",
-    "url": "https://www.aihero.dev"
+    "name": "David Lybeck"
   },
-  "description": "Matt Pocock's skills for real engineering, as an installable Claude Code plugin.",
+  "description": "David's personal fork of mattpocock/skills, as an installable Claude Code plugin.",
   "plugins": [
     {
-      "name": "mattpocock-skills",
+      "name": "david-skills",
       "source": "./",
-      "description": "Matt Pocock's agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling and more.",
+      "description": "David's personal agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling, and more. Forked from mattpocock/skills.",
       "category": "engineering",
       "keywords": [
         "engineering",
