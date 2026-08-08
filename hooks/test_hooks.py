@@ -59,11 +59,11 @@ def run_hook(script, stdin_text, cwd=REPO_ROOT):
     return proc.returncode, proc.stderr
 
 
-def run_hook_bash(script, command):
+def run_hook_bash(script, command, cwd=REPO_ROOT):
     """Run a hook with a Claude Code-shaped PreToolUse payload for a Bash
     tool call carrying `command`."""
     payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": command}})
-    return run_hook(script, payload)
+    return run_hook(script, payload, cwd=cwd)
 
 
 def git(repo, *args):
@@ -148,6 +148,74 @@ for cmd in PASS_LOOKALIKES:
     code, err = run_hook_bash("block-dangerous-git.py", cmd)
     check(f"block-dangerous-git allows lookalike: {cmd!r}",
           code == 0, f"(code={code}, err={err!r})")
+
+# Current-branch behavior must be explicit and independent of the branch on
+# which this repository's CI happens to run. A main checkout blocks implicit
+# current-branch pushes; an explicit feature refspec is still safe. Bulk or
+# matching pushes are blocked from every branch because they can include main.
+with tempfile.TemporaryDirectory() as temp_dir:
+    repo = Path(temp_dir)
+    init_git_repo(repo, with_tracker=False)
+    (repo / "README.md").write_text("hook fixture\n", encoding="utf-8")
+    git(repo, "add", "README.md")
+    git(repo, "commit", "-qm", "initial commit")
+    git(repo, "branch", "-M", "main")
+
+    for cmd in (
+        "git push",
+        "git push origin",
+        'git push "/tmp/remote repo.git"',
+        "git push --repo origin",
+        "git push --recurse-submodules check origin",
+        "git push origin HEAD",
+        "git push origin +HEAD",
+        "git push origin @",
+        "git push origin feature/auth && git push",
+        "git push origin feature/auth; git push origin",
+    ):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks implicit push from main: {cmd!r}",
+              code == 2 and "current branch (main)" in err,
+              f"(code={code}, err={err!r})")
+
+    for cmd in (
+        "git push origin feature/auth",
+        "git push origin HEAD:feature/auth",
+        "git push origin @:feature/auth",
+        'git push "/tmp/remote repo.git" feature/auth',
+        "git push --repo origin feature/auth",
+    ):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git allows explicit feature push from main: {cmd!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    unbounded_pushes = (
+        "git push --all origin",
+        "git push --al origin",
+        "git push origin --branches",
+        "git push origin --bra",
+        "git push --mirror origin",
+        "git push --mi origin",
+        "git push origin :",
+        "git push origin +:",
+        "git push origin refs/heads/*:refs/heads/*",
+    )
+    for cmd in unbounded_pushes:
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks unbounded push from main: {cmd!r}",
+              code == 2 and "can update main" in err,
+              f"(code={code}, err={err!r})")
+
+    git(repo, "switch", "-qc", "dev")
+    code, err = run_hook_bash("block-dangerous-git.py", "git push", cwd=repo)
+    check("block-dangerous-git allows implicit push from dev",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    for cmd in unbounded_pushes:
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks unbounded push from dev: {cmd!r}",
+              code == 2 and "can update main" in err,
+              f"(code={code}, err={err!r})")
 
 # The four destructive-op patterns still block outright...
 BLOCK_DESTRUCTIVE = [
