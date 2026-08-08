@@ -1,5 +1,12 @@
 # david-skills
 
+## 1.5.1
+
+### Patch Changes
+
+- [`29e21f6`](https://github.com/Dlybeck/David-Skills/commit/29e21f63b8daa669aefd645acf2ff731128c39d7) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Add native Codex plugin installation, harden hook and repository validation, and
+  remove the obsolete `scaffold-exercises` and `setup-pre-commit` skills.
+
 ## 1.5.0
 
 ### Personal baseline
