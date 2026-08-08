@@ -1,0 +1,50 @@
+{
+  "name": "denali-dev",
+  "version": "1.5.0",
+  "description": "Denali-flavored agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling and more. Forked from mattpocock/skills.",
+  "author": {
+    "name": "David Lybeck"
+  },
+  "repository": "https://github.com/DenaliAI-Automation/Denali-DEV",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "skills",
+    "tdd",
+    "code-review",
+    "grilling",
+    "domain-modeling",
+    "productivity"
+  ],
+  "skills": [
+    "./skills/engineering/ask-claude",
+    "./skills/engineering/diagnosing-bugs",
+    "./skills/engineering/grill-with-docs",
+    "./skills/engineering/triage",
+    "./skills/engineering/re-architect",
+    "./skills/engineering/setup",
+    "./skills/engineering/tdd",
+    "./skills/engineering/to-spec",
+    "./skills/engineering/to-tickets",
+    "./skills/engineering/wayfinder",
+    "./skills/engineering/implement",
+    "./skills/engineering/delegate",
+    "./skills/engineering/autopilot",
+    "./skills/engineering/yolopilot",
+    "./skills/engineering/prototype",
+    "./skills/engineering/research",
+    "./skills/engineering/domain-modeling",
+    "./skills/engineering/codebase-design",
+    "./skills/engineering/code-review",
+    "./skills/engineering/resolving-merge-conflicts",
+    "./skills/engineering/wizard",
+    "./skills/engineering/soc2",
+    "./skills/productivity/grill-me",
+    "./skills/productivity/grilling",
+    "./skills/productivity/handoff",
+    "./skills/productivity/teach",
+    "./skills/productivity/to-questionnaire",
+    "./skills/productivity/wait-what",
+    "./skills/productivity/writing-for-agents"
+  ]
+}

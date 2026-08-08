@@ -1,0 +1,5 @@
+interface:
+  display_name: "SOC2 check"
+  short_description: "Run Denali's SOC2 compliance filter on demand"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,22 @@
+{
+  "name": "denali-dev",
+  "owner": {
+    "name": "David Lybeck"
+  },
+  "description": "Denali's fork of mattpocock/skills, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "denali-dev",
+      "source": "./",
+      "description": "Denali-flavored agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling, and more. Forked from mattpocock/skills.",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "skills",
+        "tdd",
+        "code-review",
+        "grilling"
+      ]
+    }
+  ]
+}

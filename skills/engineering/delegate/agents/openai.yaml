@@ -1,0 +1,5 @@
+interface:
+  display_name: "Delegate"
+  short_description: "Dispatch ready tickets to worker subagents"
+policy:
+  allow_implicit_invocation: false
