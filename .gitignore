@@ -1,6 +1,12 @@
 node_modules
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
 
 # claude --bg's auto-created worktrees (per-job scratch checkouts) — tool state, never repo content
 /.claude/worktrees/

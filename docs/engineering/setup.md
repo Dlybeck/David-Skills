@@ -4,7 +4,7 @@
 
 Those files are the only thing that varies between repos. The skills themselves are identical everywhere; they read `docs/agents/issue-tracker.md` at run time and do what it says. That is why the set is not tied to GitHub, and why no skill file ever needs editing to point it somewhere else. Invoking it with "link the skills to a custom issue tracker" works with anything you can connect to programmatically, with zero changes to the skills.
 
-It is a prompt-driven skill, not a deterministic script. It reads your `git remote`, your existing `CLAUDE.md`, your existing `CONTEXT.md`, proposes what it found, and waits for you to confirm before writing anything.
+It is a prompt-driven skill, not a deterministic script. It reads your `git remote`, the instruction file for the active harness, and your existing domain docs, proposes what it found, and waits for you to confirm before writing anything.
 
 ## When to reach for it
 
@@ -21,7 +21,7 @@ It writes into the repo you run it in:
 | `issue-tracker.md` | `docs/agents/` |
 | `domain.md` | `docs/agents/` |
 | `triage-labels.md` | `docs/agents/`, only when the `triage` skill is installed |
-| An `## Agent skills` block | whichever of `CLAUDE.md` / `AGENTS.md` already exists |
+| An `## Agent skills` block | `CLAUDE.md` in Claude Code or `AGENTS.md` in Codex; ambiguous cases are confirmed with you |
 
 All of it is committed markdown. There is no user-level or global mode: the config lives in the repo, so every repo gets its own copy.
 
@@ -57,9 +57,9 @@ No. GitHub and local markdown under `.scratch/` ship as ready-made templates, an
 
 Asked directly after v1.1, Matt said yes. The skill's own closing message is softer — it tells you re-running is only needed to switch trackers or start over. Both are defensible and the reason for the gap is real: the seed templates change between versions, so a `docs/agents/issue-tracker.md` written by an older release can go stale against the skills now reading it. If a downstream skill starts doing something the docs describe differently, re-running is the cheap fix.
 
-**It wrote to `CLAUDE.md`, but I'm on Codex.**
+**Which instruction file does it edit?**
 
-Known gap, still open. The file-selection rule is "edit `CLAUDE.md` if it exists, else `AGENTS.md`" — it checks which file exists, not which [harness](https://www.aihero.dev/ai-coding-dictionary/harness) is running. A repo with a `CLAUDE.md` left over from Claude Code will get its `## Agent skills` block somewhere Codex never reads. Two workarounds are in circulation: move the block to `AGENTS.md` by hand, or keep `AGENTS.md` canonical and make `CLAUDE.md` a one-line pointer at it. If neither file exists, the skill asks you which to create rather than picking, which has confused people who expected it to just decide.
+The active [harness](https://www.aihero.dev/ai-coding-dictionary/harness) decides: `CLAUDE.md` in Claude Code and `AGENTS.md` in Codex. If that preferred file is absent while the other exists, setup asks whether to use the existing file or create the preferred one. If both files exist and the harness is unclear, it asks which is canonical. A symlink counts as the file it names, so a shared instruction file remains shared instead of being replaced.
 
 **It didn't create my triage labels.**
 

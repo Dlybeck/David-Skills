@@ -3,7 +3,9 @@ name: research
 description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
 ---
 
-Spin up a **background agent** to do the research, so you keep working while it reads.
+If you are already running as a delegated, background, or subagent worker, do the research directly. Do not invoke `research` again and do not spawn another agent.
+
+Otherwise, spin up exactly one **background agent** to do the research, so you keep working while it reads. Tell that worker explicitly that it is already delegated and must not delegate again.
 
 Its job:
 

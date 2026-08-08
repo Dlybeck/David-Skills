@@ -1,13 +1,22 @@
 # The canonical install block
 
-One install story, one wording. `README.md`, `.changeset/*`, and any other installation
-instructions must say this and nothing else. Change it here first, then propagate.
+Change installation wording here first, then propagate it. David Skills is David's private,
+personal fork of [mattpocock/skills](https://github.com/mattpocock/skills), shipped as the
+`david-skills` plugin from the marketplaces in this repository. It is not the
+`mattpocock-skills` package in Claude Code's official marketplace; that is Matt's original.
 
-David Skills is David's private, personal fork of
-[mattpocock/skills](https://github.com/mattpocock/skills), shipped as the `david-skills`
-plugin from the single-plugin marketplace in this repository. It is not the
-`mattpocock-skills` package in Claude Code's official marketplace; that is Matt's original,
-unmodified upstream.
+## Private-repository authentication
+
+Every new machine must be able to clone the private GitHub repository:
+
+<canonical-block name="github-auth">
+
+```bash
+gh auth login
+gh auth setup-git
+```
+
+</canonical-block>
 
 ## Claude Code — the plugin
 
@@ -20,20 +29,48 @@ unmodified upstream.
 
 </canonical-block>
 
-Because this repository is private, GitHub authentication must already be available on the
-machine. Add the marketplace once. To update a later release, refresh the catalog and then update
-the qualified plugin:
+Add the marketplace once. To update a later release, refresh the catalog and then update the
+qualified plugin:
 
 ```
 /plugin marketplace update david-skills
 /plugin update david-skills@david-skills
 ```
 
-## Codex and other agents — skills.sh
+## Codex — the plugin
 
-The plugin is Claude Code only. Everywhere else,
-[skills.sh](https://skills.sh) copies editable skill files into the project. Use the whole-set
-form in `README.md`:
+<canonical-block name="codex">
+
+```bash
+codex plugin marketplace add Dlybeck/David-Skills --ref main
+codex plugin add david-skills@david-skills
+```
+
+</canonical-block>
+
+This is a remote installation: Codex clones the GitHub marketplace into its managed cache. It
+does not link to a local checkout. The Codex plugin ships the 25 portable promoted skills; it
+excludes `ask-claude`, `autopilot`, and `yolopilot` because they depend on Claude-specific naming
+or `claude --bg` and `/goal` semantics.
+
+The plugin carries Git guardrail hooks. Codex does not trust plugin hooks silently: review and
+enable them when prompted, or inspect them with `/hooks`. Start a new task after installation.
+
+Update the remote snapshot with:
+
+```bash
+codex plugin marketplace upgrade david-skills
+```
+
+The upgrade refreshes the Git snapshot and reinstalls the configured plugin from that snapshot.
+
+Maintainers testing an unreleased integration branch may replace `--ref main` with `--ref dev`.
+Published instructions and ordinary installs always use `main`.
+
+## Other agents or editable copies — skills.sh
+
+[skills.sh](https://skills.sh) copies editable skill files into a project. Use the whole-set form
+only when an editable copy is intentional:
 
 <canonical-block name="skills-sh-whole-set">
 
@@ -41,9 +78,8 @@ form in `README.md`:
 npx skills@latest add Dlybeck/David-Skills
 ```
 
-Pick the skills and target agents you want. Make sure `setup` is included. Since the
-repository is private, run `gh auth setup-git` first when the machine is not already
-authenticated.
+Pick the skills and target agents you want, and include `setup`. This route copies only skill
+files; it does not install plugin-root hooks.
 
 </canonical-block>
 
@@ -64,10 +100,11 @@ npx skills@latest update <name>
 The flag is `--skill <name>` with a space. The `--skill=<name>` form may be ignored by the
 installer.
 
-## The two routes are exclusive
+## The routes are exclusive
 
-The plugin is a managed, read-only bundle. skills.sh writes ordinary files the user owns and
-edits. Installing both duplicates every selected skill, so always tell users to pick one.
+A plugin is a managed bundle fetched from GitHub. skills.sh writes ordinary files the user owns
+and edits. Installing both for the same harness duplicates every selected skill, so always tell
+users to pick one.
 
 ## Upstream
 

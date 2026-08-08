@@ -2,18 +2,16 @@
 """
 DELEGATE RECOMMEND: on SessionStart, best-effort check whether the active model
 matches `delegate`'s configured (or default) Router model, and if so, surface
-a recommendation to run `/delegate` via `additionalContext` -- informational
-only. This never blocks the session and never runs anything by itself;
-`/delegate` is always a manual, explicit invocation regardless of what this
-prints.
+a recommendation to invoke the `delegate` skill via `additionalContext` --
+informational only. This never blocks the session and never runs anything by
+itself; `delegate` is always a manual, explicit invocation regardless of what
+this prints.
 
-The `model` field on SessionStart's input is documented as NOT guaranteed to
-be present, and its exact value format isn't documented either (a session id
-was seen reporting a full name like "claude-fable-5", not a bare "fable") --
-so this matches case-insensitively via substring, and silently does nothing
-when the field is absent or doesn't match. Silence is the expected, common
-case, not a bug: most sessions are not on the configured light model, and
-some sessions never get a `model` field at all.
+Codex documents the `model` field on SessionStart, while Claude Code does not
+guarantee it, and model value formats vary (for example, a full name like
+"claude-fable-5" rather than bare "fable"). This therefore matches
+case-insensitively via substring and silently does nothing when the field is
+absent or doesn't match. Silence is the expected, common case, not a bug.
 
 Reads the configured Router model from docs/agents/delegate.md's
 "Router model:" line if that file exists (delegate writes it on first use);
@@ -58,9 +56,9 @@ def main():
     message = (
         f"The active model ({model}) looks like delegate's configured Router "
         f"model ({light_model}). If ticket work comes up this session, "
-        "/delegate dispatches it to heavier worker subagents in one bounded "
-        "run instead of this model doing the work itself. This is a "
-        "recommendation only -- /delegate always runs manually."
+        "the delegate skill dispatches it to heavier worker subagents in one "
+        "bounded run instead of this model doing the work itself. This is a "
+        "recommendation only -- delegate always runs manually."
     )
     print(json.dumps({
         "hookSpecificOutput": {

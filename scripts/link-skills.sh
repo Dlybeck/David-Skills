@@ -5,7 +5,7 @@ set -euo pipefail
 # It is not a supported installer. Modifications to it — or requests for
 # modifications — will not be approved.
 #
-# Links all skills in the repository into the local skill directories used by
+# Links promoted skills in the repository into the local skill directories used by
 # each agent harness:
 #   - ~/.claude/skills  — Claude Code
 #   - ~/.agents/skills  — Codex and other Agent Skills-compatible harnesses
@@ -15,14 +15,14 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills")
 
-# Collect the repo's skills once, link into every destination.
+# Collect the promoted skills once, link into every destination.
 names=()
 srcs=()
 while IFS= read -r -d '' skill_md; do
   src="$(dirname "$skill_md")"
   names+=("$(basename "$src")")
   srcs+=("$src")
-done < <(find "$REPO/skills" -name SKILL.md -not -path '*/node_modules/*' -not -path '*/deprecated/*' -print0)
+done < <(find "$REPO/skills/engineering" "$REPO/skills/productivity" -name SKILL.md -print0)
 
 for DEST in "${DESTS[@]}"; do
   # If $DEST is a symlink that resolves into this repo, we'd end up writing the
@@ -47,7 +47,9 @@ for DEST in "${DESTS[@]}"; do
     target="$DEST/$name"
 
     if [ -e "$target" ] && [ ! -L "$target" ]; then
-      rm -rf "$target"
+      echo "error: refusing to replace existing directory $target" >&2
+      echo "Move it aside yourself if this development link should replace it." >&2
+      exit 1
     fi
 
     ln -sfn "$src" "$target"

@@ -1,6 +1,6 @@
 # David Skills
 
-David's private, personal fork of [mattpocock/skills](https://github.com/mattpocock/skills) — agent skills (slash commands and behaviors) for real engineering, adapted to David's git practices and issue-tracking conventions. This collection encodes a personal working environment: some skills assume a `dev` integration branch with `main` human-gated and always-on plugin-root hooks. Those assumptions are declared rather than hidden (see [.agents/adr/0006](./.agents/adr/0006-personal-practice-assumptions-hold-in-every-install.md)).
+David's private, personal fork of [mattpocock/skills](https://github.com/mattpocock/skills) — agent skills for real engineering, adapted to David's git practices and issue-tracking conventions. This collection encodes a personal working environment: some skills assume a `dev` integration branch with `main` human-gated, and the managed plugins carry Git guardrail hooks. Those assumptions are declared rather than hidden (see [.agents/adr/0006](./.agents/adr/0006-personal-practice-assumptions-hold-in-every-install.md)).
 
 Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process. But while doing so, they take away your control and make bugs in the process hard to resolve.
 
@@ -10,9 +10,16 @@ These skills are designed to be small, easy to adapt, and composable. They work 
 
 David Skills began as a fork of [Matt Pocock's skills](https://github.com/mattpocock/skills). The original methodology and many of the skills are Matt's; see [aihero.dev](https://www.aihero.dev) for his writing, courses, and newsletter on AI-assisted engineering. This fork layers David's personal workflows on top and tracks Matt's `main` through the read-only `upstream` remote (`git fetch upstream && git merge upstream/main`).
 
-## Installation (30-second setup)
+## Installation
 
-Two ways in, two philosophies. **The [Claude Code plugin](https://code.claude.com/docs/en/plugins)** installs the whole set as a managed, read-only bundle from this repo's own marketplace — you subscribe rather than fork. **skills.sh** copies editable skill files into your project, so you can hack on them and make them your own. Pick one — installing both leaves you with every skill twice.
+The normal route is a managed plugin fetched from this private GitHub repository. It does not link to a local checkout. Authenticate GitHub once on each machine before installing:
+
+```bash
+gh auth login
+gh auth setup-git
+```
+
+Pick the plugin for the agent you use. Installing an editable file copy as well creates duplicate skills.
 
 ### 1. Get the skills
 
@@ -36,40 +43,59 @@ To update later:
 </details>
 
 <details>
-<summary><strong>Codex, and other agents</strong></summary>
+<summary><strong>Codex</strong></summary>
 
 ```bash
-npx skills@latest add Dlybeck/David-Skills
+codex plugin marketplace add Dlybeck/David-Skills --ref main
+codex plugin add david-skills@david-skills
 ```
 
-Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take — make sure `setup` is one of them.** This repo is private, so authenticate GitHub locally first.
+Codex clones a marketplace snapshot from GitHub into its own managed cache. Review and trust the plugin hooks when Codex prompts you; `/hooks` shows their commands and status. Start a new task after installation so the skills are loaded.
 
-A native Codex plugin is on the roadmap — see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+To update later:
+
+```bash
+codex plugin marketplace upgrade david-skills
+```
+
+The upgrade command refreshes the Git snapshot and reinstalls the configured plugin from it.
 
 </details>
 
 <details>
-<summary><strong>For tinkerers</strong></summary>
+<summary><strong>Editable files for other agents or tinkerers</strong></summary>
 
-Use the same installer, on any agent — including Claude Code:
+If you intentionally want ordinary skill files you can edit, use [skills.sh](https://skills.sh):
 
 ```bash
 npx skills@latest add Dlybeck/David-Skills
 ```
 
-It writes the skills into your repo as ordinary files you own and can edit. Nothing updates behind your back; pull an updated skill when you want it with `npx skills@latest update <name>`.
+Pick the target agent and skills in its prompts, and include `setup`. Nothing updates behind your back; pull an updated skill when you want it with `npx skills@latest update <name>`. This file-copy route does not install the plugin hooks.
 
 </details>
 
-### 2. Run `/setup`
+### 2. Run setup
 
-In your agent, run it once per repo. It will:
+Run `/setup` in Claude Code or `$setup` in Codex once per repo. It will:
 
 - Ask you which issue tracker you want to use (GitHub or local files)
 - Ask you what labels you apply to tickets when you triage them (`/triage` uses labels)
-- Ask you where you want to save any docs we create
+- Select the instruction file for the active agent and propose a domain-doc layout
 
-### 3. Bam - you're ready to go.
+### 3. You are ready to go
+
+The README uses `/name` as shorthand in the sections below. In Codex, invoke an installed skill as `$name`.
+
+### Harness coverage
+
+| Route | Skills | Git guardrail hooks |
+| --- | --- | --- |
+| Claude Code plugin | All 28 promoted skills | Included automatically |
+| Codex plugin | 25 portable promoted skills | Included after you review and trust them |
+| Editable skills.sh copy | Whichever skills you select | Not included |
+
+The Codex plugin intentionally excludes `ask-claude`, `autopilot`, and `yolopilot`. They depend on Claude Code naming or its `claude --bg` and `/goal` continuation mechanism; the plugin does not pretend those workflows are portable.
 
 ## Why These Skills Exist
 
