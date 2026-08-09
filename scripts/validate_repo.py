@@ -18,6 +18,7 @@ ALL_SKILL_BUCKETS = (*PROMOTED_BUCKETS, "misc", "in-progress")
 CODEX_EXCLUSIONS = {"ask-claude", "autopilot", "yolopilot"}
 JSON_FILES = (
     "package.json",
+    "package-lock.json",
     ".changeset/config.json",
     ".claude-plugin/plugin.json",
     ".claude-plugin/marketplace.json",
@@ -72,7 +73,10 @@ def check_versions(documents: dict[str, Any]) -> None:
         error("package.json: missing string version")
         return
 
+    package_name = package.get("name")
     package_version = package["version"]
+    if package_name != "david-skills":
+        error("package.json: package name must be 'david-skills'")
     for path in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
         manifest = documents.get(path)
         if not isinstance(manifest, dict):
@@ -84,6 +88,52 @@ def check_versions(documents: dict[str, Any]) -> None:
                 f"{path}: version {manifest.get('version')!r} does not match "
                 f"package.json version {package_version!r}"
             )
+
+    lock = documents.get("package-lock.json")
+    if not isinstance(lock, dict):
+        return
+    lock_packages = lock.get("packages")
+    if not isinstance(lock_packages, dict):
+        error("package-lock.json: 'packages' must be an object")
+        root_package = None
+    else:
+        root_package = lock_packages.get("")
+    if lock.get("name") != package_name:
+        error(
+            f"package-lock.json: name {lock.get('name')!r} does not match "
+            f"package.json name {package_name!r}"
+        )
+    if lock.get("version") != package_version:
+        error(
+            f"package-lock.json: version {lock.get('version')!r} does not match "
+            f"package.json version {package_version!r}"
+        )
+    if not isinstance(root_package, dict) or root_package.get("name") != package_name:
+        root_name = root_package.get("name") if isinstance(root_package, dict) else None
+        error(
+            f"package-lock.json: root package name {root_name!r} does not match "
+            f"package.json name {package_name!r}"
+        )
+    if not isinstance(root_package, dict) or root_package.get("version") != package_version:
+        root_version = root_package.get("version") if isinstance(root_package, dict) else None
+        error(
+            f"package-lock.json: root package version {root_version!r} does not match "
+            f"package.json version {package_version!r}"
+        )
+
+    try:
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        error(f"cannot read CHANGELOG.md: {exc}")
+        return
+    first_heading = re.search(r"^##\s+([^\s]+)\s*$", changelog, re.MULTILINE)
+    if first_heading is None:
+        error("CHANGELOG.md: missing a version heading")
+    elif first_heading.group(1) != package_version:
+        error(
+            f"CHANGELOG.md: latest version {first_heading.group(1)!r} does not match "
+            f"package.json version {package_version!r}"
+        )
 
 
 def check_manifests(documents: dict[str, Any]) -> None:
