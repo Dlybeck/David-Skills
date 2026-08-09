@@ -33,6 +33,9 @@ jobs:
       - name: Validate and test
         run: npm test
 
+      - name: Test direct release behavior
+        run: npm run test:release
+
       - name: Check shell syntax
         run: git ls-files -z '*.sh' | xargs -0 -r -n1 bash -n
 

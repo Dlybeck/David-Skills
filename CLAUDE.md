@@ -31,6 +31,21 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 
 `scripts/link-skills.sh` is a maintainer-only development convenience, never the installation route shown to users. It links only promoted skills and must refuse to replace a real directory on collision. Production installs come from the private GitHub remote through the relevant plugin marketplace.
 
+## Release flow
+
+Feature work is merged into `dev` and validated there. David alone promotes the tested `dev` tip
+to `main`; that push is the human release approval. The repository does not use a version or
+release pull request.
+
+After a `main` promotion, the Release workflow consumes pending Changesets, synchronizes every
+version surface, and tests the versioned tree. Its only permitted branch write is the mechanical
+release commit: it atomically advances `main` and `dev` to that same commit while creating the
+version tag, then creates the GitHub Release. It refuses to write if either branch moved or the two
+branches were not aligned at the promoted commit. A manual workflow dispatch may only complete a
+missing GitHub Release for an existing tag reachable from current `main`; it cannot consume a
+Changeset or move a Git ref. Agents remain prohibited from pushing ordinary work directly to
+`main`.
+
 ## Agent skills
 
 ### Issue tracker
