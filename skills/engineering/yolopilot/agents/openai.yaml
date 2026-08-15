@@ -1,5 +1,6 @@
 interface:
   display_name: "Yolopilot"
   short_description: "No-grilling unattended work, never auto-merged"
+  default_prompt: "Use $yolopilot to start this long-horizon task immediately and leave a review branch."
 policy:
   allow_implicit_invocation: false

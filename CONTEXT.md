@@ -19,8 +19,15 @@ A `wayfinder` unit — a child **Issue** of a `wayfinder:map` holding a *questio
 A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-agent`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
 
 **Autopilot**:
-An unattended work mode, entered by an explicit, manual "I'm leaving, keep working without me" handoff — never scheduled. A pre-departure grilling session locks the goal condition and guardrails first; the run itself is bounded by the **Confidence guideline**, not a fixed time or token ceiling.
+An understanding-first authority wrapper for long-horizon autonomous work, entered by an explicit human handoff. A pre-departure grilling session locks a **Goal contract** before **Pursue Goal** adapts the plan from evidence. It may deliver into `dev` only when the contract authorizes that target and every gate passes.
 _Avoid_: night mode, away mode (the trigger isn't time-of-day)
+
+**Goal contract**:
+The stable boundary for a long-horizon run: objective, observable proof, scope, authority, safety boundary, and delivery target. The plan may change freely inside it; changing the contract requires the human.
+
+**Pursue Goal**:
+The model-invoked autonomous engine under **Autopilot** and **Yolopilot**. It selects research, discovery, delivery, or optimization loops from the current uncertainty and stops only when proof passes, new human authority is required, or the evidence plateaus.
+_Avoid_: pipeline (the loops adapt), pilot mode (authority belongs to the wrapper)
 
 **Delegate**:
 A bounded, on-call dispatch run over the **Issue tracker**'s frontier: `/delegate` claims ready **Issues** and hands each one whole to a worker subagent, and the run is over when the frontier is drained — on-call meaning invoked per frontier, with nothing persisting between runs. Pays off at any model tier; a light-model session is the flagship case.
@@ -34,7 +41,7 @@ _Avoid_: orchestrator, manager
 The shared safety principle behind unattended work: act freely inside the scope locked before departure, or on an existing strong confidence signal (e.g. `re-architect`'s `Strong` recommendation-strength); anything outside that scope, or hard to reverse, gets logged rather than acted on, left for human review.
 
 **Yolopilot**:
-An unattended work mode, sibling to **Autopilot**, entered for a loose, last-second handoff with no time for a pre-departure grilling round: a short non-blocking warning plus the agent's own best-guess interpretation stand in for the locked goal, then it launches immediately via the same `claude --bg` + self-set `/goal` mechanism. Answers to the same **Confidence guideline**, unchanged, anchored to that best-guess interpretation instead of a jointly-grilled one. The one hard rule that earns it a distinct identity: it completes its own git cycle up through a pushed, reviewable feature branch, but never merges into `dev` on its own — that happens only once a human reviews and approves.
+The provisional-interpretation authority wrapper for long-horizon autonomous work, entered for a loose, last-second handoff with no grilling round. It states its assumptions, then **Pursue Goal** refines the plan from evidence. It may push a review branch but never merges into an integration branch on its own.
 _Avoid_: yolo mode (the name is `yolopilot`, said in full)
 
 ## Relationships
@@ -42,8 +49,8 @@ _Avoid_: yolo mode (the name is `yolopilot`, said in full)
 - An **Issue tracker** holds many **Issues**
 - An **Issue** carries one **Triage role** at a time
 - A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
-- **Autopilot** and **Yolopilot** both answer to the **Confidence guideline**; **Delegate** doesn't need it — the human is present during a run, and anything beyond a ticket's spec escalates to them
-- **Yolopilot** reuses **Autopilot**'s entire mechanism, diverging only in skipping the grilling round and never merging into `dev` unattended
+- **Autopilot** and **Yolopilot** both delegate execution to **Pursue Goal** and answer to the **Confidence guideline**; **Delegate** doesn't need it — the human is present during a run, and anything beyond an issue's spec escalates to them
+- **Autopilot** earns authority through a confirmed **Goal contract**; **Yolopilot** starts from a provisional one and therefore stops at a review branch
 
 ## Flagged ambiguities
 

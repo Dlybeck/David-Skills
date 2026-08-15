@@ -13,10 +13,10 @@ Long-running external commands are operating-system processes, not model polling
 write progress to a log and finish with a success/failure receipt; the agent returns control
 rather than repeatedly checking unchanged state.
 
-Autopilot currently launches through Claude Code's `claude --bg` with a literal `/goal`
-argument so the goal is enforced by the background session's Stop hook. That mechanism is
-Claude-specific. A Codex implementation would need its own real continuation mechanism rather
-than pretending this command is portable.
+The shared `pursue-goal` engine preserves this boundary in both harnesses. Claude Code launches
+through `claude --bg` with a literal `/goal` argument. Codex uses its native durable goal capability
+and establishes linked-worktree isolation separately because goal continuation does not create it.
+Neither adapter spends model turns polling an unchanged long-running process.
 
 The confidence boundary is not permission to bypass human gates. `re-architect` candidates may
 be acted on unattended only when the skill itself rated them `Strong`; weaker candidates remain

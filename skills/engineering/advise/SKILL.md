@@ -1,10 +1,10 @@
 ---
-name: ask-claude
+name: advise
 description: Ask which skill or flow fits your situation. A router over the skills in this repo.
 disable-model-invocation: true
 ---
 
-# Ask Claude
+# Advise
 
 You don't remember every skill, so ask.
 
@@ -33,11 +33,13 @@ Keep steps 1–3 in **one unbroken context window** — don't compact or clear u
 
 The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~150k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded — `/compact` at the nearest phase boundary and carry on (see Phase boundaries).
 
-## Running unattended
+## Running autonomously
 
-**`/autopilot`** — the main flow, run without you present. Lock a goal via a pre-departure `/grilling` session, then it launches as a backgrounded session with `/goal` as the launch argument itself and keeps working — branching, implementing, self-reviewing, completing its own git cycle into `dev` — until the goal's met or it's stuck. Bounded by the shared Confidence guideline (see `CONTEXT.md`) rather than a hard time/token cap. Reach for it when you're about to walk away and want real progress to keep happening — not when the work is small enough to just finish before you go.
+**`/autopilot`** — long-horizon work whose authority is earned through a pre-departure `/grilling` session. It locks a goal contract, then `/pursue-goal` selects research, discovery, delivery, and optimization loops until the evidence proves the goal, new human authority is required, or the evidence plateaus. It may integrate into `dev` only when the locked contract authorizes that delivery target and every gate passes.
 
-**`/yolopilot`** — a lighter-entry sibling to `/autopilot`, for when there's no time even for the pre-departure grilling round. It skips straight to a short non-blocking warning plus its own best-guess interpretation of a loose instruction, then launches the same `claude --bg` + self-set `/goal` mechanism immediately, no wait for a reply. It answers to the same Confidence guideline, unchanged, anchored to that best-guess interpretation rather than a jointly-grilled goal. The one hard rule that earns it a distinct identity: it never merges into `dev` on its own — it completes its own git cycle only up through a pushed, reviewable feature branch, finishing with one whole-branch `/code-review` pass and a deliberately explanatory closing message that recommends `/to-spec` retroactively and offers `/teach`. Reach for it when the handoff is genuinely last-second; reach for `/autopilot` instead whenever there's time for the grilling round, since a jointly-locked goal is the stronger guardrail.
+**`/yolopilot`** — the same long-horizon engine entered without grilling. It states a provisional interpretation and starts immediately, learning and refining inside that interpretation. It may push a review branch but never merges it. Its postflight gives a short account of assumptions, actions, evidence, and lessons, then offers an immediate explanation or the optional `/teach` path for durable learning.
+
+**`/pursue-goal`** — the model-invoked engine under both pilots. It is not another trust mode and normally is not the human entry point. It keeps the goal contract stable while choosing whichever loop reduces the current uncertainty.
 
 ## On-ramps
 

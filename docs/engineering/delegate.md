@@ -53,4 +53,4 @@ Claude Code has no reliable way to know which model is running mid-session. The 
 
 ## Where it fits
 
-An on-call dispatch over [implement](./implement.md)'s place in the main chain (`grill-with-docs → to-spec → to-tickets → implement → code-review`) — the same per-ticket work, dispatched rather than driven by hand, one bounded run at a time. Its frontier and claim vocabulary comes from the same tracker configuration [wayfinder](./wayfinder.md) uses, generalized to cover plain ticket sets too. [ask-claude](./ask-claude.md) is the router over the whole skill set when you're not sure which flow you're in.
+An on-call dispatch over [implement](./implement.md)'s place in the main chain (`grill-with-docs → to-spec → to-tickets → implement → code-review`) — the same per-ticket work, dispatched rather than driven by hand, one bounded run at a time. Its frontier and claim vocabulary comes from the same tracker configuration [wayfinder](./wayfinder.md) uses, generalized to cover plain ticket sets too. [advise](./advise.md) is the router over the whole skill set when you're not sure which flow you're in.

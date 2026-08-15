@@ -20,10 +20,11 @@ The canonical Claude Code route is:
 /plugin install david-skills@david-skills
 ```
 
-Claude Code ships all 28 promoted skills. Codex ships the 25 portable promoted skills and omits
-`ask-claude`, `autopilot`, and `yolopilot`; the latter two require Claude Code's `claude --bg`
-and `/goal` continuation, and the router is named for and advertises that Claude-only surface.
-Exclusion is preferable to presenting unavailable flows as portable.
+Both harnesses ship every promoted skill. The router is harness-neutral (`advise`), while
+`autopilot` and `yolopilot` delegate adaptive execution to the shared `pursue-goal` engine.
+Harness-specific continuation lives behind adapters: native durable goals plus explicit worktree
+isolation in Codex, and `claude --bg` plus `/goal` in Claude Code. Portability is achieved at the
+behavioral contract, not by pretending the launch mechanisms are identical.
 
 The canonical Codex route is:
 

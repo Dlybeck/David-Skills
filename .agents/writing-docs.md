@@ -6,7 +6,7 @@ Most of these skills are **user-invoked**: the agent will never fire them for yo
 
 Act whenever a promoted skill is added, renamed, or has its behaviour changed: create or re-sync its docs page. A rename moves the file too (`docs/<bucket>/<old>.md` → `docs/<bucket>/<new>.md`), because every other page's repo-relative link to it tracks the name; a skill that moves between `engineering/` and `productivity/` moves its docs file to the matching folder. Skills in `misc/`, `in-progress/`, and `deprecated/` get no page — none of those buckets is promoted. A skill moving *out* of one of them into `engineering/` or `productivity/` gains a page; one moving the other way loses it.
 
-Because this docs tree is internal, **cross-links between this repo's docs pages are repo-relative** — `./<name>.md` to another page in the same bucket, `../<bucket>/<name>.md` across buckets — and each one must actually resolve to a file in the repo; verify the target path exists from the linking file's location before committing it. Links that genuinely refer to Matt's published writing — his original, un-renamed skills' `aihero.dev/skills-<name>` pages, an `aihero.dev` article, the AI Coding Dictionary — may stay absolute where the page really exists; the test is "does this URL serve this content", and when unsure, prefer the repo-relative link to this repo's own page. A renamed skill (`ask-claude`, `re-architect`, `setup`) or a fork-added one (`delegate`, `autopilot`, `yolopilot`) has no `aihero.dev` page at all — those links are always repo-relative.
+Because this docs tree is internal, **cross-links between this repo's docs pages are repo-relative** — `./<name>.md` to another page in the same bucket, `../<bucket>/<name>.md` across buckets — and each one must actually resolve to a file in the repo; verify the target path exists from the linking file's location before committing it. Links that genuinely refer to Matt's published writing — his original, un-renamed skills' `aihero.dev/skills-<name>` pages, an `aihero.dev` article, the AI Coding Dictionary — may stay absolute where the page really exists; the test is "does this URL serve this content", and when unsure, prefer the repo-relative link to this repo's own page. A renamed skill (`advise`, `re-architect`, `setup`) or a fork-added one (`delegate`, `autopilot`, `yolopilot`) has no `aihero.dev` page at all — those links are always repo-relative.
 
 There is no H1 — a holdover from the `aihero.dev` template this page format originates from, which takes its title from the slug; this fork keeps the convention even though it publishes nowhere.
 
@@ -64,7 +64,7 @@ Always present. Situate the skill in the system in a sentence or two:
 
 - **Role.** Name it: a **chain step** (`grill-with-docs → to-spec → to-tickets → implement → code-review`), a **run-once setup** (`setup`), **periodic maintenance** (`re-architect`, "every few days"), or a **reach-for-it-anytime standalone** (`diagnosing-bugs`, `prototype`, `handoff`). A standalone's map is one honest sentence — far better than omitting the section.
 - **Neighbours.** The one or two siblings that matter, each with a because-clause, linked repo-relative (or absolute, per the rule above, when the sibling is one of Matt's genuinely published, un-renamed pages).
-- **The map.** Point to `ask-claude` (`./ask-claude.md` from an `engineering/` page, `../engineering/ask-claude.md` from a `productivity/` page), the router over the whole set, so this page stays a node and never has to redraw the graph.
+- **The map.** Point to `advise` (`./advise.md` from an `engineering/` page, `../engineering/advise.md` from a `productivity/` page), the router over the whole set, so this page stays a node and never has to redraw the graph.
 
 </page-template>
 
@@ -84,7 +84,7 @@ Always present. Situate the skill in the system in a sentence or two:
 - `## What it does` states the defining constraint, as plain prose rather than a labelled aside.
 - The page names no author and quotes no author — every claim stands on its own.
 - `## When to reach for it` states invocation mode and the trigger boundary.
-- `## Where it fits` names the role and links to `ask-claude`.
+- `## Where it fits` names the role and links to `advise`.
 - A prerequisite (workspace, prior setup, tooling) is stated where one exists, and the section is absent where none does.
 - The middle surfaces the leading word.
 - Every AI Coding Dictionary term the page uses is spelt the dictionary's way, and its first use — and only its first use — links to the dictionary entry.

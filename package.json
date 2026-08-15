@@ -15,8 +15,9 @@
     "check:repo": "python3 scripts/validate_repo.py",
     "test:hooks": "python3 hooks/test_hooks.py",
     "test:release": "python3 scripts/test_direct_release.py",
+    "test:pilots": "python3 scripts/test_pilot_scenarios.py",
     "test:version-sync": "python3 scripts/test_sync_plugin_version.py",
-    "test": "npm run check-plugin-version && npm run check:repo && npm run test:hooks && npm run test:version-sync"
+    "test": "npm run check-plugin-version && npm run check:repo && npm run test:hooks && npm run test:pilots && npm run test:version-sync"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",

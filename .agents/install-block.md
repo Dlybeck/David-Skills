@@ -49,9 +49,9 @@ codex plugin add david-skills@david-skills
 </canonical-block>
 
 This is a remote installation: Codex clones the GitHub marketplace into its managed cache. It
-does not link to a local checkout. The Codex plugin ships the 25 portable promoted skills; it
-excludes `ask-claude`, `autopilot`, and `yolopilot` because they depend on Claude-specific naming
-or `claude --bg` and `/goal` semantics.
+does not link to a local checkout. The Codex plugin ships all promoted skills, including the
+human-invoked `advise`, `autopilot`, and `yolopilot` wrappers and their model-invoked
+`pursue-goal` engine.
 
 The plugin carries Git guardrail hooks. Codex does not trust plugin hooks silently: review and
 enable them when prompted, or inspect them with `/hooks`. Start a new task after installation.

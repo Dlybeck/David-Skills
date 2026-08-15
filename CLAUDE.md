@@ -15,7 +15,7 @@ Skills are organized into bucket folders under `skills/`:
 - `in-progress/` — beta: available for direct installation and testing, not shipped in the plugin
 - `deprecated/` — no longer used
 
-Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array. The Codex manifest ships the portable promoted subset: everything except `ask-claude`, `autopilot`, and `yolopilot`, whose naming or continuation mechanics are Claude-specific. Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either plugin.
+Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and entries in both plugin manifests. Harness-specific mechanics belong behind adapters so the promoted set remains available in Claude Code and Codex. Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either plugin.
 
 Install commands are copied from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` make this repository a private single-plugin marketplace for each harness. Run `npm test` after changing a manifest, catalog, skill path, or hook; also run `claude plugin validate . --strict` when Claude Code is available. The distribution decision lives in [.agents/adr/0002](./.agents/adr/0002-ship-as-private-agent-plugins.md).
 
@@ -27,7 +27,7 @@ Skills in `engineering/` and `productivity/` also have a human-facing docs page 
 
 Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, reachable only by the human) or model-invoked (model- or user-reachable). See [.agents/invocation.md](./.agents/invocation.md).
 
-[`ask-claude`](./skills/engineering/ask-claude/SKILL.md) is the router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `ask-claude`'s `SKILL.md` and update it so the map stays accurate — a new skill it never mentions, or a stale one it still routes to, is a router that lies.
+[`advise`](./skills/engineering/advise/SKILL.md) is the harness-neutral router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `advise`'s `SKILL.md` and update it so the map stays accurate — a new skill it never mentions, or a stale one it still routes to, is a router that lies.
 
 `scripts/link-skills.sh` is a maintainer-only development convenience, never the installation route shown to users. It links only promoted skills and must refuse to replace a real directory on collision. Production installs come from the private GitHub remote through the relevant plugin marketplace.
 

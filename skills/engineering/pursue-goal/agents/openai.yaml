@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pursue Goal"
+  short_description: "Run an evidence-driven autonomous goal loop"
+  default_prompt: "Use $pursue-goal to drive this authorized long-horizon objective to a verified stopping condition."

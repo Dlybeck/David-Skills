@@ -1,0 +1,6 @@
+interface:
+  display_name: "Advise"
+  short_description: "Find the right skill or workflow"
+  default_prompt: "Use $advise to recommend the right David Skills workflow for my situation."
+policy:
+  allow_implicit_invocation: false
