@@ -91,11 +91,11 @@ The README uses `/name` as shorthand in the sections below. In Codex, invoke an 
 
 | Route | Skills | Git guardrail hooks |
 | --- | --- | --- |
-| Claude Code plugin | All 28 promoted skills | Included automatically |
-| Codex plugin | 25 portable promoted skills | Included after you review and trust them |
+| Claude Code plugin | All 29 promoted skills | Included automatically |
+| Codex plugin | All 29 promoted skills | Included after you review and trust them |
 | Editable skills.sh copy | Whichever skills you select | Not included |
 
-The Codex plugin intentionally excludes `ask-claude`, `autopilot`, and `yolopilot`. They depend on Claude Code naming or its `claude --bg` and `/goal` continuation mechanism; the plugin does not pretend those workflows are portable.
+Codex is the canonical autonomous-development surface. `advise`, `autopilot`, and `yolopilot` now ship there alongside the model-invoked `pursue-goal` engine; Claude Code uses its own background-goal adapter without constraining the Codex design.
 
 ## Why These Skills Exist
 
@@ -216,7 +216,7 @@ Skills for daily code work.
 
 **User-invoked**
 
-- **[ask-claude](./skills/engineering/ask-claude/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
+- **[advise](./skills/engineering/advise/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[re-architect](./skills/engineering/re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
@@ -240,6 +240,7 @@ Skills for daily code work.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (does it follow the repo's coding standards, plus a Fowler smell baseline?) and **Spec** (does it faithfully implement the originating issue/spec?), run as parallel sub-agents so neither pollutes the other.
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — Work through an in-progress git merge or rebase conflict hunk by hunk, resolving by intent traced to each side's primary source, then finish the operation — never `--abort`.
 - **[wizard](./skills/engineering/wizard/SKILL.md)** — Generate an interactive bash wizard that walks a human through steps only they can perform: provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover.
+- **[pursue-goal](./skills/engineering/pursue-goal/SKILL.md)** — Drive an authorized long-horizon objective through adaptive research, discovery, delivery, and optimization loops until the evidence reaches a real stopping boundary.
 
 ### Productivity
 

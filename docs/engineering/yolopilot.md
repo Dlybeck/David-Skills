@@ -1,50 +1,64 @@
 ## What it does
 
-`yolopilot` is `autopilot` minus the pre-departure grilling round: it takes a loose, one-line instruction, shows a short non-blocking warning naming the elevated risk, states its own best-guess interpretation, then launches immediately as a background [session](https://www.aihero.dev/ai-coding-dictionary/session) — no wait for a reply between any of those steps. It never merges into `dev` on its own; it completes its own git cycle only up through a pushed, reviewable feature branch, leaving the actual merge for a human decision.
+`yolopilot` starts a durable autonomous run immediately from the agent's stated best interpretation
+of a loose handoff. It uses the same [pursue-goal](./pursue-goal.md) engine as Autopilot but replaces
+upfront alignment with a stricter delivery boundary: it leaves a pushed review branch and never
+merges it.
+
+Its defining behavior is **refine afterward**. The run preserves what it initially assumed, learns
+from research and experiments, and explains the difference at postflight.
 
 ## When to reach for it
 
-You invoke this by typing `/yolopilot` — the agent won't reach for it on its own, and it ships with `disable-model-invocation: true`.
+You invoke this by typing `/yolopilot` — the agent will not reach for it on its own.
 
-Reach for it when a handoff is genuinely last-second — no time even for [autopilot](./autopilot.md)'s grilling round, but you still want real, unattended progress rather than nothing. Reach for `/autopilot` instead whenever there's time for that round: a jointly-locked goal is the stronger guardrail, and `yolopilot` only exists for when that guardrail isn't affordable.
+Reach for it when the handoff is genuinely last-second and a useful provisional interpretation is
+better than waiting. Whenever you can stay for an understanding round, use
+[autopilot](./autopilot.md); a jointly locked contract earns broader delivery authority.
 
-## Prerequisites
+## The review-branch boundary
 
-Same as `autopilot`: the repo has to run a `dev` integration branch (`main ← dev ← feature/**`, with `main` human-gated) — a personal workflow assumption stated rather than generalized away, per ADR 0006. A repo without a `dev` branch is outside its audience.
+Yolopilot may research, modify local files, install dependencies, use local compute, run tests and
+evaluations, make small commits, and push its feature branch. It cannot merge into `dev` or another
+integration branch. Money, credentials, production, material deletion, safeguards, unrelated scope,
+and `main` remain human boundaries.
 
-## The entry sequence
+## The learning digest
 
-No grilling round happens here. Three steps run straight through, with no pause between them:
+Postflight stays lightweight: initial assumptions, actions, evidence, changed understanding,
+uncertainty, and what to inspect. The agent offers to explain a finding immediately. If you want to
+retain the material across lessons, it offers the user-invoked `/teach` skill in a separate teaching
+workspace.
 
-| Step | What happens |
-| --- | --- |
-| 1 | A short, 1–2 sentence non-blocking warning names the elevated risk directly — there's no locked goal, and the read on the instruction is the agent's own guess. |
-| 2 | The agent states its own best-guess interpretation of the loose instruction, so there's a record of what got assumed. |
-| 3 | It launches immediately via the same `claude --bg` + self-set `/goal` mechanism `autopilot` uses — the interpretation and the hard git rule stated directly in the `/goal` condition text, where the evaluator can judge them. |
-
-## The one hard rule
-
-Everything else about the working loop — the per-unit [code-review](https://aihero.dev/skills-code-review) gate, `Strong`-only [re-architect](./re-architect.md) idle-capacity work, the stopping logic — carries over from `autopilot` unchanged. The one rule that earns `yolopilot` its own identity: it never merges into `dev` automatically. It commits more often and at a finer grain than `autopilot` throughout the run — since there's no upfront-verified scope to lean on, the git history itself has to carry the audit trail — but the branch stops short of the merge. Once a human reviews and approves it, the AI can perform the actual `--no-ff` merge itself as a follow-up action, rather than the human needing to run the git commands by hand.
-
-Before stopping, it runs one more whole-branch `/code-review` pass — on top of the per-unit passes already inherited from the working loop — using its own stated interpretation as the stand-in for a spec, since no formal one exists for a `yolopilot` run.
+A retrospective spec is exceptional rather than automatic. It pays only when the run exposes a
+lasting product decision, unresolved requirement, or coordination need.
 
 ## Common questions
 
-**Why doesn't this loosen the Confidence guideline the same way it loosens the grilling requirement?**
+**Is this just Autopilot without questions?**
 
-Because the two are separate concerns. The Confidence guideline — the same one `autopilot` answers to — anchors to *whatever the goal is*; here that anchor happens to be the agent's own best-guess interpretation instead of a jointly-grilled one, which naturally produces more assumption-driven behavior, but nothing about the guideline's own mechanics changed.
+It shares the engine, but not the authority. Autopilot can earn a confirmed integration target;
+Yolopilot always stops at a review branch.
 
-**Why does the closing message read so differently from `autopilot`'s?**
+**What if its initial interpretation turns out wrong?**
 
-Because there's no jointly-set goal to report against — the closing message is doing more work here, explaining *why* key decisions were made and what's riskiest about them, not just stating which of the two stopping conditions ended the run. It also recommends running [to-spec](https://aihero.dev/skills-to-spec) retroactively, so work built without an upfront plan still gets a proper record, and offers [teach](https://aihero.dev/skills-teach) as an optional next step — never a default one.
+It can refine the plan inside the provisional objective and scope. A new objective or broader
+authority stops the run for a human.
+
+**Does it automatically start a teaching course afterward?**
+
+No. It gives the short digest itself and merely offers `/teach`, whose stateful workspace would be
+disproportionate after routine work.
 
 ## It's working if
 
-- The warning and best-guess interpretation both show up before the branch appears, with no confirmation round in between.
-- `dev` has no new commits from this run until a human has reviewed and approved the pushed branch — the merge, when it happens, is a distinct follow-up action.
-- The pushed branch's history reads as a trail of small, individually-labeled commits, not one large diff.
-- The closing message explains its reasoning and assumptions, not just what got done, and recommends `/to-spec` while only offering `/teach`.
+- The warning and provisional interpretation appear before mutation, without waiting for a reply.
+- Git history makes each material decision easy to inspect.
+- The final branch is validated, reviewed, pushed, and unmerged.
+- The learning digest says what changed in the agent's understanding.
 
 ## Where it fits
 
-A lighter-entry sibling to [autopilot](./autopilot.md), not a chain step of its own — the same unattended mechanism, entered without the grilling round its safety property normally rests on, and structurally safer at the one point that matters (`dev`) to make up for it. [ask-claude](./ask-claude.md) is the router over the whole set when you're not sure which flow you're in.
+`yolopilot` is the immediate autonomous entrance. [autopilot](./autopilot.md) is the stronger
+understanding-first sibling, and [pursue-goal](./pursue-goal.md) is their shared engine.
+[advise](./advise.md) routes across the whole set.

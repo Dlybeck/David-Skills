@@ -1,12 +1,12 @@
 ## What it does
 
-`ask-claude` is the router over the skills in this repo. You describe the situation you are in — an idea you cannot start, a pile of incoming bug reports, a [session](https://www.aihero.dev/ai-coding-dictionary/session) that has run long — and it names the skill or the sequence of skills that fits, plus where the human decisions in that sequence sit.
+`advise` is the harness-neutral router over the skills in this repo. You describe the situation you are in — an idea you cannot start, a pile of incoming bug reports, a [session](https://www.aihero.dev/ai-coding-dictionary/session) that has run long — and it names the skill or the sequence of skills that fits, plus where the human decisions in that sequence sit.
 
 It recommends and stops. It does not grill, write a [spec](https://www.aihero.dev/ai-coding-dictionary/spec), open a file or fire the skill it just named; what you get back is the next thing to type, and you type it. It is also a hand-written map of the skills in this repo rather than a scan of what you have installed, so it will not route you over your own skills or another author's.
 
 ## When to reach for it
 
-You invoke this by typing `/ask-claude` — the agent won't reach for it on its own.
+You invoke this by typing `/advise` — the agent won't reach for it on its own.
 
 | Your situation | What the router gives back |
 | --- | --- |
@@ -14,6 +14,7 @@ You invoke this by typing `/ask-claude` — the agent won't reach for it on its 
 | Bugs and requests arriving from other people | The [triage](https://aihero.dev/skills-triage) on-ramp, and why [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) you generated yourself don't belong on it |
 | Two skills that look interchangeable | The line between them, and it is usually one concrete test rather than a matter of taste. [grill-me](https://aihero.dev/skills-grill-me) or [grill-with-docs](https://aihero.dev/skills-grill-with-docs) turns on whether you are in a working directory; [grill-with-docs](https://aihero.dev/skills-grill-with-docs) or [wayfinder](https://aihero.dev/skills-wayfinder) turns on whether the effort fits one session |
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
+| A large objective you want pursued autonomously | Whether [autopilot](./autopilot.md) can earn a confirmed contract or [yolopilot](./yolopilot.md) must start provisionally |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 
 ## Prerequisites
@@ -24,10 +25,11 @@ The tracker-dependent routes — triage, `to-spec`, `to-tickets`, `implement` �
 
 ## Flows, not skills
 
-The word the skill gives you to think with is **flow**: a path *through* the skills, not a single one. Naming your situation places you on a flow at a step, which is a different answer from "here is the skill that matches your keywords". Four kinds of route exist, and the skill itself carries them in full:
+The word the skill gives you to think with is **flow**: a path *through* the skills, not a single one. Naming your situation places you on a flow at a step, which is a different answer from "here is the skill that matches your keywords". Five kinds of route exist, and the skill itself carries them in full:
 
 - **The main flow**, idea to ship. Grill, spec, tickets, implement, review, with two branches inside it: a prototype detour when a question needs runnable code to settle, and the spec-and-tickets split, which only earns its cost when the build spans more than one session.
 - **On-ramps**, for a situation that generates work and then merges onto the main flow: incoming bug reports, something broken, or an effort too foggy and too large to hold in one session.
+- **Autonomous entrances**, where Autopilot or Yolopilot grants an adaptive goal engine different authority based on how the handoff was established.
 - **Standalones**, off every flow, reached for on their own terms — the prototype, the questionnaire, the merge conflict you are already sitting in.
 - **A vocabulary layer underneath**, the two references the other skills pull in when the words rather than the process are the problem.
 
@@ -53,7 +55,7 @@ People keep asking for one in the README. This skill is that list — it is what
 
 **It told me half the skills aren't installed.**
 
-A known bug, unfixed. Most of the skills the router routes you through set `disable-model-invocation: true`, which means the harness leaves them out of the skill list it injects into the agent's context. The agent reads that list as exhaustive and reports them missing. One reported session had it declare the whole spec-and-tickets flow absent and reroute to bare `/grilling` and `/tdd`. Thirteen of the plugin's twenty-two skills carry the flag, so this is the common case rather than an edge. They are installed. Type the slash command anyway, or check `.claude-plugin/plugin.json`, which is the authority on what is present.
+A known bug, unfixed. Most of the skills the router routes you through are human-only, which means the harness leaves them out of the skill list it injects into the agent's context. The agent can read that list as exhaustive and report them missing. One reported session had it declare the whole spec-and-issues flow absent and reroute to bare `/grilling` and `/tdd`. Seventeen of this plugin's twenty-nine skills are human-only, so this is the common case rather than an edge. They are installed. Type the skill explicitly, or check the active harness's plugin manifest, which is the authority on what is present.
 
 **It described a skill's behaviour, and the skill doesn't do that.**
 
@@ -65,7 +67,7 @@ A fair complaint, filed as an open issue arguing that most of the routing is det
 
 **Can it route over my own skills, or another author's?**
 
-No. Three separate proposals have asked for a router that reads your local `skills/` directory and recommends from whatever is installed. `ask-claude` is not that. It is a map of one set, maintained by hand, and it knows nothing about skills you wrote or installed from elsewhere.
+No. Three separate proposals have asked for a router that reads your local `skills/` directory and recommends from whatever is installed. `advise` is not that. It is a map of one set, maintained by hand, and it knows nothing about skills you wrote or installed from elsewhere.
 
 **It told me to edit a SKILL.md.**
 
@@ -85,6 +87,6 @@ Check the changelog for a rename before assuming it is gone. `writing-great-skil
 
 ## Where it fits
 
-`ask-claude` is a **standalone router** that sits over the whole set. It is never a step in a chain; it points into every chain, and it is the node the other docs pages link back to so none of them has to redraw the graph. From here you most often land on [grill-with-docs](https://aihero.dev/skills-grill-with-docs), the head of the main flow, or [triage](https://aihero.dev/skills-triage), the on-ramp for work that arrived rather than work you started.
+`advise` is a **standalone router** that sits over the whole set. It is never a step in a chain; it points into every chain, and it is the node the other docs pages link back to so none of them has to redraw the graph. From here you most often land on [grill-with-docs](https://aihero.dev/skills-grill-with-docs), the head of the interactive flow, or [autopilot](./autopilot.md), the trust-building entrance to autonomous work.
 
 It is a [secondary source](https://www.aihero.dev/ai-coding-dictionary/secondary-source) over the skills it describes. Where the router and a `SKILL.md` disagree, the `SKILL.md` is right.

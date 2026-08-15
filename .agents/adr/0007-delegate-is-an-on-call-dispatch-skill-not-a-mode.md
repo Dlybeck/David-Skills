@@ -7,7 +7,7 @@ ways:
 - Every prompt to use it arrived per-work-item, not per-session: the `SessionStart` hook
   recommended it before any tickets existed (it triggers on model match, not work state), the
   assistant pitched it as an `/implement`-stage alternative each time a frontier appeared, and
-  `ask-claude` positioned it at the ticket-working step — while the skill's own identity section
+  `advise` positioned it at the ticket-working step — while the skill's own identity section
   insisted it was "a mode, not a one-off task."
 - The mode had an entry trigger but no exit trigger, so it outlived its work: after the frontier
   drained it sat ON and inert, meaning nothing.

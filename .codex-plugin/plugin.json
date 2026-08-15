@@ -1,7 +1,7 @@
 {
   "name": "david-skills",
   "version": "1.5.1",
-  "description": "Flexible engineering and productivity skills for planning, implementation, testing, review, debugging, delegation, and clearer agent collaboration.",
+  "description": "Codex-first engineering skills for autonomous research, discovery, optimization, delivery, testing, review, and collaboration.",
   "author": {
     "name": "David Lybeck",
     "url": "https://github.com/Dlybeck"
@@ -19,6 +19,7 @@
     "planning"
   ],
   "skills": [
+    "./skills/engineering/advise",
     "./skills/engineering/diagnosing-bugs",
     "./skills/engineering/grill-with-docs",
     "./skills/engineering/triage",
@@ -30,6 +31,9 @@
     "./skills/engineering/wayfinder",
     "./skills/engineering/implement",
     "./skills/engineering/delegate",
+    "./skills/engineering/autopilot",
+    "./skills/engineering/yolopilot",
+    "./skills/engineering/pursue-goal",
     "./skills/engineering/prototype",
     "./skills/engineering/research",
     "./skills/engineering/domain-modeling",
@@ -47,8 +51,8 @@
   ],
   "interface": {
     "displayName": "David Skills",
-    "shortDescription": "Flexible engineering and productivity tools",
-    "longDescription": "A practical toolkit for shaping work, implementing safely, testing rigorously, reviewing code, diagnosing bugs, and collaborating clearly with agents.",
+    "shortDescription": "Autonomous engineering and research workflows",
+    "longDescription": "A Codex-first toolkit for pursuing long-horizon goals, researching and experimenting from evidence, shaping work, implementing safely, testing rigorously, and reviewing complete changes.",
     "developerName": "David Lybeck",
     "category": "Developer Tools",
     "capabilities": [
@@ -57,9 +61,9 @@
     ],
     "websiteURL": "https://github.com/Dlybeck/David-Skills",
     "defaultPrompt": [
-      "Turn this idea into an implementation-ready spec",
-      "Diagnose this bug and identify the root cause",
-      "Review these changes for correctness and risk"
+      "Pursue this long-horizon objective autonomously",
+      "Research and optimize this AI development goal",
+      "Advise me which engineering workflow fits"
     ]
   }
 }

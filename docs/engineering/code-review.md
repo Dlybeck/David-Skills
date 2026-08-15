@@ -91,4 +91,4 @@ No. It diffs `<fixed-point>...HEAD`, three-dot, which is measured from the merge
 - [to-spec](https://aihero.dev/skills-to-spec) and [to-tickets](https://aihero.dev/skills-to-tickets) produce the document the Spec axis checks against; a vague spec makes that axis vague.
 - [re-architect](./re-architect.md) is the whole-codebase counterpart — this skill only ever looks at one diff.
 
-[ask-claude](./ask-claude.md) routes across the whole set when you are unsure which skill the situation wants.
+[advise](./advise.md) routes across the whole set when you are unsure which skill the situation wants.

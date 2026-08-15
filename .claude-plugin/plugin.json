@@ -1,7 +1,7 @@
 {
   "name": "david-skills",
   "version": "1.5.1",
-  "description": "David's personal agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling and more. Forked from mattpocock/skills.",
+  "description": "David's personal agent skills for autonomous research, discovery, optimization, delivery, and rigorous engineering. Forked from mattpocock/skills.",
   "author": {
     "name": "David Lybeck"
   },
@@ -17,7 +17,7 @@
     "productivity"
   ],
   "skills": [
-    "./skills/engineering/ask-claude",
+    "./skills/engineering/advise",
     "./skills/engineering/diagnosing-bugs",
     "./skills/engineering/grill-with-docs",
     "./skills/engineering/triage",
@@ -31,6 +31,7 @@
     "./skills/engineering/delegate",
     "./skills/engineering/autopilot",
     "./skills/engineering/yolopilot",
+    "./skills/engineering/pursue-goal",
     "./skills/engineering/prototype",
     "./skills/engineering/research",
     "./skills/engineering/domain-modeling",

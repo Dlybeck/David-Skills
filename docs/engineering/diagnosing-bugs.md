@@ -88,6 +88,6 @@ Renamed to `/diagnosing-bugs` in v1.0.0. The old name no longer exists. Anything
 
 ## Where it fits
 
-`diagnosing-bugs` is a reach-for-it-anytime standalone. You drop into it when something is broken and drop out when the fix and its regression test are in; it holds no state and needs no prior setup. [ask-claude](./ask-claude.md) routes "Something's broken" here.
+`diagnosing-bugs` is a reach-for-it-anytime standalone. You drop into it when something is broken and drop out when the fix and its regression test are in; it holds no state and needs no prior setup. [advise](./advise.md) routes "Something's broken" here.
 
 Two neighbours matter. [re-architect](./re-architect.md) takes the [handoff](https://www.aihero.dev/ai-coding-dictionary/handoff) when the real finding is that the code has no seam to lock the bug down — the recommendation is made after the fix is in, when there is more information. [triage](https://aihero.dev/skills-triage) sits upstream of it for bugs that arrive as raw reports from other people, and does a shallower version of the same first two phases.

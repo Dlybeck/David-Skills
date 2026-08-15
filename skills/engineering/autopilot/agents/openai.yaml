@@ -1,5 +1,6 @@
 interface:
   display_name: "Autopilot"
   short_description: "Unattended work, backgrounded"
+  default_prompt: "Use $autopilot to establish a verified contract, then pursue this objective autonomously."
 policy:
   allow_implicit_invocation: false

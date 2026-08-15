@@ -15,7 +15,6 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 PROMOTED_BUCKETS = ("engineering", "productivity")
 ALL_SKILL_BUCKETS = (*PROMOTED_BUCKETS, "misc", "in-progress")
-CODEX_EXCLUSIONS = {"ask-claude", "autopilot", "yolopilot"}
 JSON_FILES = (
     "package.json",
     "package-lock.json",
@@ -149,9 +148,7 @@ def check_manifests(documents: dict[str, Any]) -> None:
     codex = manifest_paths(
         documents.get(".codex-plugin/plugin.json"), ".codex-plugin/plugin.json"
     )
-    codex_expected = {
-        path for path in promoted if Path(path).name not in CODEX_EXCLUSIONS
-    }
+    codex_expected = promoted
 
     compare_sets(".claude-plugin/plugin.json skills", claude, promoted)
     compare_sets(".codex-plugin/plugin.json skills", codex, codex_expected)
@@ -215,6 +212,46 @@ def check_skill_metadata() -> None:
             metadata = directory / "agents" / "openai.yaml"
             if not metadata.is_file():
                 error(f"{directory.relative_to(ROOT)}: missing agents/openai.yaml")
+                continue
+
+            skill_text = skill_file.read_text(encoding="utf-8")
+            sections = skill_text.split("---", 2)
+            frontmatter = sections[1] if len(sections) == 3 else ""
+            user_invoked = bool(
+                re.search(
+                    r"^disable-model-invocation\s*:\s*true\s*$",
+                    frontmatter,
+                    re.MULTILINE,
+                )
+            )
+            metadata_text = metadata.read_text(encoding="utf-8")
+            codex_manual = bool(
+                re.search(
+                    r"^\s*allow_implicit_invocation\s*:\s*false\s*$",
+                    metadata_text,
+                    re.MULTILINE,
+                )
+            )
+            if user_invoked != codex_manual:
+                error(
+                    f"{directory.relative_to(ROOT)}: Claude and Codex invocation "
+                    "metadata disagree"
+                )
+
+
+def check_docs() -> None:
+    for bucket in PROMOTED_BUCKETS:
+        expected = {directory.name for directory in skill_dirs(bucket)}
+        actual = {path.stem for path in (ROOT / "docs" / bucket).glob("*.md")}
+        compare_sets(f"docs/{bucket} skill pages", actual, expected)
+
+    retired_router_paths = (
+        ROOT / "skills" / "engineering" / "ask-claude",
+        ROOT / "docs" / "engineering" / "ask-claude.md",
+    )
+    for path in retired_router_paths:
+        if path.exists():
+            error(f"retired router path still exists: {path.relative_to(ROOT)}")
 
 
 def markdown_skill_links(readme: Path, pattern: re.Pattern[str]) -> set[str]:
@@ -335,6 +372,7 @@ def main() -> int:
     check_manifests(documents)
     check_skill_metadata()
     check_catalogs()
+    check_docs()
     check_marketplaces(documents)
     check_agent_instructions_link()
     check_legacy_name()
