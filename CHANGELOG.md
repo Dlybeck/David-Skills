@@ -1,5 +1,12 @@
 # david-skills
 
+## 1.6.0
+
+### Minor Changes
+
+- [`3e9fe8d`](https://github.com/Dlybeck/David-Skills/commit/3e9fe8dac1469721eb2a460d115ffe1d40e6c021) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Port Autopilot and Yolopilot to Codex through a shared adaptive `pursue-goal` engine, ship the
+  harness-neutral `advise` router in both plugins, and retire the legacy `ask-claude` name.
+
 ## 1.5.1
 
 ### Patch Changes
