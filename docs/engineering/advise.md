@@ -15,6 +15,8 @@ You invoke this by typing `/advise` — the agent won't reach for it on its own.
 | Two skills that look interchangeable | The line between them, and it is usually one concrete test rather than a matter of taste. [grill-me](https://aihero.dev/skills-grill-me) or [grill-with-docs](https://aihero.dev/skills-grill-with-docs) turns on whether you are in a working directory; [grill-with-docs](https://aihero.dev/skills-grill-with-docs) or [wayfinder](https://aihero.dev/skills-wayfinder) turns on whether the effort fits one session |
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
 | A large objective you want pursued autonomously | Whether [autopilot](./autopilot.md) can earn a confirmed contract or [yolopilot](./yolopilot.md) must start provisionally |
+| Current progress is hard to place in the larger project | [status-report](../productivity/status-report.md), which connects verified work to milestones and long-term outcomes |
+| Work is ready for review but not committed | [code-review](./code-review.md), including relevant staged, unstaged, and new files; the request or goal contract can supply its requirements |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 
 ## Prerequisites

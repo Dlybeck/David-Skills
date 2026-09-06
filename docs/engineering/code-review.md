@@ -1,6 +1,6 @@
 ## What it does
 
-`code-review` reviews the diff between `HEAD` and a fixed point you name — a commit, a branch, a tag, `main`, `HEAD~5` — along two axes. **Standards** asks whether the code follows how this repo writes code. **Spec** asks whether the code does what the originating issue or [spec](https://www.aihero.dev/ai-coding-dictionary/spec) asked for. Each axis runs in its own [sub-agent](https://www.aihero.dev/ai-coding-dictionary/subagent) so neither sees the other's reasoning.
+`code-review` reviews changes since a pinned baseline along two axes, including relevant uncommitted work when reviewing work in progress. **Standards** asks whether the code follows how this repo writes code. **Spec** asks whether the code does what the originating request, goal contract, issue, or [spec](https://www.aihero.dev/ai-coding-dictionary/spec) asked for. Each axis runs in its own [sub-agent](https://www.aihero.dev/ai-coding-dictionary/subagent) so neither sees the other's reasoning.
 
 The two axes are never merged and never re-ranked. The report ends with a worst issue *per axis* and refuses to name a single winner across them, because a change can pass one axis and fail the other: code that follows every convention while implementing the wrong thing passes Standards and fails Spec; code that does exactly what the [ticket](https://www.aihero.dev/ai-coding-dictionary/ticket) asked while breaking the repo's conventions does the reverse. A blended verdict lets the passing axis hide the failing one.
 
@@ -17,29 +17,34 @@ Type `/code-review`, or the agent reaches for it automatically when you ask to r
 | The whole codebase has drifted, not one diff | [re-architect](./re-architect.md) |
 | Something is broken and you do not know why | [diagnosing-bugs](https://aihero.dev/skills-diagnosing-bugs) |
 
-You must supply the fixed point. If you do not, the skill asks for one rather than guessing; it then checks the ref resolves and the diff is non-empty before spawning anything, so a typo'd branch name fails in front of you instead of inside two sub-agents.
+The baseline comes from you or the calling workflow; an uncommitted-only review uses `HEAD`.
+It asks when the baseline remains ambiguous and validates it before spawning reviewers.
+Committed-only reviews stay confined to their range; pre-commit and WIP reviews also cover
+relevant staged, unstaged, and new files without pulling in unrelated edits.
 
 ## Prerequisites
 
 The Standards axis needs nothing. It reads whatever the repo documents (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, and the like) and falls back on a built-in baseline when the repo documents nothing.
 
-The Spec axis needs a spec to exist and be findable. It looks in this order:
+The Spec axis needs a requirements source, not necessarily a formal document. It looks in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, a GitLab `!67`), fetched through `docs/agents/issue-tracker.md`.
-2. A path you pass in as an argument.
+1. Your supplied spec, explicit request, or confirmed goal contract, including current corrections.
+2. Issue references in the commit messages (`#123`, `Closes #45`, a GitLab `!67`), fetched through the configured tracker.
 3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch or feature name.
 4. Asking you.
 
-Step 1 depends on `docs/agents/issue-tracker.md`, which [setup](./setup.md) writes. Without it the axis still works if you hand it a path. With no spec at all, the Spec sub-agent is skipped and the report says "no spec available" rather than inventing requirements.
+Tracker lookup uses `docs/agents/issue-tracker.md` when available. A supplied request or document
+does not require [setup](./setup.md). With no requirements source at all, the Spec sub-agent is
+skipped and the report says "no spec available" rather than inventing requirements.
 
 ## The two axes
 
 | | Standards | Spec |
 | --- | --- | --- |
 | Question | Is it built right? | Is it the right thing? |
-| Reads | The repo's documented standards, plus the smell baseline | The originating issue or spec |
+| Reads | The repo's documented standards, plus the smell baseline | The originating request, goal contract, issue, or spec |
 | Reports | Documented breaches (can be hard), and smells (always judgement calls) | Missing or partial requirements, scope creep, requirements implemented wrongly |
-| Every finding cites | The standards file and the rule, or the named smell plus the hunk | The line of the spec |
+| Every finding cites | The standards file and the rule, or the named smell plus the hunk | The requirement in its source |
 
 A generic review skill that does not know your standards is the thing this design is trying to avoid — it flags what is deliberate in your codebase and misses the invariants your codebase actually depends on. So the repo's own documentation is the [primary source](https://www.aihero.dev/ai-coding-dictionary/primary-source) on the Standards axis, and **the repo always overrides**.
 
@@ -73,13 +78,17 @@ Because fixes create new surface, and because the judgement-call half of the Sta
 
 **Does it review my uncommitted work?**
 
-No. It diffs `<fixed-point>...HEAD`, three-dot, which is measured from the merge-base and excludes staged and working-tree changes. If `implement` has not made an interim commit, the work about to be committed is invisible to the review. Commit first, then review, then amend or add a fixup.
+Yes, for WIP and pre-commit reviews. It includes tracked edits in the index and working tree,
+plus the contents of relevant untracked files. Both reviewers receive the same scope and evidence,
+even if they run in isolated worktrees. It does not commit or stash your work to make it visible.
+A committed-only PR review does not silently include local edits.
 
 ## It's working if
 
-- It refuses to start on a bad ref or an empty diff, before any sub-agent is spawned.
+- It refuses a bad ref before dispatch and reports no changes only after checking every in-scope layer.
+- New files and uncommitted changes appear in a WIP review; unrelated edits remain outside its scope.
 - The report arrives as two separate blocks under `## Standards` and `## Spec`, not one merged list.
-- Every Standards finding names either a rule in one of your repo's files or one of the twelve smells, with the hunk quoted; every Spec finding quotes a line of the spec.
+- Every Standards finding names either a rule in one of your repo's files or one of the twelve smells, with the hunk quoted; every Spec finding quotes the originating requirement.
 - The closing summary gives a worst issue per axis and declines to pick an overall winner.
 - With no spec available, the Spec block says so instead of listing requirements it inferred from the code.
 

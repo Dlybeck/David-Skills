@@ -258,3 +258,4 @@ General workflow tools, not code-specific.
 
 - **[grilling](./skills/productivity/grilling/SKILL.md)** — Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved. The reusable interview primitive behind `grill-me`, `grill-with-docs`, `triage`, `wayfinder` and `re-architect`.
 - **[writing-for-agents](./skills/productivity/writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
+- **[status-report](./skills/productivity/status-report/SKILL.md)** — Connect verified current progress to long-term project goals in chat, a Markdown snapshot, or a requested webpage.

@@ -31,6 +31,9 @@ Autopilot may commit and push a feature branch inside the confirmed contract. It
 `dev` only when that exact delivery target was authorized during the understanding session and the
 full validation and review gates pass. It never inherits authority over `main`.
 
+An unmet integration gate leaves work on the review branch. That branch stays local unless the
+contract separately authorizes pushing it; a fallback is not permission to publish.
+
 ## Common questions
 
 **Does Autopilot keep following the plan when research changes the answer?**

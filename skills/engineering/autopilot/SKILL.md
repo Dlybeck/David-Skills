@@ -54,8 +54,9 @@ Before any authorized integration into `dev`:
 3. Fix every real finding and rerun affected gates.
 4. Merge `--no-ff` from the feature branch, push only the authorized refs, and verify the remote.
 
-If any delivery permission or gate is absent, leave a pushed review branch instead. `main` remains
-human-gated.
+If any integration permission or gate is absent, leave the work on its review branch and report
+the unmet condition. Push that branch only when the contract explicitly authorizes the push;
+otherwise leave it local. `main` remains human-gated.
 
 ## Return
 

@@ -149,6 +149,40 @@ for cmd in PASS_LOOKALIKES:
     check(f"block-dangerous-git allows lookalike: {cmd!r}",
           code == 0, f"(code={code}, err={err!r})")
 
+# Generated reports live outside the commit-gated tracker. Check the real
+# status command without weakening protection for any .scratch directory.
+with tempfile.TemporaryDirectory() as temp_dir:
+    repo = Path(temp_dir)
+    init_git_repo(repo)
+    reports = repo / ".reports" / "status"
+    reports.mkdir(parents=True)
+    (reports / "snapshot.md").write_text("Dated progress snapshot\n", encoding="utf-8")
+    for state in ("untracked", "staged", "modified"):
+        if state == "staged":
+            git(repo, "add", ".reports/status")
+        elif state == "modified":
+            git(repo, "commit", "-qm", "save snapshot")
+            (reports / "snapshot.md").write_text("Updated snapshot\n", encoding="utf-8")
+        code, err = run_hook(
+            "require-committed-claim.py", dispatch_payload("Agent"), cwd=repo,
+        )
+        check(f"require-committed-claim allows {state} status report",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    for relative in ("spec.md", "map.md", "issues/001.md", "status-reports/claim.md"):
+        tracker_file = repo / ".scratch" / relative
+        tracker_file.parent.mkdir(parents=True, exist_ok=True)
+        tracker_file.write_text("Uncommitted tracker change\n", encoding="utf-8")
+        code, err = run_hook(
+            "require-committed-claim.py", dispatch_payload("Agent"), cwd=repo,
+        )
+        check(f"require-committed-claim blocks {relative} alongside reports",
+              code == 2 and f".scratch/{relative}" in err
+              and ".reports/status/snapshot.md" not in err,
+              f"(code={code}, err={err!r})")
+        git(repo, "add", ".scratch")
+        git(repo, "commit", "-qm", "save tracker fixture")
+
 # Current-branch behavior must be explicit and independent of the branch on
 # which this repository's CI happens to run. A main checkout blocks implicit
 # current-branch pushes; an explicit feature refspec is still safe. Bulk or

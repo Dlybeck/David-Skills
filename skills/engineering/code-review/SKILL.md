@@ -3,33 +3,54 @@ name: code-review
 description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+Two-axis review of changes since a pinned baseline, including in-scope work in progress:
 
 - **Standards** — does the code conform to this repo's documented coding standards?
 - **Spec** — does the code faithfully implement the originating issue / spec?
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-The issue tracker should have been provided to you — run `/setup` if `docs/agents/issue-tracker.md` is missing.
+Use the configured issue tracker when relevant. A review based on a supplied request, goal
+contract, or spec does not require tracker setup.
 
 ## Process
 
 ### 1. Pin the fixed point
 
-Whatever the user said is the fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. If they didn't specify one, ask for it.
+Honor the user's fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. Otherwise use
+the baseline established by the calling workflow, or `HEAD` for an explicitly uncommitted-only
+review. Ask only if the baseline remains ambiguous. Resolve it to a commit SHA before proceeding.
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+Pin the scope as committed-only, uncommitted-only, or combined. A PR/commit-range review is
+committed-only unless the user includes local work; WIP and a caller's pre-commit review include
+the relevant staged, unstaged, and untracked files. Do not expand into unrelated user edits.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here — not inside two parallel sub-agents.
+- For a branch/range, resolve `git merge-base <fixed-point-sha> HEAD` once as `<base-sha>` and
+  record `git log <fixed-point-sha>..HEAD --oneline`. For uncommitted-only, `<base-sha>` is `HEAD`.
+- Committed-only uses `git diff <base-sha> HEAD`. WIP/combined uses
+  `git diff <base-sha>` for the net tracked changes, plus `git diff --cached` and `git diff` to
+  expose staged/unstaged differences that might otherwise cancel out.
+- Enumerate new files with `git ls-files --others --exclude-standard`; inspect their in-scope
+  contents explicitly because `git diff` omits them. Report unreadable or binary coverage gaps.
+- Give both reviewers the same pinned SHAs, scope, commands, and relevant new-file contents.
+  If reviewers cannot access this working tree, supply a captured patch and new-file snapshot;
+  never assume an isolated worktree sees local edits. Do not commit or stash merely to review.
+
+Reject a bad ref before dispatch. Stop as "no changes in scope" only after checking all applicable
+layers, not merely the committed diff. Keep the review read-only; if files change during it,
+disclose the affected coverage instead of claiming the result covers a newer snapshot.
 
 ### 2. Identify the spec source
 
 Look for the originating spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.) — fetch via the workflow in `docs/agents/issue-tracker.md`.
-2. A path the user passed as an argument.
+1. The user's supplied spec path, explicit request, or confirmed goal contract, including current
+   scope corrections. Conversation requirements are valid spec evidence; quote them accurately.
+2. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.) — fetch via
+   the configured tracker when available.
 3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
+4. If no requirements source exists, ask once. If none is available, skip the **Spec** sub-agent
+   and report "no spec available". Never infer requirements from the implementation itself.
 
 ### 3. Identify the standards sources
 
@@ -59,15 +80,15 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 **Standards sub-agent prompt** — include:
 
-- The full diff command and commit list.
+- The pinned scope, diff commands, commit list, and in-scope untracked contents from step 1.
 - The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the sub-agent has no other access to it.
 - The constraint: "You are already the reviewer. Do not invoke `code-review` and do not spawn additional agents; perform this review directly."
 - The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** — include:
 
-- The diff command and commit list.
-- The path or fetched contents of the spec.
+- The same scope and change evidence supplied to the Standards reviewer.
+- The path or exact contents of the requirements source, including any conversation contract.
 - The constraint: "You are already the reviewer. Do not invoke `code-review` and do not spawn additional agents; perform this review directly."
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
 
