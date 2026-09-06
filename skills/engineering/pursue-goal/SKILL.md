@@ -66,6 +66,12 @@ After every material result:
 5. Record only a material transition: hypothesis resolved, checkpoint reached, direction changed,
    authority needed, completed, or failed.
 
+For work that must survive sessions, maintain one compact checkpoint in the project's existing
+notes location: stable contract, current evidence and revision, decisions/failed approaches worth
+retaining, unresolved questions, and next action. Reuse an existing plan or report when it serves
+this purpose; link receipts rather than copying logs. On resumption, reconcile it with live state
+before acting. A checkpoint is continuity context, not a mandatory spec or another roadmap.
+
 For an external command expected to exceed ten minutes, state its expected duration when known,
 launch it as a resumable operating-system process, and give it a local progress log plus terminal
 success/failure receipt. Return control after launch. Continue from the receipt on a later turn;

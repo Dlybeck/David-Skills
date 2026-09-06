@@ -21,4 +21,16 @@ def read_hook_input():
         data = json.load(sys.stdin)
     except Exception:
         return None
-    return data if isinstance(data, dict) else None
+    if not isinstance(data, dict):
+        return None
+    tool_input = data.get("tool_input")
+    if tool_input is not None:
+        if not isinstance(tool_input, dict):
+            return None
+        command = tool_input.get("command")
+        if command is not None and not isinstance(command, str):
+            return None
+    model = data.get("model")
+    if model is not None and not isinstance(model, str):
+        return None
+    return data

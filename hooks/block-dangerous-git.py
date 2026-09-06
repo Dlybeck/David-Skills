@@ -63,6 +63,45 @@ BRANCH_FORCE_DELETE = re.compile(r'git\s+branch\s+-D\b')
 DISCARD_ALL = re.compile(r'git\s+(checkout|restore)\s+\.(?:\s|$)')
 
 
+def normalize_git_options(command):
+    """Expose Git subcommands behind global options to the existing guards.
+
+    This is still a shell-text heuristic, not an authorization sandbox. When
+    options or a shell cd can change ref resolution, require explicit push
+    destinations rather than trusting the hook process's current branch.
+    """
+    try:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()")
+        lexer.whitespace_split = True
+        tokens = list(lexer)
+    except ValueError:
+        return command, True
+    output = []
+    context_changed = "cd" in tokens
+    index = 0
+    value_options = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--config-env"}
+    while index < len(tokens):
+        token = tokens[index]
+        output.append(token)
+        index += 1
+        if token != "git":
+            continue
+        while index < len(tokens) and tokens[index].startswith("-"):
+            option = tokens[index]
+            if option in value_options:
+                context_changed = True
+                index += 2
+            elif option == "--":
+                index += 1
+                break
+            else:
+                if option not in {"--no-pager", "--paginate", "--no-optional-locks"}:
+                    context_changed = True
+                index += 1
+    return " ".join(token if set(token) <= set(";&|()") else shlex.quote(token)
+                    for token in output), context_changed
+
+
 def normalize_quoting(command):
     """Strip shell quote characters (`"` and `'`) from the command text
     before pattern matching, so `git push origin "main"` (or an
@@ -186,6 +225,7 @@ def main():
         return 0
 
     command = (data.get("tool_input") or {}).get("command") or ""
+    command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
 
     reason = None
@@ -203,6 +243,8 @@ def main():
             "uses a bulk or matching refspec that can update main without naming it. "
             "Push explicit non-main branches instead."
         )
+    elif context_changed and push_uses_implicit_ref(command):
+        reason = "leaves the push target implicit where it can resolve to main. Name an explicit non-main destination."
     elif current_branch() == "main" and push_uses_implicit_ref(command):
         reason = "pushes the current branch (main) upstream. Same rule as a direct push."
     elif RESET_HARD.search(normalized):

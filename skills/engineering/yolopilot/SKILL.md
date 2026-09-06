@@ -22,6 +22,8 @@ Run these steps straight through without pausing for a reply:
      compute, small feature-branch commits, and a pushed review branch.
    - Keep money, new credentials, production deployment, material deletion, safeguard weakening,
      unrelated scope, integration branches, and `main` outside the contract.
+   - Apply any narrower authority the user supplied; defaults cannot override an explicit
+     no-push, no-commit, read-only, or other boundary.
 4. Invoke `/pursue-goal` immediately with the provisional contract. This is delegated continuation
    of the human-triggered Yolopilot process, not a new invocation of the human-only wrapper.
 
@@ -33,7 +35,8 @@ or expanding authority remains a human boundary, even when a broader move looks 
 
 Commit in small, intelligible steps. Before stopping, run the relevant full validation surface and
 one `/code-review` over the entire branch, using the provisional contract as the spec. Fix every real
-finding, push the feature branch, and leave it unmerged for human review.
+finding, push the feature branch only within the active contract, and leave it unmerged for human
+review. With no push authority or no remote, leave the result local and state that limitation.
 
 Yolopilot never merges into `dev` or another integration branch. A later, explicit approval may
 authorize the merge as a separate action.

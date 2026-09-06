@@ -1,6 +1,6 @@
 ## What it does
 
-`delegate` runs one bounded dispatch pass over your ticket frontier: each ready [ticket](https://www.aihero.dev/ai-coding-dictionary/ticket) is claimed on the tracker, handed whole to a worker [subagent](https://www.aihero.dev/ai-coding-dictionary/subagent), tracked until its status flips to `resolved`, and integrated — and the run is over when the frontier is drained. Nothing stays on afterward; there is no mode and no toggle.
+`delegate` runs one bounded dispatch pass over your ticket frontier: each ready [ticket](https://www.aihero.dev/ai-coding-dictionary/ticket) is claimed, handed whole to a worker [subagent](https://www.aihero.dev/ai-coding-dictionary/subagent), and integrated after a completion notification identifies its branch and resolved revision. The run ends when the frontier is drained. Nothing stays on afterward; there is no mode or recurring polling loop.
 
 The dispatching session acts strictly as a **Router**: it classifies and hands off. It never decomposes a ticket into subtasks it invented, never judges a worker's partial result, and never tries to recover a stuck worker — at any model tier. Withholding those duties is the whole point of the design.
 
@@ -17,13 +17,13 @@ Each invocation is its own run. Next time a frontier exists, type it again.
 
 ## Prerequisites
 
-The issue tracker should already be configured by [setup](./setup.md) — `delegate` reads its "find the frontier" and "claim the ticket" conventions directly. Separately, `delegate` owns one small config file, `docs/agents/delegate.md`, written the first time it runs in a repo: the **Worker model** (which model does ticket work) and **Max concurrent workers** (one number — tickets in flight at once), plus a `Router model` line only the session-start recommendation hook reads.
+The issue tracker needs known "find the frontier" and "claim the ticket" conventions; [setup](./setup.md) can establish them when missing. Separately, `delegate` owns `docs/agents/delegate.md`: the **Worker model**, **Max concurrent workers**, and a `Router model` line used only by the session-start recommendation hook.
 
 ## The Router role
 
 **Router** is the load-bearing word, and the three withheld duties above are why it's safe at both tiers. On a weak model, prior art on cheap-orchestrator/expensive-worker patterns is consistent that real decomposition or recovery duties are a documented failure mode. On a strong model, judging duplicates a review that already happened: each worker runs the full two-axis code review inside its own run, with fresh-context sub-agents, and its brief requires fixing real findings *before* committing. The Router asks one question of a dispatched ticket: has it resolved yet?
 
-Safety comes from the layers around the run, not from a second opinion in the dispatcher — the full reasoning is recorded in the repo's ADR 0007.
+Safety comes from the layers around the run, not a second code review in the dispatcher. The worker's completion notification identifies the revision whose committed ticket status is checked; a stale copy in the dispatcher's checkout is not sufficient. Without a completion notification, the run yields for later resumption rather than repeatedly polling.
 
 ## Common questions
 
@@ -47,7 +47,7 @@ Claude Code has no reliable way to know which model is running mid-session. The 
 
 - A run announces what it claimed at the start and "frontier drained, run over" at the end — and nothing delegate-shaped persists after that.
 - Claims are visible on the tracker (committed) before any worker starts.
-- A ticket only ever gets treated as done once its `Status:` line reads `resolved`, never earlier.
+- A ticket counts as done only when the worker reports completion and its committed revision contains `Status: resolved`.
 - Worker branches land on the integration branch one at a time, each merge verified against the checkout.
 - A stuck worker shows up as a message to you, not as the Router quietly trying something else first.
 

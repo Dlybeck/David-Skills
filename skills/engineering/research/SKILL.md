@@ -5,9 +5,12 @@ description: Investigate a question against high-trust primary sources and captu
 
 If you are already running as a delegated, background, or subagent worker, do the research directly. Do not invoke `research` again and do not spawn another agent.
 
-Otherwise, spin up exactly one **background agent** to do the research, so you keep working while it reads. Tell that worker explicitly that it is already delegated and must not delegate again.
+Otherwise, research directly for a small lookup or when there is no useful independent work to
+continue locally. Use at most one **background agent** for substantial reading that can run
+alongside other work, within the user's delegation budget. Tell that worker it is already
+delegated and must not delegate again.
 
-Its job:
+The researcher's job:
 
 1. Investigate the question against **primary sources** — official docs, source code, specs, first-party APIs — not a secondary write-up of them. Follow every claim back to the source that owns it.
 2. Write the findings to a single Markdown file, citing each claim's source.

@@ -75,9 +75,11 @@ Pick the target agent and skills in its prompts, and include `setup`. Nothing up
 
 </details>
 
-### 2. Run setup
+### 2. Configure only what you need
 
-Run `/setup` in Claude Code or `$setup` in Codex once per repo. It will:
+When selected skills need missing tracker or domain configuration, run `/setup` in Claude Code
+or `$setup` in Codex. Standalone work can start directly; an existing usable convention counts.
+Setup will:
 
 - Ask you which issue tracker you want to use (GitHub or local files)
 - Ask you what labels you apply to tickets when you triage them (`/triage` uses labels)
@@ -91,8 +93,8 @@ The README uses `/name` as shorthand in the sections below. In Codex, invoke an 
 
 | Route | Skills | Git guardrail hooks |
 | --- | --- | --- |
-| Claude Code plugin | All 29 promoted skills | Included automatically |
-| Codex plugin | All 29 promoted skills | Included after you review and trust them |
+| Claude Code plugin | All promoted skills listed below | Included automatically |
+| Codex plugin | All promoted skills listed below | Included after you review and trust them |
 | Editable skills.sh copy | Whichever skills you select | Not included |
 
 Codex is the canonical autonomous-development surface. `advise`, `autopilot`, and `yolopilot` now ship there alongside the model-invoked `pursue-goal` engine; Claude Code uses its own background-goal adapter without constraining the Codex design.
@@ -220,7 +222,7 @@ Skills for daily code work.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[re-architect](./skills/engineering/re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
-- **[setup](./skills/engineering/setup/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain doc layout). Run once per repo before using the other engineering skills.
+- **[setup](./skills/engineering/setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn the current conversation into a spec and publish it to the issue tracker. No interview — just synthesizes what you've already discussed.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — written as text in a local file, or as native blocking links on a real tracker.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams, closing out with `/code-review` before committing, then marking the ticket resolved.
@@ -233,7 +235,7 @@ Skills for daily code work.
 
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a single shareable HTML file for state/logic questions, or several radically different UI variations toggleable from one route.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: build a feedback loop that goes red on this bug → minimise → hypothesise → instrument → fix → regression-test.
-- **[research](./skills/engineering/research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a background agent.
+- **[research](./skills/engineering/research/SKILL.md)** — Investigate primary sources and save cited findings; delegate substantial independent reading when useful.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms against the glossary, stress-test with edge-case scenarios, and update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface.
@@ -256,6 +258,6 @@ General workflow tools, not code-specific.
 
 **Model-invoked**
 
-- **[grilling](./skills/productivity/grilling/SKILL.md)** — Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved. The reusable interview primitive behind `grill-me`, `grill-with-docs`, `triage`, `wayfinder` and `re-architect`.
+- **[grilling](./skills/productivity/grilling/SKILL.md)** — Resolve material decisions through focused interview rounds, reusing settled context.
 - **[writing-for-agents](./skills/productivity/writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
 - **[status-report](./skills/productivity/status-report/SKILL.md)** — Connect verified current progress to long-term project goals in chat, a Markdown snapshot, or a requested webpage.

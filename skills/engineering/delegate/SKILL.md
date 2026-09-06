@@ -75,8 +75,11 @@ file, separate from `/setup`'s issue-tracker/triage/domain scope.
    - **Fast-forward the worktree branch to the dispatching branch's tip first.** A fresh
      worktree can spawn stale; starting from the tip is what makes the committed claim visible
      to the worker.
-4. **Track status** by watching only for the ticket's `Status:` line to flip to `resolved` — the
-   one judgment-free signal the Router needs, not the diff or the code-review report itself.
+4. **Receive completion** from the worker's completion notification, including its branch and
+   committed revision. Inspect the ticket's `Status: resolved` at that revision — not a stale
+   copy in the dispatcher's checkout. This is the Router's completion signal, not a second code
+   review. Without a completion notification, yield and let the user resume; do not poll ticket
+   files or spend repeated AI turns waiting for an unchanged worker.
 5. **Integrate** each finished worker branch as it completes: merge `--no-ff` into the
    integration branch, one branch at a time, then confirm the checkout took the merge — compare
    one merged file on disk against `git show HEAD:<path>` (a worktree merge has left a checkout

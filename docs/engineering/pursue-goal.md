@@ -26,6 +26,11 @@ At each checkpoint the engine compares evidence with the goal, preserves or reve
 replans, and chooses again. A spec or issues appear only when stable decomposition or coordination
 makes them valuable.
 
+For work spanning sessions, it keeps one compact checkpoint in the project's existing notes,
+plan, or report: the contract, evidence and revision, useful decisions and failed approaches,
+open questions, and next action. On resumption it checks that snapshot against live state.
+This is continuity context, not a mandatory spec or a second roadmap.
+
 ## Durable continuation
 
 Codex uses its native goal capability and creates a linked Git worktree when mutating work is still
@@ -56,6 +61,7 @@ authority.
 - Research can become a prototype, benchmark, or delivery slice without a forced pipeline reset.
 - Updates report material evidence transitions rather than unchanged status.
 - The final receipt ties every completion claim to observable proof.
+- Resumption preserves useful decisions while correcting stale checkpoint claims against current evidence.
 
 ## Where it fits
 

@@ -1,11 +1,16 @@
 ---
 name: diagnosing-bugs
-description: Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.
+description: Evidence-driven diagnosis for hard bugs and performance regressions. Use when the user asks to diagnose/debug an unclear failure or slowness; a straightforward known fix need not run the full investigation.
 ---
 
 # Diagnosing Bugs
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
+
+Match the stopping point to the request. For diagnosis-only work, use read-only checks or an
+isolated repro, explain the verified cause and proposed fix, and stop before changing application
+code. Proceed through the fix phases only when implementation is authorized. Reuse an existing
+repro or settled evidence instead of rebuilding it for ceremony.
 
 When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 

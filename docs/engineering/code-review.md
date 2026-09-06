@@ -12,10 +12,10 @@ Type `/code-review`, or the agent reaches for it automatically when you ask to r
 | --- | --- |
 | A diff exists and you want to know if it is built right *and* is the right thing | `code-review` |
 | You want bugs hunted in the diff — null paths, races, off-by-one | Claude Code's own built-in review, not this one (see the name clash below) |
-| Nothing is written yet and you want it written test-first | [tdd](https://aihero.dev/skills-tdd) |
-| A whole spec needs building, review included | [implement](https://aihero.dev/skills-implement), which calls this skill itself |
+| Nothing is written yet and you want it written test-first | [tdd](./tdd.md) |
+| A whole spec needs building, review included | [implement](./implement.md), which calls this skill itself |
 | The whole codebase has drifted, not one diff | [re-architect](./re-architect.md) |
-| Something is broken and you do not know why | [diagnosing-bugs](https://aihero.dev/skills-diagnosing-bugs) |
+| Something is broken and you do not know why | [diagnosing-bugs](./diagnosing-bugs.md) |
 
 The baseline comes from you or the calling workflow; an uncommitted-only review uses `HEAD`.
 It asks when the baseline remains ambiguous and validates it before spawning reviewers.
@@ -62,7 +62,7 @@ That was an upstream bug reproduced in more than one harness, with one report re
 
 **Should I run it in the same [session](https://www.aihero.dev/ai-coding-dictionary/session) that wrote the code?**
 
-Prefer a fresh one. As one reader put it: "Same context reviewing itself isn't review, it's confirmation bias with a slash command." The reviewing agent in the authoring session holds every assumption that shaped the code, which is exactly the context an independent reviewer would not have. This is also why people ask for [implement](https://aihero.dev/skills-implement) without its built-in review step — it runs the review inside the session that just wrote the diff. Invoking `/code-review` yourself from a clean session is the honest version.
+Prefer a fresh one. As one reader put it: "Same context reviewing itself isn't review, it's confirmation bias with a slash command." The reviewing agent in the authoring session holds every assumption that shaped the code, which is exactly the context an independent reviewer would not have. This is also why people ask for [implement](./implement.md) without its built-in review step — it runs the review inside the session that just wrote the diff. Invoking `/code-review` yourself from a clean session is the honest version.
 
 **After every ticket, or once at the end?**
 
@@ -96,8 +96,8 @@ A committed-only PR review does not silently include local edits.
 
 `code-review` is the review step at the tail of the build chain — `grill-with-docs → to-spec → to-tickets → implement → code-review` — and also stands alone on any branch or PR you point it at.
 
-- [implement](https://aihero.dev/skills-implement) is the closest neighbour: it drives the build and calls this skill as its own closing review before committing.
-- [to-spec](https://aihero.dev/skills-to-spec) and [to-tickets](https://aihero.dev/skills-to-tickets) produce the document the Spec axis checks against; a vague spec makes that axis vague.
+- [implement](./implement.md) is the closest neighbour: it drives the build and calls this skill as its own closing review before committing.
+- [to-spec](./to-spec.md) and [to-tickets](./to-tickets.md) produce the document the Spec axis checks against; a vague spec makes that axis vague.
 - [re-architect](./re-architect.md) is the whole-codebase counterpart — this skill only ever looks at one diff.
 
 [advise](./advise.md) routes across the whole set when you are unsure which skill the situation wants.

@@ -102,6 +102,13 @@ def dispatch_payload(tool_name, command=None):
 # ---------------------------------------------------------------------------
 
 BLOCK_PUSH_TO_MAIN = [
+    'git -C /tmp/repo push',
+    'git -c push.default=matching push origin',
+    'cd /tmp/repo && git push',
+    'git -C /tmp/repo push origin main',
+    'git -c color.ui=false push origin HEAD:main',
+    'git --no-pager push origin main',
+    'git --git-dir=/tmp/repo/.git push origin main',
     'git push origin main',
     'git push origin "main"',
     "git push origin 'main'",
@@ -134,6 +141,9 @@ for cmd in BLOCK_PR_TO_MAIN:
 # Feature-branch pushes and feature/main-page-style lookalikes must pass,
 # quoted or not -- the boundary behavior the fix must not break.
 PASS_LOOKALIKES = [
+    'git -C /tmp/repo status && git push origin feature/auth',
+    'git -C "/tmp/repo with spaces" push origin feature/auth',
+    'git -c color.ui=false status',
     'git push origin feature/main-page',
     'git push origin "feature/main-page"',
     "git push origin 'feature/main-page'",

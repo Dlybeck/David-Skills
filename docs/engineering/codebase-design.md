@@ -15,10 +15,10 @@ Several skills sit close to it. Which one you want depends on what the actual pr
 | The problem | The skill |
 |---|---|
 | The shape of one module — its interface, its seam, its depth | `codebase-design` |
-| The *words of the domain* — "account" means three things, two people mean different things by "cancellation" | [domain-modeling](https://aihero.dev/skills-domain-modeling) |
+| The *words of the domain* — "account" means three things, two people mean different things by "cancellation" | [domain-modeling](./domain-modeling.md) |
 | You don't yet know *which* module to redesign | [re-architect](./re-architect.md) — the survey that finds candidates |
-| You want the design argued with, not just named | [grilling](https://aihero.dev/skills-grilling) |
-| There's a concrete behaviour to build and you want tests that survive a refactor | [tdd](https://aihero.dev/skills-tdd) |
+| You want the design argued with, not just named | [grilling](../productivity/grilling.md) |
+| There's a concrete behaviour to build and you want tests that survive a refactor | [tdd](./tdd.md) |
 
 ## The vocabulary
 
@@ -85,4 +85,4 @@ People have proposed exactly those. [Issue #180](https://github.com/mattpocock/s
 
 ## Where it fits
 
-`codebase-design` is a **reach-for-it-anytime standalone**, and the vocabulary layer underneath the engineering skills rather than a step in any chain. Its closest neighbour is [domain-modeling](https://aihero.dev/skills-domain-modeling), the parallel reference for the *problem domain*'s words rather than the module's shape — the two are usually wanted together, since naming a deep module well needs both. [re-architect](./re-architect.md) is the other: it surveys a codebase for deepening candidates and writes every one of them in this glossary, so it finds the module and this skill is the bench you design it on. When you're unsure which skill or flow fits, [advise](./advise.md) routes you.
+`codebase-design` is a **reach-for-it-anytime standalone**, and the vocabulary layer underneath the engineering skills rather than a step in any chain. Its closest neighbour is [domain-modeling](./domain-modeling.md), the parallel reference for the *problem domain*'s words rather than the module's shape — the two are usually wanted together, since naming a deep module well needs both. [re-architect](./re-architect.md) is the other: it surveys a codebase for deepening candidates and writes every one of them in this glossary, so it finds the module and this skill is the bench you design it on. When you're unsure which skill or flow fits, [advise](./advise.md) routes you.
