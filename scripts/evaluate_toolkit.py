@@ -118,9 +118,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", choices=CASES)
     parser.add_argument("--timeout", type=int, default=120)
+    parser.add_argument("--enable-code-mode-host", action="store_true",
+                        help="Explicitly enable the execution host for this subprocess only")
     args = parser.parse_args()
     if not 1 <= args.timeout <= 180:
         parser.error("timeout must be 1..180 seconds")
+    runtime_directory = None
+    if args.enable_code_mode_host:
+        executable = shutil.which("codex")
+        if not executable:
+            parser.error("codex is not on PATH")
+        bundled = Path(executable).resolve().parent / "codex-code-mode-host"
+        helper = str(bundled) if bundled.is_file() else shutil.which("codex-code-mode-host")
+        if not helper or not os.access(helper, os.X_OK):
+            parser.error("execution helper unavailable; no installation attempted")
+        runtime_directory = str(Path(helper).parent)
     case = CASES[args.case]
     folder = Path(tempfile.mkdtemp(prefix=f"david-eval-{args.case}-"))
     project = folder / "project"
@@ -161,12 +173,17 @@ def main():
                "-o", str(folder / "answer.md")]
     if not case.get("installed"):
         command += ["-c", 'plugins."david-skills@david-skills".enabled=false']
+    if args.enable_code_mode_host:
+        command += ["-c", "features.code_mode_host=true"]
     command += [case["prompt"]]
     env = os.environ.copy()
     env.pop("OPENAI_API_KEY", None)  # This evaluation must use existing subscription auth.
+    if runtime_directory:
+        env["PATH"] = runtime_directory + os.pathsep + env.get("PATH", "")
     started = time.monotonic()
     receipt = {"case": args.case, "project": str(project), "mode":
                "installed-plugin" if case.get("installed") else "candidate-project-skills"}
+    receipt["runtime_override"] = args.enable_code_mode_host
     print(json.dumps({"started": receipt, "receipt": str(folder / "receipt.json")}), flush=True)
     with (folder / "trace.jsonl").open("w") as trace, (folder / "stderr.log").open("w") as errors:
         receipt.update(execute(command, project, env, args.timeout, trace, errors))
