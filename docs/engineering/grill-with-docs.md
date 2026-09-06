@@ -12,8 +12,8 @@ Reach for it at the start of a change, in a repo, when the plan is still fuzzy a
 
 | What you have | Reach for |
 | --- | --- |
-| You aren't working in a working directory at all | [grill-me](../productivity/grill-me.md) |
-| A repo, and a change you can settle in one session | `grill-with-docs` |
+| A stateless discussion, including inside a repo | [grill-me](../productivity/grill-me.md) |
+| A repo, and a change whose domain knowledge you want recorded | `grill-with-docs` |
 | An effort too big to hold in one session — a greenfield build, a large feature | [wayfinder](./wayfinder.md) |
 | A repo with no domain docs at all, and no particular feature in mind | `grill-with-docs`, aimed at the repo rather than a change |
 | A decision blocked on knowledge in someone else's head | [to-questionnaire](../productivity/to-questionnaire.md) |
@@ -79,7 +79,7 @@ Nobody is happy with the name. There is an open suggestion to rename it `grill-d
 
 ## Where it fits
 
-`grill-with-docs` is the head of the main build chain:
+`grill-with-docs` can begin a documented build sequence when those artifacts are useful:
 
 ```txt
 grill-with-docs → to-spec → to-tickets → implement → code-review

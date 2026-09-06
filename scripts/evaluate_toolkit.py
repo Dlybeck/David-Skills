@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import tempfile
 import time
@@ -61,6 +62,56 @@ CASES = {
 def run(command, cwd, **kwargs):
     return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True,
                           timeout=15, **kwargs)
+
+
+def classify_trace(trace_text, exit_code):
+    """Validate runtime evidence, not the skill's behavior or answer quality."""
+    reasons = []
+    completed = False
+    if exit_code != 0:
+        reasons.append(f"process exit: {exit_code}")
+    for number, line in enumerate(trace_text.splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            reasons.append(f"malformed trace line {number}")
+            continue
+        if not isinstance(event, dict) or not isinstance(event.get("type"), str):
+            reasons.append(f"invalid event at line {number}")
+            continue
+        item = event.get("item")
+        if event["type"] in {"error", "turn.failed"} or (
+            isinstance(item, dict) and item.get("type") == "error"
+        ):
+            reasons.append(f"runtime error at line {number}")
+        if event["type"] == "turn.completed":
+            completed = True
+    if not completed:
+        reasons.append("missing turn.completed")
+    return {"status": "invalid-runtime" if reasons else "needs-review",
+            "runtime_issues": reasons, "behavioral_verdict": "not-evaluated"}
+
+
+def execute(command, project, env, timeout, trace, errors):
+    """Bound the entire subprocess group, including tool children, on timeout."""
+    try:
+        with subprocess.Popen(command, stdout=trace, stderr=errors, env=env,
+                              stdin=subprocess.DEVNULL, cwd=project,
+                              start_new_session=True) as process:
+            try:
+                return {"exit_code": process.wait(timeout=timeout)}
+            except subprocess.TimeoutExpired:
+                # Only this evaluation's new process group is targeted.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait()
+                return {"status": "timeout", "exit_code": process.returncode}
+    except OSError as exc:
+        return {"status": "launch-failed", "error": str(exc), "exit_code": None}
 
 
 def main():
@@ -118,20 +169,18 @@ def main():
                "installed-plugin" if case.get("installed") else "candidate-project-skills"}
     print(json.dumps({"started": receipt, "receipt": str(folder / "receipt.json")}), flush=True)
     with (folder / "trace.jsonl").open("w") as trace, (folder / "stderr.log").open("w") as errors:
-        try:
-            process = subprocess.run(command, stdout=trace, stderr=errors, env=env,
-                                     timeout=args.timeout, cwd=project)
-            receipt.update(status="finished", exit_code=process.returncode)
-        except subprocess.TimeoutExpired:
-            receipt.update(status="timeout", exit_code=None)
-        except OSError as exc:
-            receipt.update(status="launch-failed", error=str(exc))
+        receipt.update(execute(command, project, env, args.timeout, trace, errors))
+    validation = classify_trace((folder / "trace.jsonl").read_text(), receipt["exit_code"])
+    runtime_status = receipt.get("status")
+    receipt.update(validation)
+    if runtime_status:
+        receipt["status"] = runtime_status
     receipt["elapsed_seconds"] = round(time.monotonic() - started, 2)
     receipt["git_status"] = run(["git", "status", "--porcelain"], project).stdout
     (folder / "changes.patch").write_text(run(["git", "diff", "HEAD"], project).stdout)
     (folder / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(receipt), flush=True)
-    return 0 if receipt.get("exit_code") == 0 else 1
+    return 0 if receipt["status"] == "needs-review" else 1
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 `yolopilot` starts a durable autonomous run immediately from the agent's stated best interpretation
 of a loose handoff. It uses the same [pursue-goal](./pursue-goal.md) engine as Autopilot but replaces
-upfront alignment with a stricter delivery boundary: it leaves a pushed review branch and never
+upfront alignment with a stricter delivery boundary: it leaves a review branch and never
 merges it.
 
 Its defining behavior is **refine afterward**. The run preserves what it initially assumed, learns
@@ -19,7 +19,9 @@ better than waiting. Whenever you can stay for an understanding round, use
 ## The review-branch boundary
 
 Yolopilot may research, modify local files, install dependencies, use local compute, run tests and
-evaluations, make small commits, and push its feature branch. It cannot merge into `dev` or another
+evaluations, and make small commits within your stated restrictions. It pushes its feature branch
+only when your authority allows it and a remote is available; otherwise delivery stays local.
+It cannot merge into `dev` or another
 integration branch. Money, credentials, production, material deletion, safeguards, unrelated scope,
 and `main` remain human boundaries.
 
@@ -54,7 +56,7 @@ disproportionate after routine work.
 
 - The warning and provisional interpretation appear before mutation, without waiting for a reply.
 - Git history makes each material decision easy to inspect.
-- The final branch is validated, reviewed, pushed, and unmerged.
+- The final branch is validated, reviewed, and unmerged; it is pushed only when authorized.
 - The learning digest says what changed in the agent's understanding.
 
 ## Where it fits

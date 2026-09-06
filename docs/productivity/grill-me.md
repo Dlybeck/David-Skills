@@ -1,12 +1,12 @@
 ## What it does
 
-`grill-me` takes a **loose idea** and interviews you until you can commit to it. You do not need a worked-out plan to start — producing one is what the [session](https://www.aihero.dev/ai-coding-dictionary/session) is for. It asks in **rounds**: each round is the whole **frontier** — every question whose prerequisites you have already settled — so you are never asked something that hinges on an answer it hasn't heard yet.
+`grill-me` takes a **loose idea** or a decision you want to revisit and helps you understand it. You do not need a worked-out plan to start. The [session](https://www.aihero.dev/ai-coding-dictionary/session) asks in manageable **rounds**, choosing the highest-impact ready questions from the **frontier** while reusing settled context.
 
 It is **[stateless](https://www.aihero.dev/ai-coding-dictionary/stateless)**. It writes no files and leaves no workspace behind. The only thing it leaves is a sharper version of the idea, in your own head.
 
 ## When to reach for it
 
-You invoke this by typing `/grill-me` — the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own. Start it in a **fresh conversation**, not on top of a plan you already had an agent write.
+You invoke this by typing `/grill-me` — the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own. Start fresh for an independent challenge, or keep the current conversation when you want to revisit a particular decision without losing settled context.
 
 Reach for it as soon as you have an idea worth taking seriously — a feature, a product direction, a business call, a piece of writing — and long before you have worked out what it involves. Vagueness is not a reason to wait; it is the thing the session eats. If you can already specify the thing precisely, you don't need to grill it.
 
@@ -16,7 +16,7 @@ Which of the three grilling skills you want depends on what is in front of you:
 - **A codebase to align against** — [grill-with-docs](../engineering/grill-with-docs.md). The same interview, but [stateful](https://www.aihero.dev/ai-coding-dictionary/stateful): it reads your code and keeps what it learns in `CONTEXT.md` and ADRs.
 - **Too big for one session** — [wayfinder](../engineering/wayfinder.md). It charts the effort as a map and runs grilling sessions inside it.
 
-Leave [plan mode](https://www.aihero.dev/ai-coding-dictionary/agent-mode) off. Plan mode primes the agent to rush toward producing a plan, which is the opposite of staying in inquiry.
+Make the boundary explicit: discussion only until you authorize implementation. The skill does not require changing your harness mode.
 
 ## It's a conversation, not an interview
 
@@ -39,7 +39,7 @@ Talking your way through an ungrillable question is where sessions balloon. The 
 ## Common questions
 
 **How many questions should I expect, and how do I know when it ends?**
-Count rounds, not questions. Forty-six questions across four rounds is an ordinary session. It ends when the frontier is empty — every branch visited, nothing left silently assumed.
+There is no target count. It ends when the material decisions in your agreed scope are resolved and the shared understanding is confirmed. A small decision may need only a short exchange; assumptions and deferred choices should be named rather than hidden.
 
 **It asked me two hundred questions. What went wrong?**
 Usually the scope was too large. Ask the agent to break the work into smaller pieces first, then grill each one. Very long sessions also drift into the **[dumb zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**, where the [context window](https://www.aihero.dev/ai-coding-dictionary/context-window) is full enough that the questions get worse.

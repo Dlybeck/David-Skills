@@ -71,7 +71,7 @@ If you intentionally want ordinary skill files you can edit, use [skills.sh](htt
 npx skills@latest add Dlybeck/David-Skills
 ```
 
-Pick the target agent and skills in its prompts, and include `setup`. Nothing updates behind your back; pull an updated skill when you want it with `npx skills@latest update <name>`. This file-copy route does not install the plugin hooks.
+Pick the target agent and skills in its prompts. Include `setup` when your selected skills need missing project configuration. Nothing updates behind your back; pull an updated skill when you want it with `npx skills@latest update <name>`. This file-copy route does not install the plugin hooks.
 
 </details>
 

@@ -36,7 +36,7 @@ No. Upstream [issue #530](https://github.com/mattpocock/skills/issues/530) docum
 
 **Where should the file live — and should I commit it?**
 
-The skill puts the file where the repo already keeps notes and does not have an opinion beyond that. The community one is fairly settled: ADRs are kept, research files are not. The sharpest version of it, from a Discord thread on exactly this question: "ADRs yes. Everything else archive or delete after done. It otherwise becomes cruft of work and can poison future repo reads if you've drifted away from the spec/research." A research file records what was true on the day it was written, so a stale one is worse than none. On balance these artifacts don't really belong in git, and there is no canonical home for them — people use Obsidian, a separate knowledge repo, or the issue tracker instead.
+Follow the repo's existing notes convention and your retention policy. A dated research file can preserve valuable evidence, but later work should recheck facts that may have changed. The skill does not require either committing or deleting it.
 
 **What counts as a "high-trust" primary source, and who decides?**
 
@@ -56,7 +56,7 @@ There is no stopping criterion in the skill, and this shows up as two complaints
 
 **`/wayfinder` created research tickets — do I resolve those myself?**
 
-No, it now fires them for you. In the unreleased changes since v1.1, a charting session spawns a `/research` subagent per research ticket and burns them down in parallel, capturing findings on a throwaway `research/<name>` branch with a [context pointer](https://www.aihero.dev/ai-coding-dictionary/context-pointer) from the ticket. Research tickets are the one exception to wayfinder's one-ticket-per-session rule, because they are [AFK](https://www.aihero.dev/ai-coding-dictionary/afk) — nothing waits on you. Two known snags with those branches: the subagent has been seen opening a draft PR from a branch that is never meant to merge ([issue #576](https://github.com/mattpocock/skills/issues/576)), and deleting the branch later breaks the context pointers the tickets hold.
+Wayfinder can resolve ready research directly or through one bounded worker. Extra tickets remain pending rather than causing one worker per ticket. Findings are linked from their tickets; a separate branch is optional when isolation and Git authority justify it. Preserve linked evidence while the map still depends on it.
 
 ## It's working if
 
@@ -68,4 +68,4 @@ No, it now fires them for you. In the unreleased changes since v1.1, a charting 
 
 ## Where it fits
 
-A reach-for-it-anytime standalone that feeds the thinking skills rather than sitting in the build chain. Its file is something to take *into* the flow: [grilling](../productivity/grilling.md) and [grill-with-docs](./grill-with-docs.md) ask sharper questions when the facts are already on the table, and [to-spec](./to-spec.md) can synthesise against it. [wayfinder](./wayfinder.md) is the one skill that invokes it directly, resolving each research ticket on its map with a `/research` subagent. For the whole map, see [advise](./advise.md).
+A reach-for-it-anytime standalone: its findings can answer the request directly or inform [grilling](../productivity/grilling.md), [wayfinder](./wayfinder.md), or an autonomous [pursue-goal](./pursue-goal.md) run. For the whole map, see [advise](./advise.md).

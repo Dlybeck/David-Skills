@@ -72,7 +72,7 @@ Into [codebase-design](./codebase-design.md) in v1.0, generalised so several ski
 
 **Does it know about my other tickets?**
 
-No. Run against one ticket, it will happily propose work that belongs to a sibling ticket, because it has no view of the rest of the issue graph ([issue #129](https://github.com/mattpocock/skills/issues/129)). Matt's position is that this is not `tdd`'s job. Passing the spec alongside the ticket helps; right-sizing the tickets in the first place helps more.
+Not automatically. Supply the relevant scope and dependencies when they affect the behavior under test. The skill does not manage the issue graph, and test-first work is not permission to expand into sibling tickets.
 
 ## It's working if
 
@@ -85,7 +85,7 @@ No. Run against one ticket, it will happily propose work that belongs to a sibli
 
 ## Where it fits
 
-`tdd` is the engine inside the build step of the main chain, rather than a step of its own:
+`tdd` is independently useful test-first discipline. One composition uses it inside implementation:
 
 ```txt
 grill-with-docs → to-spec → to-tickets → implement → code-review

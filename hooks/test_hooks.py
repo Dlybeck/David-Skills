@@ -263,6 +263,10 @@ with tempfile.TemporaryDirectory() as temp_dir:
 
 # The four destructive-op patterns still block outright...
 BLOCK_DESTRUCTIVE = [
+    'git -C /tmp/repo reset --hard',
+    'git -c color.ui=false clean -fd',
+    'git --no-pager branch -D some-branch',
+    'git --work-tree=/tmp/repo restore .',
     'git reset --hard',
     'git reset --hard HEAD~1',
     'git clean -f',
@@ -304,6 +308,15 @@ check("block-dangerous-git ignores non-Bash tool", code == 0 and err == "",
 
 # Malformed stdin must fail open: exit 0, no stderr.
 MALFORMED_STDIN = ["", "not json", "null", "[]", '{"tool_name": "Bash"}']
+MALFORMED_STDIN += [
+    json.dumps({"tool_name": "Bash", "tool_input": value})
+    for value in ([], "invalid", 7)
+]
+MALFORMED_STDIN += [
+    json.dumps({"tool_name": "Bash", "tool_input": {"command": value}})
+    for value in ([], {}, 7)
+]
+MALFORMED_STDIN += [json.dumps({"model": ["invalid"]})]
 
 for raw in MALFORMED_STDIN:
     code, err = run_hook("block-dangerous-git.py", raw)

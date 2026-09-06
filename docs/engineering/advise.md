@@ -37,7 +37,7 @@ The word **flow** means one possible composition, not a required sequence. You c
 
 ## The phase boundary
 
-The other idea it hands you is the **phase boundary**. A phase is a chunk of work inside a session — the [grilling](https://www.aihero.dev/ai-coding-dictionary/grilling), the implementation, the QA — and the boundary between two of them is the only place the question "what do I do with this context?" belongs. Mid-phase there is nothing to decide: continue, or split what is left into [subagents](https://www.aihero.dev/ai-coding-dictionary/subagent).
+The other idea it hands you is the **phase boundary**: a useful moment to decide whether to continue, compact, or hand off. Preserve settled requirements across that choice. A compact checkpoint or self-contained ticket can support a restart; neither a fresh session nor a particular context-size threshold is mandatory for every task.
 
 | Option | Take it when |
 | --- | --- |

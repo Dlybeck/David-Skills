@@ -36,9 +36,13 @@ implementation, research, review, or any standalone skill.
 
 ### Context hygiene
 
-Keep steps 1–3 in **one unbroken context window** — don't compact or clear until after `/to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket.
+Preserve settled decisions between related practices. Continue in the same conversation while its
+context remains useful; use a compact checkpoint or self-contained ticket when restarting would
+otherwise lose requirements. A fresh implementation session is useful for an independent ticket,
+not a mandatory boundary for every change.
 
-The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~150k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded — `/compact` at the nearest phase boundary and carry on (see Phase boundaries).
+Use the current harness's context controls when needed, preserving the primary evidence and open
+decisions. Do not infer a universal safe context size from another model's token count.
 
 ## Running autonomously
 
@@ -56,7 +60,7 @@ A starting situation that generates work, then merges onto the main flow.
 
   Triage is only for issues **you didn't create** — bug reports, incoming feature requests, anything that arrives raw. Tickets that `/to-tickets` produced are already agent-ready, so **don't triage them**.
 
-- **Something's broken** → **`/diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression that crept in between two known-good states. It refuses to theorise until it has a **tight feedback loop** — one command that already goes red on *this* bug — then fixes with a regression test. Its post-mortem hands off to **`/re-architect`** when the real finding is that there's no good seam to lock the bug down.
+- **Something's broken** → **`/diagnosing-bugs`**. For unclear failures, intermittent flakes, or regressions, establish or reuse a **tight feedback loop**. Diagnosis-only ends with the cause and proposed fix; an authorized repair continues through a regression test and fix. Consider **`/re-architect`** when the finding is that there's no good seam to lock the bug down.
 
 - **A huge, foggy effort — a greenfield project or a huge feature build, too big for one session** → **`/wayfinder`**, the most cognitively demanding flow here. When the way from here to the destination isn't visible yet, it charts a **shared map** of **decision tickets** on the issue tracker and resolves them one at a time — producing **decisions, not deliverables** — until the fog is pushed back and the way is clear. Where **`/grill-with-docs`** sharpens an idea you can hold in one session, wayfinder is for the idea you can't — and it's slower and denser, so save it for exactly that, never a well-scoped feature.
 
