@@ -20,7 +20,7 @@ Tickets that `to-tickets` produced are agent-ready by construction. Don't run [t
 
 ## Prerequisites
 
-`to-tickets` publishes into a tracker, so [setup](./setup.md) must have configured one for this repo, along with the triage-label vocabulary. Either kind works: a real tracker like GitHub or Linear, or local markdown files under `.scratch/`, which is supported out of the box.
+`to-tickets` needs a known tracker destination and triage-label vocabulary. Existing project conventions count; [setup](./setup.md) can establish missing ones when you invoke it. The destination can be a service such as GitHub or Linear, or local Markdown under `.scratch/`.
 
 ## Tracer bullets, not layers
 

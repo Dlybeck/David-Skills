@@ -20,7 +20,7 @@ You invoke this by typing `/triage` and then describing what you want in plain l
 
 ## Prerequisites
 
-`triage` reads and writes your issue tracker, so [setup](./setup.md) has to have configured that tracker and its label vocabulary first. The role names below are **canonical**; the label strings in your tracker may differ, and the mapping is what setup provides. If your tracker already uses the canonical names exactly, there is nothing to map and nothing to set up.
+`triage` needs the tracker destination and its label vocabulary. Reuse existing conventions; invoke [setup](./setup.md) only when you want it to establish missing ones. The role names below are **canonical**. If your tracker uses them exactly, no translation is needed; otherwise the mapping must be known before labels change.
 
 The tracker config also decides whether external pull requests count as a request surface, and who counts as external. That flag defaults to off and is no longer a setup question — flip it in `docs/agents/issue-tracker.md` if you want PRs in scope.
 

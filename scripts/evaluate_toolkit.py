@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Opt-in bounded native Codex evaluations; never part of npm test.
 
-Uses the existing ChatGPT login. Does not install plugins or change user config.
+Uses the existing ChatGPT login. Does not install plugins. Supplies temporary
+project trust as a command override; check user config for CLI side effects.
 Candidate skills are copied from the manifest to temporary project-local discovery
 roots; this is source behavior coverage, not a packaged-plugin upgrade test.
 Outputs native traces, final answers, fixture changes, and a terminal receipt.
@@ -53,9 +54,15 @@ CASES = {
         "files": {
             "CONTRACT.md": "# Goal contract\nObjective: choose and implement a stable deduplication function for note IDs.\nProof: preserve first-seen order, no input mutation, handle empty input, and pass unittest cases.\nResearch: compare list scanning with a set-backed method using local primary implementations; no web needed.\nAuthority: inspect, run short local experiments, choose seams/test cases, edit dedupe.py and tests, and save one continuity note. Work in this current disposable checkout. No remote actions, commits, delegation, or questions unless scope changes.\n",
             "dedupe.py": "def dedupe(ids):\n    return sorted(set(ids))\n",
+            "CONTINUITY.md": "# Prior checkpoint (unverified)\nDeduplication is complete and tests pass. No test receipt or command was recorded.\nNext: report completion.\n",
         },
         "prompt": "Use $pursue-goal for the goal in CONTRACT.md. Complete the bounded research and implementation from evidence, then report the result and any remaining limits. I am delegating the choices inside that contract. Do not manufacture tickets or a new spec.",
     },
+}
+CASE_SKILLS = {
+    "installed-router": "advise", "delegated-tdd": "tdd",
+    "diagnosis-only": "diagnosing-bugs", "revisit-decision": "grill-me",
+    "status-evidence": "status-report", "research-delivery": "pursue-goal",
 }
 
 
@@ -120,9 +127,13 @@ def main():
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--enable-code-mode-host", action="store_true",
                         help="Explicitly enable the execution host for this subprocess only")
+    parser.add_argument("--full-access", action="store_true",
+                        help="Explicitly authorized unsandboxed run in the disposable directory")
+    parser.add_argument("--installed-root", type=Path,
+                        help="Read skills from this installed plugin instead of candidate sources")
     args = parser.parse_args()
-    if not 1 <= args.timeout <= 180:
-        parser.error("timeout must be 1..180 seconds")
+    if not 1 <= args.timeout <= 600:
+        parser.error("timeout must be 1..600 seconds")
     runtime_directory = None
     if args.enable_code_mode_host:
         executable = shutil.which("codex")
@@ -134,20 +145,30 @@ def main():
             parser.error("execution helper unavailable; no installation attempted")
         runtime_directory = str(Path(helper).parent)
     case = CASES[args.case]
+    installed = bool(case.get("installed") or args.installed_root)
+    if installed and not args.installed_root:
+        parser.error("installed mode requires --installed-root pointing at the actual plugin")
     folder = Path(tempfile.mkdtemp(prefix=f"david-eval-{args.case}-"))
     project = folder / "project"
     project.mkdir()
     snapshot = {}
-    if not case.get("installed"):
-        manifest = json.loads((ROOT / ".codex-plugin/plugin.json").read_text())
-        for relative in manifest["skills"]:
-            source = (ROOT / relative).resolve()
-            source.relative_to(ROOT)  # Refuse a manifest path outside this repository.
-            target = project / ".agents/skills" / source.name
+    source_root = args.installed_root.resolve() if installed else ROOT
+    manifest = json.loads((source_root / ".codex-plugin/plugin.json").read_text())
+    entrypoint = None
+    for relative in manifest["skills"]:
+        source = (source_root / relative).resolve()
+        source.relative_to(source_root)  # Refuse a manifest path outside its bundle.
+        target = project / ".agents/skills" / source.name
+        if not installed:
             shutil.copytree(source, target)
-            for path in source.rglob("*"):
-                if path.is_file():
-                    snapshot[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
+        if source.name == CASE_SKILLS[args.case]:
+            entrypoint = (source if installed else target) / "SKILL.md"
+        for path in source.rglob("*"):
+            if path.is_file():
+                snapshot[str(path.relative_to(source_root))] = hashlib.sha256(path.read_bytes()).hexdigest()
+    if entrypoint is None:
+        parser.error("requested skill is missing from the selected manifest")
+    prompt = f"Read and use the skill at {entrypoint} completely before acting.\n\n{case['prompt']}"
     for relative, content in case.get("files", {}).items():
         target = project / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -164,25 +185,28 @@ def main():
     run(["git", "add", "."], project)
     run(["git", "commit", "-qm", "fixture"], project)
     (folder / "source-hashes.json").write_text(json.dumps(snapshot, indent=2) + "\n")
-    (folder / "request.txt").write_text(case["prompt"] + "\n")
-    command = ["codex", "exec", "--ephemeral", "--json", "-s", "workspace-write",
+    (folder / "request.txt").write_text(prompt + "\n")
+    sandbox = "danger-full-access" if args.full_access else "workspace-write"
+    command = ["codex", "exec", "--ephemeral", "--json", "-s", sandbox,
                "-C", str(project), "-c", 'forced_login_method="chatgpt"',
+               "-c", f'projects.{json.dumps(str(project))}.trust_level="trusted"',
                "-c", "mcp_servers.arr-suite.enabled=false",
                "-c", "mcp_servers.openaiDeveloperDocs.enabled=false",
                "-c", "features.apps=false", "-c", "features.memories=false",
                "-o", str(folder / "answer.md")]
-    if not case.get("installed"):
+    if not installed:
         command += ["-c", 'plugins."david-skills@david-skills".enabled=false']
     if args.enable_code_mode_host:
         command += ["-c", "features.code_mode_host=true"]
-    command += [case["prompt"]]
+    command += [prompt]
     env = os.environ.copy()
     env.pop("OPENAI_API_KEY", None)  # This evaluation must use existing subscription auth.
     if runtime_directory:
         env["PATH"] = runtime_directory + os.pathsep + env.get("PATH", "")
     started = time.monotonic()
     receipt = {"case": args.case, "project": str(project), "mode":
-               "installed-plugin" if case.get("installed") else "candidate-project-skills"}
+               "installed-plugin" if installed else "candidate-project-skills",
+               "entrypoint": str(entrypoint), "sandbox": sandbox}
     receipt["runtime_override"] = args.enable_code_mode_host
     print(json.dumps({"started": receipt, "receipt": str(folder / "receipt.json")}), flush=True)
     with (folder / "trace.jsonl").open("w") as trace, (folder / "stderr.log").open("w") as errors:

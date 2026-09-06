@@ -19,7 +19,7 @@ Reach for it when the build is too big for one agent [session](https://www.aiher
 
 ## Prerequisites
 
-`to-spec` publishes the spec as an issue, so [setup](./setup.md) must have configured a tracker and the triage-label vocabulary for this repo first. Either kind works: a real tracker like GitHub, or local markdown files under `.scratch/`, which is supported out of the box.
+`to-spec` needs a known tracker destination and triage-label vocabulary. Existing project conventions count; [setup](./setup.md) can establish missing ones when you invoke it. The destination can be a service such as GitHub or local Markdown under `.scratch/`.
 
 ## The spec is a decision record
 

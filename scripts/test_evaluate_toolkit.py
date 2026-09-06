@@ -4,10 +4,13 @@ import io
 import json
 import signal
 import subprocess
+import tempfile
 import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from evaluate_toolkit import classify_trace, execute
+from evaluate_toolkit import classify_trace, execute, main
 
 
 def trace(*events):
@@ -67,6 +70,45 @@ class ExecutionTests(unittest.TestCase):
         result = execute(["fixture"], "/tmp", {}, 1, io.StringIO(), io.StringIO())
         self.assertEqual(result["status"], "launch-failed")
         self.assertIsNone(result["exit_code"])
+
+
+class HarnessTests(unittest.TestCase):
+    def test_candidate_and_installed_modes_with_explicit_full_access(self):
+        for installed in (False, True):
+            with self.subTest(installed=installed), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp) / "bundle"
+                source = root / "skills/engineering/tdd"
+                source.mkdir(parents=True)
+                (source / "SKILL.md").write_text("Test fixture discipline.\n")
+                (source / "reference.md").write_text("Supporting evidence.\n")
+                (root / ".codex-plugin").mkdir()
+                (root / ".codex-plugin/plugin.json").write_text(json.dumps({
+                    "skills": ["skills/engineering/tdd"]}))
+                output = Path(temp) / "evaluation"
+                output.mkdir()
+                argv = ["evaluate_toolkit.py", "delegated-tdd"]
+                if installed:
+                    argv += ["--installed-root", str(root), "--full-access"]
+
+                def fake_execute(command, project, env, timeout, stream, errors):
+                    self.assertEqual(command[command.index("-s") + 1],
+                                     "danger-full-access" if installed else "workspace-write")
+                    self.assertNotIn("OPENAI_API_KEY", env)
+                    self.assertIn(f'projects.{json.dumps(str(project))}.trust_level="trusted"', command)
+                    self.assertIn("Read and use the skill at", command[-1])
+                    stream.write(trace(COMPLETE) + "\n")
+                    return {"exit_code": 0}
+
+                with patch("evaluate_toolkit.ROOT", root), \
+                     patch("evaluate_toolkit.tempfile.mkdtemp", return_value=str(output)), \
+                     patch("evaluate_toolkit.execute", side_effect=fake_execute), \
+                     patch("sys.argv", argv), redirect_stdout(io.StringIO()):
+                    self.assertEqual(main(), 0)
+                receipt = json.loads((output / "receipt.json").read_text())
+                self.assertEqual(receipt["status"], "needs-review")
+                copied = output / "project/.agents/skills/tdd/reference.md"
+                self.assertEqual(copied.exists(), not installed)
+                self.assertEqual(len(json.loads((output / "source-hashes.json").read_text())), 2)
 
 
 if __name__ == "__main__":
