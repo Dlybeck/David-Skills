@@ -4,8 +4,10 @@ Use the snapshot from `SKILL.md` as the content source. A webpage is a presentat
 snapshot, not a live dashboard or an additional status authority.
 
 - Reuse an existing report page or private project hub when the request authorizes updating it.
-- For a local webpage, produce a self-contained HTML file beside the Markdown report. Keep
-  styles and any necessary scripts inline; avoid external fonts, analytics, or CDNs.
+- For a local webpage, produce a self-contained HTML file in the project's report location,
+  falling back to `.reports/status/<timestamp>-<topic>.html`. A Markdown companion is optional,
+  not a prerequisite. Keep styles and any necessary scripts inline; avoid external fonts,
+  analytics, or CDNs.
 - For hosting, use the environment's available website-building and hosting workflow within
   the user's authorized destination and visibility. Without a configured or authorized hosting
   route, deliver the local file and explain what is needed for a remotely accessible URL.

@@ -29,7 +29,8 @@ makes them valuable.
 For work spanning sessions, it keeps one compact checkpoint in the project's existing notes,
 plan, or report: the contract, evidence and revision, useful decisions and failed approaches,
 open questions, and next action. On resumption it checks that snapshot against live state.
-This is continuity context, not a mandatory spec or a second roadmap.
+Branch, revision, and dirty-state claims come from command results and are rechecked before
+Git delivery. This is continuity context, not a mandatory spec or a second roadmap.
 
 ## Durable continuation
 

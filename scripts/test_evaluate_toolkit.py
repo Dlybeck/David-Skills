@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from evaluate_toolkit import classify_trace, execute, main
+from evaluate_toolkit import classify_trace, execute, git_snapshot, main, run
 
 
 def trace(*events):
@@ -96,6 +96,7 @@ class HarnessTests(unittest.TestCase):
                     self.assertNotIn("OPENAI_API_KEY", env)
                     self.assertIn(f'projects.{json.dumps(str(project))}.trust_level="trusted"', command)
                     self.assertIn("Read and use the skill at", command[-1])
+                    (project / "labels.py").write_text("# Fixture change, not a model execution.\n")
                     stream.write(trace(COMPLETE) + "\n")
                     return {"exit_code": 0}
 
@@ -106,9 +107,59 @@ class HarnessTests(unittest.TestCase):
                     self.assertEqual(main(), 0)
                 receipt = json.loads((output / "receipt.json").read_text())
                 self.assertEqual(receipt["status"], "needs-review")
+                self.assertEqual(receipt["git_before"]["branch"], "eval")
+                self.assertFalse(receipt["git_before"]["detached"])
+                self.assertFalse(receipt["git_before"]["dirty"])
+                self.assertTrue(receipt["git_after"]["dirty"])
+                self.assertEqual(receipt["git_after"]["branch"], "eval")
+                self.assertEqual(receipt["git_before"]["revision"], receipt["git_after"]["revision"])
+                self.assertIn("labels.py", receipt["git_after"]["porcelain_v2"])
                 copied = output / "project/.agents/skills/tdd/reference.md"
                 self.assertEqual(copied.exists(), not installed)
                 self.assertEqual(len(json.loads((output / "source-hashes.json").read_text())), 2)
+
+
+class GitEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.project = Path(self.temp.name)
+        run(["git", "init", "-q", "-b", "review"], self.project)
+        run(["git", "config", "user.name", "Evidence Test"], self.project)
+        run(["git", "config", "user.email", "test@example.invalid"], self.project)
+        (self.project / "source.txt").write_text("baseline\n")
+        run(["git", "add", "source.txt"], self.project)
+        run(["git", "commit", "-qm", "baseline"], self.project)
+        self.revision = run(["git", "rev-parse", "HEAD"], self.project).stdout.strip()
+
+    def test_named_branch_and_revision_are_observed(self):
+        result = git_snapshot(self.project)
+        self.assertEqual(result["worktree"], str(self.project.resolve()))
+        self.assertEqual(result["branch"], "review")
+        self.assertEqual(result["revision"], self.revision)
+        self.assertFalse(result["detached"])
+        self.assertFalse(result["dirty"])
+
+    def test_detached_checkout_is_not_a_named_branch(self):
+        run(["git", "switch", "--detach", "-q", self.revision], self.project)
+        result = git_snapshot(self.project)
+        self.assertTrue(result["detached"])
+        self.assertIsNone(result["branch"])
+        self.assertEqual(result["revision"], self.revision)
+
+    def test_tracked_and_untracked_changes_are_retained_as_evidence(self):
+        (self.project / "source.txt").write_text("changed\n")
+        (self.project / "new.txt").write_text("untracked\n")
+        result = git_snapshot(self.project)
+        self.assertTrue(result["dirty"])
+        self.assertIn("source.txt", result["porcelain_v2"])
+        self.assertIn("? new.txt", result["porcelain_v2"])
+
+    def test_unavailable_git_is_not_reported_as_clean(self):
+        with patch("evaluate_toolkit.run", side_effect=FileNotFoundError("git unavailable")):
+            result = git_snapshot(self.project)
+        self.assertEqual(result["status"], "unavailable")
+        self.assertNotIn("dirty", result)
 
 
 if __name__ == "__main__":

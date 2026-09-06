@@ -15,7 +15,7 @@ You invoke this by typing `/advise` — the agent won't reach for it on its own.
 | Two skills that look interchangeable | Their different outputs: [grill-me](../productivity/grill-me.md) for stateless discussion, [grill-with-docs](./grill-with-docs.md) for domain documentation, [wayfinder](./wayfinder.md) for a large unresolved decision map |
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
 | A large objective you want pursued autonomously | Whether [autopilot](./autopilot.md) can earn a confirmed contract or [yolopilot](./yolopilot.md) must start provisionally |
-| Current progress is hard to place in the larger project | [status-report](../productivity/status-report.md), which connects verified work to milestones and long-term outcomes |
+| Current progress is hard to place in the larger project | [status-report](../productivity/status-report.md), which connects verified work to milestones and long-term outcomes directly in chat, with useful visuals |
 | Work is ready for review but not committed | [code-review](./code-review.md), including relevant staged, unstaged, and new files; the request or goal contract can supply its requirements |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 

@@ -4,8 +4,9 @@
 Every report is a dated **snapshot**, grounded in available evidence; a plan to do something
 does not count as proof that it is finished.
 
-It connects active work to milestones and project outcomes, identifies what changed, and gives
-you the next useful action with the evidence you should expect from it.
+The report appears directly in chat, with useful visuals connecting active work to milestones
+and project outcomes. It identifies what changed and gives you the next useful action with the
+evidence you should expect from it. Saving a separate report is opt-in.
 
 ## When to reach for it
 
@@ -14,19 +15,14 @@ it when a task calls for a project progress report.
 
 | Situation | Result |
 | --- | --- |
-| Returning to a project or reviewing a milestone | Current state, recent changes, and next actions connected to project goals |
+| Returning to a project or reviewing a milestone | An in-chat report with current state, useful visuals, and next actions connected to project goals |
 | Reviewing a long autonomous run | Verified outcomes, remaining gaps, and their significance to the project |
 | Requesting a document | A concise chat overview and saved Markdown snapshot |
 | Requesting a webpage | The same evidence presented as a readable webpage |
 | Checking whether one running job has changed | A short status answer; no full report needed |
 
-## Prerequisites
-
-Provide access to the project and any long-term plan outside it that the report should use.
-Existing planning and tracking conventions are sufficient. Saved reports use the project's
-report location outside commit-gated tracker directories, falling back to `.reports/status/`;
-chat-only reports need no folder. Report snapshots do not require tracker commits before later
-agent dispatch.
+It uses available project evidence and any linked long-term plan. Existing planning and tracking
+conventions are sufficient; the default chat report needs no report folder or document tool.
 
 ## Common questions
 
@@ -37,8 +33,15 @@ If the project direction is missing or the connection is uncertain, the report s
 
 **Do I have to open a document or webpage to understand it?**
 
-No. The key conclusions appear directly in chat. The saved report holds the fuller evidence.
-You can also request chat only.
+No. The report itself is in chat, including its useful visuals and evidence links. A separate
+Markdown snapshot or webpage is created only when you request it or your project explicitly
+requires a saved report.
+
+**By visuals, do you mean just a table with status icons?**
+
+No. When useful, it includes a diagram, a chart of measured results, or relevant images directly
+in the conversation. The choice follows the evidence rather than a fixed template. A brief update
+can still be plain text; unavailable rendering is disclosed rather than blocking the report.
 
 **Does a webpage mean it gets published or updates itself?**
 
@@ -52,7 +55,8 @@ failed experiments can count as useful progress when they settle a project quest
 
 ## It's working if
 
-- You can understand current progress and its purpose without rereading the conversation.
+- You can understand current progress and its purpose directly in chat without opening a file.
+- Visuals explain a meaningful relationship or result rather than just decorating status labels.
 - You can tell which work is proposed, tested, and actually delivered.
 - Important claims link to evidence, and unknowns remain visible.
 - You know what happens next and which decisions need your attention.

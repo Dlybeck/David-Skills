@@ -71,6 +71,9 @@ notes location: stable contract, current evidence and revision, decisions/failed
 retaining, unresolved questions, and next action. Reuse an existing plan or report when it serves
 this purpose; link receipts rather than copying logs. On resumption, reconcile it with live state
 before acting. A checkpoint is continuity context, not a mandatory spec or another roadmap.
+Derive recorded execution metadata from command results, including branch, revision, and dirty
+state; keep it distinct from the worker's narrative. Recheck it before Git delivery rather than
+inferring it from a checkout path or an earlier checkpoint.
 
 For an external command expected to exceed ten minutes, state its expected duration when known,
 launch it as a resumable operating-system process, and give it a local progress log plus terminal

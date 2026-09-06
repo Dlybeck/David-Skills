@@ -18,4 +18,4 @@ Model- or user-reachable (rich trigger phrasing so the model can reach for them)
 
 - **[grilling](./grilling/SKILL.md)** — Resolve material decisions through focused interview rounds, reusing settled context.
 - **[writing-for-agents](./writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
-- **[status-report](./status-report/SKILL.md)** — Connect verified current progress to long-term project goals in chat, a Markdown snapshot, or a requested webpage.
+- **[status-report](./status-report/SKILL.md)** — Connect verified progress to long-term project goals directly in chat with useful visuals; export a document or webpage on request.

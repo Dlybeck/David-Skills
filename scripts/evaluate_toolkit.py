@@ -65,10 +65,47 @@ CASE_SKILLS = {
     "status-evidence": "status-report", "research-delivery": "pursue-goal",
 }
 
+# Keep export coverage separate from the ordinary report request. These are
+# opt-in behavioral scenarios, not text-matching assertions about skill prose.
+CASES["status-chat"] = {
+    "files": dict(CASES["status-evidence"]["files"]),
+    "prompt": "Use $status-report. Where are we with this project, how does the current work connect to the bigger goal, and what should happen next? Use existing evidence; no new experiments or source changes.",
+}
+CASES["status-web"] = {
+    "files": dict(CASES["status-evidence"]["files"]),
+    "prompt": "Use $status-report. Make a self-contained local HTML status report for this project, with the conclusions in chat. No Markdown companion, hosting, installation, experiments, or source changes.",
+}
+CASES["status-brief"] = {
+    "files": {"receipt.txt": "Checkpoint 4 of 10; same checkpoint as the previous check. Completion not recorded.\n"},
+    "prompt": "Use $status-report. Check receipt.txt once: has there been any recorded change since checkpoint 4?",
+}
+CASE_SKILLS.update({name: "status-report" for name in
+                    ("status-chat", "status-web", "status-brief")})
+
 
 def run(command, cwd, **kwargs):
     return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True,
                           timeout=15, **kwargs)
+
+
+def git_snapshot(project):
+    """Record independent delivery facts, not a model's description of them."""
+    try:
+        worktree = run(["git", "rev-parse", "--show-toplevel"], project).stdout.strip()
+        status = run(["git", "status", "--porcelain=v2", "--branch",
+                      "--untracked-files=all"], project).stdout
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {"status": "unavailable", "error": str(exc)}
+    headers = dict(line[2:].split(" ", 1) for line in status.splitlines()
+                   if line.startswith("# "))
+    branch = headers.get("branch.head")
+    revision = headers.get("branch.oid")
+    return {"status": "observed", "worktree": worktree,
+            "branch": None if branch == "(detached)" else branch,
+            "detached": branch == "(detached)",
+            "revision": None if revision == "(initial)" else revision,
+            "dirty": any(not line.startswith("# ") for line in status.splitlines()),
+            "porcelain_v2": status}
 
 
 def classify_trace(trace_text, exit_code):
@@ -208,6 +245,7 @@ def main():
                "installed-plugin" if installed else "candidate-project-skills",
                "entrypoint": str(entrypoint), "sandbox": sandbox}
     receipt["runtime_override"] = args.enable_code_mode_host
+    receipt["git_before"] = git_snapshot(project)
     print(json.dumps({"started": receipt, "receipt": str(folder / "receipt.json")}), flush=True)
     with (folder / "trace.jsonl").open("w") as trace, (folder / "stderr.log").open("w") as errors:
         receipt.update(execute(command, project, env, args.timeout, trace, errors))
@@ -217,6 +255,7 @@ def main():
     if runtime_status:
         receipt["status"] = runtime_status
     receipt["elapsed_seconds"] = round(time.monotonic() - started, 2)
+    receipt["git_after"] = git_snapshot(project)
     receipt["git_status"] = run(["git", "status", "--porcelain"], project).stdout
     (folder / "changes.patch").write_text(run(["git", "diff", "HEAD"], project).stdout)
     (folder / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

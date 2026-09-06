@@ -95,7 +95,7 @@ Read [PHASE-BOUNDARIES.md](PHASE-BOUNDARIES.md) for the ordered tree — the fiv
 
 Off the main flow entirely.
 
-- **`/status-report`** — a model- or user-invoked progress snapshot connecting current evidence to milestones and long-term project outcomes. Use for a project overview or a substantial pilot review update: concise conclusions in chat, a saved Markdown report, and a webpage when requested. It reports existing state without changing plans or starting monitoring.
+- **`/status-report`** — a model- or user-invoked progress snapshot connecting current evidence to milestones and long-term project outcomes. Use for a project overview or a substantial pilot review update: the report and useful visuals appear in chat by default; saved documents and webpages are opt-in. It reports existing state without changing plans or starting monitoring.
 - **`/grill-me`** — a **stateless** interview: no local files or `CONTEXT.md`. Use it to sharpen
   a plan, design, or piece of writing whenever you want discussion without documentation.
 - **`/grilling`** — the interview primitive itself: rounds, the frontier, facts are the agent's job and decisions are yours. `/grill-me` and `/grill-with-docs` are the two named ways in, and `/triage`, `/wayfinder` and `/re-architect` all run it internally. Reach for it directly only when you want the interview with no wrapper around it.

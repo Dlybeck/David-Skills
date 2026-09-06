@@ -1,12 +1,13 @@
 ---
 name: status-report
-description: Create an evidence-backed project status report connecting current work, milestones, and long-term goals. Use when the user asks for a progress overview, a project status document or webpage, or when an authorized workflow needs a milestone or final review report. Keep simple one-line status checks lightweight.
+description: Explain verified project progress in chat, with useful visuals connecting current work, milestones, and long-term goals. Use for progress overviews, milestone or final review reports, and requested status documents or webpages. Keep simple one-line status checks lightweight.
 ---
 
 # Status Report
 
 Produce a dated **snapshot** that answers: where are we, what changed, why does it matter to
-the project, and what comes next? Make it understandable without reading the conversation.
+the project, and what comes next? The report lives in the chat by default, understandable
+without opening a file or rereading the conversation.
 
 ## Ground the snapshot
 
@@ -68,15 +69,24 @@ from the evidence; reserve completion for satisfied proof conditions at the stat
 
 ## Deliver once
 
-Default to a concise overview directly in chat plus a Markdown snapshot in the project's
-existing report location outside any commit-gated tracker directory. If none exists, use
-`.reports/status/<timestamp>-<topic>.md`
-with a collision-free timestamp. Honor chat-only requests. Without a writable workspace,
-deliver in chat and state that no file was saved.
+Present the report directly in the response. Include an actual visual when it makes the state
+or a relationship easier to understand: a diagram linking work to outcomes, a chart of measured
+results, or a relevant image comparison. Choose what the evidence supports, not a fixed dashboard
+template. Tables can clarify exact comparisons; status emojis and tables alone are not a
+substitute when a graphical explanation would materially help. Simple updates can stay prose.
 
-For a requested webpage, read [references/web-report.md](references/web-report.md).
-Keep the same claims, dates, and evidence across formats. Link the saved report from chat;
-the chat overview must remain useful on its own.
+Use an available in-chat visualization capability according to its instructions; otherwise use
+supported inline diagrams or image previews. Check generated visuals against the source evidence
+and inspect rendering when tooling permits. If rendering is unavailable, keep the report useful
+in text and disclose the limit. Illustrations are not evidence of implementation or delivery.
+
+Save or export a report only when requested or explicitly required by the project's reporting
+convention. For Markdown, use the existing report location outside commit-gated tracker
+directories, falling back to `.reports/status/<timestamp>-<topic>.md` with a collision-free
+timestamp. For a requested webpage, read [references/web-report.md](references/web-report.md).
+An inline visual may need a backing file in the environment's response-output location; that
+does not require a separate Markdown report, attachment, or hosted page. Keep claims, dates,
+and evidence consistent across any requested formats; the chat response remains self-contained.
 
 This is a reporting operation: write only report artifacts, leaving source plans, issue status,
 code, and goal lifecycle unchanged. A report request does not start a goal, authorize delivery,
