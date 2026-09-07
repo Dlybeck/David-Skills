@@ -36,6 +36,17 @@ contract separately authorizes pushing it; a fallback is not permission to publi
 
 ## Common questions
 
+**Do I need to answer every technical question before leaving?**
+
+No. The understanding session resolves consequential human decisions, reuses existing answers,
+and leaves delegated technical choices to the agent. Depth follows the ambiguity, not a fixed
+question count.
+
+**Can I change direction while it works?**
+
+Yes. Ordinary corrections flow through [pursue-goal](./pursue-goal.md), which updates the working
+understanding and accounts for affected work. A check-in does not require restarting the interview.
+
 **Does Autopilot keep following the plan when research changes the answer?**
 
 No. The plan is provisional. The engine can move between research, discovery, delivery, and

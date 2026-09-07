@@ -2,7 +2,7 @@
 
 `pursue-goal` drives an authorized long-horizon objective through whatever evidence loop it needs:
 research, discovery, delivery, or optimization. The goal contract stays stable while the plan and
-loop evolve.
+loop evolve; its human owner can correct it during the run.
 
 This is the reusable autonomous engine beneath the two pilots, not a third trust mode. The wrapper
 decides what the run may do; the engine decides what useful work comes next.
@@ -39,6 +39,17 @@ in a primary checkout. Claude Code uses its background `/goal` mechanism and the
 mechanism supplies. Both keep long-running external jobs outside the model loop: the process writes
 its own log and terminal receipt.
 
+Actual continuation after waiting must be verified on the current host within account policy.
+A completed background job is not proof that the conversation will resume. When no permitted
+mechanism exists, the engine records that limitation instead of promising an automatic return.
+
+## Human steering
+
+Check in through ordinary conversation. Questions get answers without changing the goal;
+suggestions stay provisional until adopted; clear corrections update the working plan and
+checkpoint. The agent reconciles affected jobs and evidence without reopening settled decisions.
+A stop request stops new work and accounts for identified running work safely.
+
 ## Common questions
 
 **Why is this model-invoked when the pilots are human-invoked?**
@@ -63,6 +74,8 @@ authority.
 - Updates report material evidence transitions rather than unchanged status.
 - The final receipt ties every completion claim to observable proof.
 - Resumption preserves useful decisions while correcting stale checkpoint claims against current evidence.
+- Your correction changes subsequent work and survives a context transfer.
+- A status question does not become a new objective or withdraw autonomy.
 
 ## Where it fits
 

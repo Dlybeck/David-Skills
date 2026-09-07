@@ -44,8 +44,9 @@ Yolopilot always stops at a review branch.
 
 **What if its initial interpretation turns out wrong?**
 
-It can refine the plan inside the provisional objective and scope. A new objective or broader
-authority stops the run for a human.
+It can refine the plan inside the provisional objective and scope. You can also correct it in
+ordinary conversation: the engine retains the original interpretation as history and works from
+the revised direction. Broader authority still requires your explicit instruction.
 
 **Does it automatically start a teaching course afterward?**
 

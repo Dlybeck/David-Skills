@@ -27,9 +27,17 @@ Tracker-dependent work needs a known tracker convention. Existing usable instruc
 
 ## Optional compositions
 
+The everyday menu covers understanding, pilot handoff, status, clarification, and teaching.
+The supporting skills [to-spec](./to-spec.md), [to-tickets](./to-tickets.md),
+[implement](./implement.md), and [handoff](../productivity/handoff.md) can also be selected by the
+agent during authorized work. This router still recommends and stops; its role is plugin guidance,
+not general product planning. Ordinary corrections steer an active pilot without another command.
+
 The word **flow** means one possible composition, not a required sequence. You can start from settled context, skip artifacts that add no value, or revisit a decision. A selected skill still has its own discipline and genuine inputs. The map describes several useful compositions:
 
-- **The main flow**, idea to ship. Grill, spec, tickets, implement, review, with two branches inside it: a prototype detour when a question needs runnable code to settle, and the spec-and-tickets split, which only earns its cost when the build spans more than one session.
+- **Build compositions:** understanding, optional requirements capture or decomposition, and tested
+  implementation. A prototype can settle a question at any point; artifact choices depend on their
+  usefulness rather than session count alone.
 - **On-ramps**, for a situation that generates work and then merges onto the main flow: incoming bug reports, something broken, or an effort too foggy and too large to hold in one session.
 - **Autonomous entrances**, where Autopilot or Yolopilot grants an adaptive goal engine different authority based on how the handoff was established.
 - **Standalones**, off every flow, reached for on their own terms — the prototype, the questionnaire, the merge conflict you are already sitting in.

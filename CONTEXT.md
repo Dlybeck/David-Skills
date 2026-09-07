@@ -1,6 +1,7 @@
 # David Skills
 
-A collection of agent skills (slash commands and behaviors) loaded by Claude Code. Skills are organized into buckets and consumed by per-repo configuration emitted by `/setup`.
+A private collection of composable engineering skills for Codex and Claude Code. Skills are
+organized into buckets; existing project conventions or optional `/setup` supply configuration.
 
 ## Language
 
@@ -23,7 +24,12 @@ An understanding-first authority wrapper for long-horizon autonomous work, enter
 _Avoid_: night mode, away mode (the trigger isn't time-of-day)
 
 **Goal contract**:
-The stable boundary for a long-horizon run: objective, observable proof, scope, authority, safety boundary, and delivery target. The plan may change freely inside it; changing the contract requires the human.
+The stable boundary for a long-horizon run: objective, observable proof, scope, authority, safety boundary, and delivery target. The plan may change freely inside it; changing the contract requires the human. A clear mid-run correction from that human can change it without restarting the understanding session.
+
+**Human steering**:
+Ordinary conversation that questions, suggests, corrects, or stops an active run. Clear corrections
+update the working understanding, affected work, and continuity checkpoint. Questions do not
+silently become requirements; a status check does not withdraw autonomous authority.
 
 **Pursue Goal**:
 The model-invoked autonomous engine under **Autopilot** and **Yolopilot**. It selects research, discovery, delivery, or optimization loops from the current uncertainty and stops only when proof passes, new human authority is required, or the evidence plateaus.
@@ -38,7 +44,10 @@ The role the dispatching session plays during a **Delegate** run: classify a tic
 _Avoid_: orchestrator, manager
 
 **Confidence guideline**:
-The shared safety principle behind unattended work: act freely inside the scope locked before departure, or on an existing strong confidence signal (e.g. `re-architect`'s `Strong` recommendation-strength); anything outside that scope, or hard to reverse, gets logged rather than acted on, left for human review.
+The shared safety principle behind unattended work: act within the current user-authorized scope;
+a strong confidence signal helps choose work inside that boundary but does not expand authority.
+Anything outside it or requiring fresh approval is left for human review. Clear human steering
+can revise the scope; model confidence alone cannot.
 
 **Yolopilot**:
 The provisional-interpretation authority wrapper for long-horizon autonomous work, entered for a loose, last-second handoff with no grilling round. It states its assumptions, then **Pursue Goal** refines the plan from evidence. It may push a review branch but never merges into an integration branch on its own.

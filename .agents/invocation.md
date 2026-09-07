@@ -13,6 +13,10 @@ Bucket `README.md`s and the top-level `README.md` group entries into **User-invo
 
 ## Dependencies between them
 
+Invocation is discovery, not authority. Model-reachable `to-spec`, `to-tickets`, `implement`,
+and `handoff` may reuse delegated decisions; publishing, Git delivery, tracker updates, and
+dispatch still require the active request's authority. Advice-only requests remain advice-only.
+
 Dependencies are expressed as **`/skill`-style prose invocation** ("Run the `/grilling` skill"), not deep `../other-skill/FILE.md` cross-references. Shared reference docs live inside the skill that owns them; other skills reach that material by invoking the skill, not by linking across folders.
 
 ## Passive vs active domain work
@@ -21,6 +25,6 @@ Merely _reading_ `CONTEXT.md` for vocabulary is a one-line prose pointer, not th
 
 ## Delegated continuation of a user-invoked skill's own process
 
-A user-invoked skill sometimes needs a dispatched worker — a subagent, or a separate backgrounded session — to carry out a process a user-invoked skill describes, whether that's a *different* skill's process or its own: `delegate` dispatching ticket work the way `/implement` describes it; `autopilot` continuing unattended work the way its own pre-departure grilling locked it down; `autopilot` scanning for tech debt the way `/re-architect`'s exploration steps do. This is not that worker *invoking* the user-invoked skill — nothing about who can reach one changes. The worker follows the process directly, seeded with whatever it needs to know, because the human's one deliberate act of triggering the outer skill is the trigger the rule requires. It substitutes for retyping the inner skill's name per unit of work; it does not route around who's allowed to trigger it.
+A user-invoked skill sometimes needs a dispatched worker — a subagent, or a separate backgrounded session — to carry out a process a user-invoked skill describes, whether that's a *different* skill's process or its own: `autopilot` continuing unattended work the way its own pre-departure grilling locked it down; `autopilot` scanning for tech debt the way `/re-architect`'s exploration steps do. This is not that worker *invoking* the user-invoked skill — nothing about who can reach one changes. The worker follows the process directly, seeded with whatever it needs to know, because the human's one deliberate act of triggering the outer skill is the trigger the rule requires. It substitutes for retyping the inner skill's name per unit of work; it does not route around who's allowed to trigger it.
 
 Name this pattern explicitly wherever it's used — point back to this section — rather than leaving it as an unexamined mechanism a future reader has to puzzle out for themselves.

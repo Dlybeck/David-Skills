@@ -7,6 +7,10 @@ boundary. External work-only adapters and rollout/session artifacts are intentio
 
 ## Layout
 
+When changing plugin behavior or evaluating the collection, consult
+[David's development profile](./docs/agents/david-development-profile.md). It is a design reference,
+not additional execution authority or a profile to copy into consuming projects.
+
 Skills are organized into bucket folders under `skills/`:
 
 - `engineering/` — daily code work

@@ -20,6 +20,9 @@ import subprocess
 import tempfile
 import time
 
+from pivot_cases import CASES as PIVOT_CASES
+from evaluate_steering import execute_steered
+
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {
     "installed-router": {
@@ -81,6 +84,8 @@ CASES["status-brief"] = {
 }
 CASE_SKILLS.update({name: "status-report" for name in
                     ("status-chat", "status-web", "status-brief")})
+CASES.update(PIVOT_CASES)
+CASE_SKILLS.update({name: case["skill"] for name, case in PIVOT_CASES.items()})
 
 
 def run(command, cwd, **kwargs):
@@ -112,6 +117,7 @@ def classify_trace(trace_text, exit_code):
     """Validate runtime evidence, not the skill's behavior or answer quality."""
     reasons = []
     completed = False
+    tool_events = 0
     if exit_code != 0:
         reasons.append(f"process exit: {exit_code}")
     for number, line in enumerate(trace_text.splitlines(), 1):
@@ -126,6 +132,16 @@ def classify_trace(trace_text, exit_code):
             reasons.append(f"invalid event at line {number}")
             continue
         item = event.get("item")
+        if isinstance(item, dict) and item.get("type") in {
+            "command_execution", "mcp_tool_call", "function_call", "tool_call"
+        }:
+            tool_events += 1
+        nested = event.get("event", {})
+        if isinstance(nested, dict) and nested.get("method") == "item/started":
+            if nested.get("params", {}).get("item", {}).get("type") in {
+                "commandExecution", "mcpToolCall", "dynamicToolCall"
+            }:
+                tool_events += 1
         if event["type"] in {"error", "turn.failed"} or (
             isinstance(item, dict) and item.get("type") == "error"
         ):
@@ -135,7 +151,10 @@ def classify_trace(trace_text, exit_code):
     if not completed:
         reasons.append("missing turn.completed")
     return {"status": "invalid-runtime" if reasons else "needs-review",
-            "runtime_issues": reasons, "behavioral_verdict": "not-evaluated"}
+            "runtime_issues": reasons, "behavioral_verdict": "not-evaluated",
+            "observed_tool_events": tool_events,
+            "evidence_warnings": [] if tool_events else [
+                "No tool-execution events observed; required skill reads or local actions are unverified"]}
 
 
 def execute(command, project, env, timeout, trace, errors):
@@ -158,6 +177,17 @@ def execute(command, project, env, timeout, trace, errors):
         return {"status": "launch-failed", "error": str(exc), "exit_code": None}
 
 
+def config_fingerprint():
+    """Detect CLI configuration side effects without reporting configuration contents."""
+    config = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "config.toml"
+    try:
+        return {"status": "observed", "sha256": hashlib.sha256(config.read_bytes()).hexdigest()}
+    except FileNotFoundError:
+        return {"status": "absent"}
+    except OSError:
+        return {"status": "unavailable"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", choices=CASES)
@@ -171,6 +201,8 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.timeout <= 600:
         parser.error("timeout must be 1..600 seconds")
+    if args.case in PIVOT_CASES and args.timeout > 300:
+        parser.error("pivot evaluations are limited to 300 seconds each")
     runtime_directory = None
     if args.enable_code_mode_host:
         executable = shutil.which("codex")
@@ -245,15 +277,27 @@ def main():
                "installed-plugin" if installed else "candidate-project-skills",
                "entrypoint": str(entrypoint), "sandbox": sandbox}
     receipt["runtime_override"] = args.enable_code_mode_host
+    receipt["criteria"] = case.get("criteria", [])
     receipt["git_before"] = git_snapshot(project)
+    receipt["account_config_before"] = config_fingerprint()
     print(json.dumps({"started": receipt, "receipt": str(folder / "receipt.json")}), flush=True)
     with (folder / "trace.jsonl").open("w") as trace, (folder / "stderr.log").open("w") as errors:
-        receipt.update(execute(command, project, env, args.timeout, trace, errors))
+        if case.get("steer"):
+            receipt.update(execute_steered(command, project, env, args.timeout, trace, errors, case))
+        else:
+            receipt.update(execute(command, project, env, args.timeout, trace, errors))
     validation = classify_trace((folder / "trace.jsonl").read_text(), receipt["exit_code"])
     runtime_status = receipt.get("status")
     receipt.update(validation)
     if runtime_status:
         receipt["status"] = runtime_status
+    receipt["account_config_after"] = config_fingerprint()
+    receipt["account_config_changed"] = receipt["account_config_before"] != receipt["account_config_after"]
+    if receipt["account_config_changed"]:
+        receipt["status"] = "invalid-environment"
+        receipt["evidence_warnings"].append("Account configuration changed during evaluation; review side effects before another run")
+    if receipt["account_config_before"]["status"] == "unavailable" or receipt["account_config_after"]["status"] == "unavailable":
+        receipt["evidence_warnings"].append("Account configuration side effects could not be checked")
     receipt["elapsed_seconds"] = round(time.monotonic() - started, 2)
     receipt["git_after"] = git_snapshot(project)
     receipt["git_status"] = run(["git", "status", "--porcelain"], project).stdout

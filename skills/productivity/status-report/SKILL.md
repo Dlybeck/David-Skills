@@ -53,6 +53,9 @@ readable in about a minute; move detailed evidence below it. Prefer these elemen
 or omitting empty sections to suit the project:
 
 - **Now:** active work, latest verified result, and immediate milestone.
+- **Direction:** the current working interpretation and why this approach was chosen, including
+  consequential user corrections. Distinguish adopted direction from tentative suggestions;
+  surface drift or stale goal metadata without rewriting it as part of the report.
 - **Bigger picture:** longer-term outcome and how current work advances it. Use a small table
   such as `Project outcome | Milestone | Current evidence | Remaining gap` when it clarifies
   several relationships.

@@ -11,15 +11,16 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[triage](./triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[re-architect](./re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 - **[setup](./setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
-- **[to-spec](./to-spec/SKILL.md)** — Turn the current conversation into a spec and publish it to the issue tracker.
-- **[to-tickets](./to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — text in a local file, or native blocking links on a real tracker.
-- **[implement](./implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams, closing out with `/code-review` before committing, then marking the ticket resolved.
 - **[delegate](./delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
 - **[autopilot](./autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
 - **[yolopilot](./yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended without merging into `dev` on its own.
 - **[wayfinder](./wayfinder/SKILL.md)** — Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
 
 ## Model-invoked
+
+- **[to-spec](./to-spec/SKILL.md)** — Synthesize settled requirements into a proportionate spec; publish only with authority.
+- **[to-tickets](./to-tickets/SKILL.md)** — Decompose understood work into verifiable tracer-bullet tickets with blocking edges when useful.
+- **[implement](./implement/SKILL.md)** — Build understood work from a conversation, goal, spec, or tickets with tests and whole-change review.
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 

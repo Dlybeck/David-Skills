@@ -1,14 +1,13 @@
 ---
 name: to-spec
-description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
-disable-model-invocation: true
+description: Synthesize settled requirements into a proportionate spec. Use when the user requests a spec or authorized work needs a durable requirements reference; not a prerequisite for every implementation.
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user — just synthesize what you already know.
 
-Use the project's existing issue-tracker and triage-label conventions. If a required convention
-is missing, ask the user to provide it or invoke `/setup`; `/setup` is human-invoked, not an
-automatic prerequisite to run again.
+Use existing issue-tracker and triage-label conventions when publishing. If a required convention
+is missing, ask for it or recommend that the human invoke `/setup`; never invoke that human-only
+skill automatically. Drafting in chat does not require tracker setup.
 
 ## Process
 
@@ -16,9 +15,14 @@ automatic prerequisite to run again.
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
 
-Check with the user that these seams match their expectations.
+Reuse agreed seams or choose them when test design is delegated. Ask only about consequential
+unresolved behavior or interface choices outside that delegation; do not repeat the interview.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write a proportionate spec using the template below. Publish to the configured tracker only
+when the request or active contract authorizes that write; apply `ready-for-agent` only when the
+requirements are settled and the label change is authorized. Otherwise return a draft in chat or
+an already-authorized notes location and state what remains unpublished. Selecting this skill
+does not grant tracker authority or authorize implementing the spec.
 
 <spec-template>
 
@@ -32,7 +36,8 @@ The solution to the problem, from the user's perspective.
 
 ## User Stories
 
-A LONG, numbered list of user stories. Each user story should be in the format of:
+A concise numbered list covering distinct user-visible behaviors and important edge cases.
+Use this form when helpful:
 
 1. As an <actor>, I want a <feature>, so that <benefit>
 
@@ -40,7 +45,8 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
 </user-story-example>
 
-This list of user stories should be extremely extensive and cover all aspects of the feature.
+Scale detail to the actual feature. Do not invent actors, scope, or duplicate stories to fill a
+template. Preserve decisions already captured elsewhere with a reference rather than repetition.
 
 ## Implementation Decisions
 
