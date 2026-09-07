@@ -8,7 +8,9 @@ the tracked `AGENTS.md` symlink. All changes are local; no push, install, releas
 ## Result
 
 Source implementation is present, but the full pivot is **not complete or release-validated**.
-Required live steering, fresh-context transfer, and long-job continuation remain unverified.
+The [approved follow-up batch](2026-09-07-approved-live-pivot-batch.md) now verifies an explicit
+live correction and fresh-context transfer in a bounded fixture. Production long-job continuation,
+live stop handling, and timeout recovery remain unverified.
 The reference for judging behavior is the
 [development profile](../../docs/agents/david-development-profile.md), not a mandatory workflow.
 
@@ -39,6 +41,10 @@ The reference for judging behavior is the
 
 ## Live budget and observations
 
+Follow-up: David subsequently approved a **new** six-run full-access batch. See the
+[approved live batch](2026-09-07-approved-live-pivot-batch.md) for its separate evidence and
+current results. The observations and original budget below describe the earlier sandboxed attempt.
+
 One of six authorized live runs was consumed (28.29 seconds, 120-second cap). Remaining five were
 not launched after file-access evidence was missing. The allowed ceiling remains 300 seconds per
 pivot case; offline tests verify rejection of a larger timeout. No recurring AI polling was used.
@@ -66,7 +72,8 @@ The six reusable scenarios in `scripts/pivot_cases.py` cover routing, small deli
 composition, steering, status, and short waiting. `scripts/evaluate_steering.py` is a disposable
 test transport: real `turn/steer`, followed by a new ephemeral thread receiving only artifact
 context. It is not a production chat client or supervisor. Its protocol and timeout tests pass
-offline; live support is unverified. It refuses unsupported approval/tool requests and does not
+offline; live support was unverified at that point and is now demonstrated for the bounded
+fixture in the approved follow-up batch. It refuses unsupported approval/tool requests and does not
 silently substitute a static replay for an in-flight correction.
 
 ## Native waiting boundary
@@ -83,15 +90,13 @@ No helper was added because process receipts alone cannot wake an ended chat.
 
 ## Remaining gates
 
-1. Establish a working approved live test runtime; do not silently enable full-access execution
-   to work around the confirmed sandbox startup restriction. Account trust side effects need
-   explicit handling. Re-running all six scenarios after the invalid attempt requires a revised
-   budget; the original six-run allowance has only five remaining.
-2. Run the remaining scenarios within the remaining budget. Re-testing the updated router also
-   consumes a run; do not silently exceed six total. Record any uncovered scenario honestly.
-3. Provide Node/npm and Claude CLI through an approved existing environment where those checks
+The initial runtime and test-budget gates were superseded by David's explicit approval of a new
+six-scenario full-access batch. Its separate report records the actual coverage and CLI trust
+side effects; this approval does not authorize unattended jobs or account-policy changes.
+
+1. Provide Node/npm and Claude CLI through an approved existing environment where those checks
    are required, without changing another application's managed executable permissions.
-4. Review the [waiting-policy proposal](../research/2026-09-07-waiting-policy-proposal.md), then
+2. Review the [waiting-policy proposal](../research/2026-09-07-waiting-policy-proposal.md), then
    verify actual permitted long-job continuation and interruption. If that requires a persistent
    agent service/custom production client, stop for redesign as agreed.
 

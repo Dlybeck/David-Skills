@@ -26,6 +26,13 @@ agent supervisor or custom production chat client.
 
 ## What has actually been established
 
+The subsequent [approved live batch](../evaluation/2026-09-07-approved-live-pivot-batch.md)
+verified native in-flight correction and artifact-only transfer, plus short success/failure
+completion followed by receipt inspection and an authorized next-action report. Its six runs
+do not establish production long-job continuation, live stop handling, or timeout recovery.
+The batch also records incomplete exported launch logging and parent supervision shortcomings;
+neither is hidden by the successful bounded behaviors. This proposal remains unapplied.
+
 - Native shell tools returned two-second success and failure jobs and this agent compared their
   results afterward. This proves bounded synchronous tool continuation, not an overnight callback.
 - Official [app-server documentation](https://learn.chatgpt.com/docs/app-server), fetched
