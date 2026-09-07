@@ -6,7 +6,14 @@ disable-model-invocation: true
 
 # Advise
 
-You don't remember every skill, so ask.
+Help the human use this plugin. Recommend and stop; do not turn plugin advice into product
+planning or start the recommended work, even when the suggested skill is model-invoked.
+
+For everyday use, orient around understanding (`/grill-me` or `/grill-with-docs`), autonomous
+handoff (`/autopilot` or `/yolopilot`), checking progress (`/status-report`), clarification
+(`/wait-what`), and learning (`/teach`). Specialist skills remain available on their own terms.
+`/to-spec`, `/to-tickets`, `/implement`, and `/handoff` are model- or user-reachable;
+automatic selection never supplies missing authority for their effects.
 
 A **flow** is one possible composition of skills, not a required sequence. Start from the user's
 current situation and settled context. Recommend only the next useful practice; skip, revisit,
@@ -26,11 +33,20 @@ implementation, research, review, or any standalone skill.
    - **`/handoff`** out, then open a fresh session against that file,
    - **`/prototype`** to answer the question with throwaway code,
    - **`/handoff`** back what you learned, and reference it from the original idea thread.
-3. **Branch — is this a multi-session build?**
-   - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed — kick off **`/implement`** per ticket, **`/clear`ing context between each one**. Each ticket is self-contained, so the last one's context is disposable.
-   - **No** → **`/implement`** right here, in the same context window.
+3. **Branch — would durable requirements or decomposition help?**
+   - **Requirements need a reference** → **`/to-spec`** synthesizes settled understanding.
+   - **Independent work units help** → **`/to-tickets`** records tracer-bullet slices and blocking
+     edges, directly from a conversation, plan, or spec. Publish only within tracker authority.
+   - **Work is already coherent and understood** → **`/implement`** directly in the current context.
 
-   Either way, **`/implement`** builds each issue by driving **`/tdd`** internally — one red-green slice at a time — then closes out by running **`/code-review`**, a two-axis review (Standards + Spec) including relevant uncommitted and new files, before committing and marking the ticket resolved. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review WIP, a branch, or a PR against a fixed point. The originating request or confirmed goal contract can supply the Spec axis without a formal spec document.
+   These are independent choices, not a package deal. During authorized work the agent may select
+   them and make delegated technical decisions without another approval round. Keep context while
+   useful; neither tickets nor a new session are required merely because the work is long.
+
+   **`/implement`** uses **`/tdd`** where appropriate and **`/code-review`** over the whole change.
+   Commits and ticket resolution require authority; without it, leave a tested local diff.
+   **`/tdd`** and **`/code-review`** also work standalone. A conversation or current goal contract,
+   including user corrections, can supply the requirements without a formal spec.
 
    **`/delegate`** dispatches this same step instead of you driving it: one bounded run claims each frontier ticket, hands it whole to a worker subagent, and tracks only whether it resolved — over when the frontier is drained. Reach for it when several tickets are ready and independent.
 
@@ -52,6 +68,10 @@ decisions. Do not infer a universal safe context size from another model's token
 
 **`/pursue-goal`** — the model-invoked engine under both pilots. It is not another trust mode and normally is not the human entry point. It keeps the goal contract stable while choosing whichever loop reduces the current uncertainty.
 
+The human can question or correct a run in ordinary conversation. `/pursue-goal` reconciles clear
+corrections with running work and its checkpoint; `/status-report` exposes current intent and
+evidence without changing the goal. `/wait-what` repairs an explanation, not the goal itself.
+
 ## On-ramps
 
 A starting situation that generates work, then merges onto the main flow.
@@ -64,7 +84,9 @@ A starting situation that generates work, then merges onto the main flow.
 
 - **A huge, foggy effort — a greenfield project or a huge feature build, too big for one session** → **`/wayfinder`**, the most cognitively demanding flow here. When the way from here to the destination isn't visible yet, it charts a **shared map** of **decision tickets** on the issue tracker and resolves them one at a time — producing **decisions, not deliverables** — until the fog is pushed back and the way is clear. Where **`/grill-with-docs`** sharpens an idea you can hold in one session, wayfinder is for the idea you can't — and it's slower and denser, so save it for exactly that, never a well-scoped feature.
 
-  When the map clears, **it hands off, it doesn't build**: merge onto the main flow at **`/to-spec`**, which collapses the map's linked decisions into a buildable plan, then `/to-tickets` and `/implement` as usual. Looping the map straight into `/implement` skips that collapse and throws the linked detail away — go straight to `/implement` only when the effort turned out genuinely small.
+  When the map clears, **it hands off, it doesn't build**. Preserve its linked decisions in the
+  implementation context. `/to-spec` can consolidate them when that would help; `/to-tickets`
+  supplies decomposition when needed. None of these artifacts grants execution authority.
 
 ## Codebase health
 

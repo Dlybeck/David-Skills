@@ -12,6 +12,20 @@ Goal continuation does not create Git isolation. Establish or reuse the linked w
 by `/pursue-goal` before the first mutation, and include its absolute path in the goal objective so
 every continuation operates in the same checkout.
 
-Use goal continuations for meaningful work, not status polling. Long-running external processes
-must write their own log and receipt; return control until the user resumes the goal after that
-receipt should exist.
+Treat incoming human messages as steering of the current run, not implicit requests to replace
+the goal. Use only goal controls actually exposed by this host. When a correction cannot be
+written into native goal metadata, keep the updated contract in the existing checkpoint, identify
+the stale metadata, and reconcile both at each continuation.
+
+Before an unattended dependency, establish whether this host provides a permitted interruptible
+wait or non-AI completion callback that actually resumes this run. Test a short task through
+completion and a subsequent agent action; CLI subprocess exit or app-server process events alone
+do not prove that an existing chat resumes. Keep exact process/session identity and receipts.
+
+Use goal continuations for meaningful work, not status polling.
+Use the verified mechanism within current host wait limits. Do useful independent work when
+available, without interfering with the running experiment. Never replace a native wait with
+recurring goal turns, model status calls, or a polling agent. If the host or account policy
+requires returning control and no completion callback is available, state the missing capability
+and preserve the next action. Do not claim unattended continuation is supported in that case.
+An account-policy amendment needs explicit user approval; plugin instructions cannot supply it.

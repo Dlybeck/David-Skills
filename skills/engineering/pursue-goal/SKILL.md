@@ -32,7 +32,9 @@ has earned.
    progress update. Keep all subsequent commands scoped to that worktree.
 
 The contract may be clarified by new evidence, but changing the objective, authority, safety
-boundary, or delivery target requires the human. Replanning inside that envelope does not.
+boundary, or delivery target requires the human. A clear mid-run instruction from that human
+can supply the change; the contract is not frozen against its owner. Replanning inside that
+envelope does not require renewed approval.
 
 ## Select the next loop
 
@@ -46,7 +48,9 @@ Choose the loop from the uncertainty in front of the goal, not from the kind of 
 | A measurable result needs improvement | **Optimization** | Baseline, controlled change, measurement, and retained or reverted result |
 
 Invoke model-reachable skills when their discipline fits: `/research`, `/prototype`,
-`/diagnosing-bugs`, `/tdd`, `/codebase-design`, `/domain-modeling`, and `/code-review`. Follow a
+`/diagnosing-bugs`, `/tdd`, `/codebase-design`, `/domain-modeling`, and `/code-review`. Use
+`/to-spec`, `/to-tickets`, or `/implement` when requirements capture, decomposition, or delivery
+helps; `/handoff` serves an actual authorized transfer, not ordinary checkpointing. Follow a
 human-only skill's process only when the outer pilot contract explicitly delegates that process.
 That is delegated continuation of the user's wrapper invocation, not a new invocation of the
 human-only skill.
@@ -68,17 +72,52 @@ After every material result:
 
 For work that must survive sessions, maintain one compact checkpoint in the project's existing
 notes location: stable contract, current evidence and revision, decisions/failed approaches worth
-retaining, unresolved questions, and next action. Reuse an existing plan or report when it serves
+retaining, consequential user corrections and what they supersede, unresolved questions, and next
+action. Reuse an existing plan or report when it serves
 this purpose; link receipts rather than copying logs. On resumption, reconcile it with live state
 before acting. A checkpoint is continuity context, not a mandatory spec or another roadmap.
 Derive recorded execution metadata from command results, including branch, revision, and dirty
 state; keep it distinct from the worker's narrative. Recheck it before Git delivery rather than
 inferring it from a checkout path or an earlier checkpoint.
 
+## Incorporate human steering
+
+The human can inspect and steer an active run in ordinary conversation; no interruption skill
+is required. Classify the intent before changing the plan:
+
+| Input | Response |
+| --- | --- |
+| Question or status check | Answer from evidence; retain the objective and authorized next action. |
+| Tentative suggestion | Assess it as a candidate, not a new requirement. Ask only if ambiguity would materially change the work. |
+| Clear correction or changed priority | Briefly state the impact, update the contract or plan as appropriate, and persist the correction before further affected work. Reuse settled decisions. |
+| Stop request | Stop initiating work immediately; safely cancel only identified task-owned work where authorized, preserve a receipt, and report anything still running. |
+
+For a correction, reconcile pending changes and exact running job handles. Keep still-useful
+results, mark superseded experiments as historical evidence, and withdraw affected completion
+claims. Cancel or restart only within existing authority; do not kill unrelated processes or
+overwrite user changes. An unaffected authorized branch may continue while a material ambiguity
+is resolved. Propagate revised instructions to existing authorized workers without creating more.
+
+On resumption, prefer the latest explicit user direction over a stale checkpoint; distinguish it
+from unadopted suggestions. Use the harness's supported goal controls, never invent a goal-edit
+API or mark old work complete to replace it. If persistent goal text cannot be amended, record
+the correction in the checkpoint and disclose that limitation. Continue after questions and
+corrections when supported; do not treat the user's check-in as withdrawal of autonomy.
+
+## Wait without abandoning the work
+
 For an external command expected to exceed ten minutes, state its expected duration when known,
-launch it as a resumable operating-system process, and give it a local progress log plus terminal
-success/failure receipt. Return control after launch. Continue from the receipt on a later turn;
-never spend model turns polling unchanged state.
+launch it as a resumable operating-system process, and give it an exact job handle, local progress
+log, and terminal success/failure receipt. Choose meaningful independent work within scope when it
+does not interfere with the job's resources or evidence. Otherwise use the adapter's verified
+non-AI completion/wait mechanism within host and account limits. Never use model turns, repeated
+status calls, or subagents as a polling loop.
+
+After completion, verify the receipt belongs to this job and attempt, distinguish success from
+failure, timeout, or cancellation, and continue with the next meaningful action. A background
+process finishing is not proof that agent continuation works. If no permitted mechanism can
+preserve or resume execution, report that capability boundary honestly; a skill cannot override
+account policy or promise that an ended turn will wake itself.
 
 ## Apply authority continuously
 
@@ -104,3 +143,5 @@ There is no arbitrary turn, token, or duration ceiling. Difficulty is not a stop
 When stopping, run the broadest validation justified by the changes, inspect the whole result
 against the contract, and leave a concise receipt containing outcome, evidence, validation,
 delivery location, assumptions, residual risks, and the exact stopping boundary.
+Offer an explanation or the optional user-invoked `/teach` path when there is useful learning.
+Recommend a next stage if warranted; activate it only on user direction, not to fill available time.

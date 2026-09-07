@@ -13,8 +13,10 @@ software pipeline.
 ## Establish the contract
 
 Inspect the live workspace first: repository instructions, current branch and worktrees, dirty
-state, relevant artifacts, available tools, and the validation surface. Then run `/grilling` in
-this conversation until the whole decision frontier needed for unattended work is closed.
+state, relevant artifacts, available tools, and the validation surface. Then run `/grilling` for
+consequential unresolved human choices. Reuse settled answers and distinguish delegated technical
+choices from missing product intent. A rich understanding session is useful when the ambiguity
+warrants it, not a checklist to repeat for a small or already-understood task.
 
 Lock one self-contained **goal contract**:
 
@@ -32,8 +34,10 @@ session and repository gates pass. Keep money, new credentials, production deplo
 deletion, safeguard weakening, unrelated scope, and `main` outside the contract unless the user
 grants the specific action explicitly.
 
-Present the final contract compactly and obtain confirmation. Do not start a durable goal while a
-material contract question remains open.
+Present the objective and endpoint compactly, with supporting scope and authority available in
+the working context, and obtain confirmation. An explicit approval of the same complete contract
+already in the conversation counts. Do not start a durable goal while a material contract
+question remains open.
 
 ## Hand off to the engine
 
@@ -43,7 +47,8 @@ engine supplies adaptive execution without re-invoking the human-only wrapper.
 
 Let `/pursue-goal` choose among research, discovery, delivery, and optimization loops. A spec or
 issues are optional coordination artifacts, not admission tickets. Keep the contract stable while
-the plan changes in response to evidence.
+the plan changes in response to evidence. Mid-run human corrections use the engine's steering
+discipline; the initial agreement does not prevent its owner from changing direction.
 
 ## Delivery
 

@@ -30,11 +30,14 @@ Run these steps straight through without pausing for a reply:
 Refine the plan and working interpretation from evidence. Preserve the original interpretation in
 the receipt so the user can see where the run learned or changed direction. Changing the objective
 or expanding authority remains a human boundary, even when a broader move looks promising.
+Use `/pursue-goal`'s steering discipline when the human checks in: incorporate clear corrections,
+retain provisional assumptions as history, and do not turn a question into a changed objective.
 
 ## Review-branch boundary
 
 Commit in small, intelligible steps. Before stopping, run the relevant full validation surface and
-one `/code-review` over the entire branch, using the provisional contract as the spec. Fix every real
+one `/code-review` over the entire branch, using the contract with subsequent user corrections as
+the spec. Fix every real
 finding, push the feature branch only within the active contract, and leave it unmerged for human
 review. With no push authority or no remote, leave the result local and state that limitation.
 

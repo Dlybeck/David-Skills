@@ -4,13 +4,16 @@ import io
 import json
 import signal
 import subprocess
+import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from evaluate_toolkit import classify_trace, execute, git_snapshot, main, run
+from evaluate_steering import SteeringProtocol, execute_steered
+from pivot_cases import CASES as PIVOT_CASES
 
 
 def trace(*events):
@@ -26,6 +29,8 @@ class TraceTests(unittest.TestCase):
         self.assertEqual(result["status"], "needs-review")
         self.assertEqual(result["behavioral_verdict"], "not-evaluated")
         self.assertEqual(result["runtime_issues"], [])
+        self.assertEqual(result["observed_tool_events"], 0)
+        self.assertTrue(result["evidence_warnings"])
 
     def test_runtime_errors_invalidate_even_exit_zero(self):
         for event in (
@@ -53,6 +58,18 @@ class TraceTests(unittest.TestCase):
 
 
 class ExecutionTests(unittest.TestCase):
+    def test_real_success_failure_and_timeout_receipts(self):
+        with tempfile.TemporaryDirectory() as temp:
+            for script, expected in (("pass", 0), ("raise SystemExit(7)", 7)):
+                with tempfile.TemporaryFile(mode="w+") as output:
+                    result = execute([sys.executable, "-c", script], temp, {}, 2, output, output)
+                self.assertEqual(result["exit_code"], expected)
+            with tempfile.TemporaryFile(mode="w+") as output:
+                result = execute([sys.executable, "-c", "import time; time.sleep(10)"],
+                                 temp, {}, 0.1, output, output)
+            self.assertEqual(result["status"], "timeout")
+            self.assertLess(result["exit_code"], 0)
+
     @patch("evaluate_toolkit.os.killpg")
     @patch("evaluate_toolkit.subprocess.Popen")
     def test_timeout_cancels_only_own_process_group(self, popen, killpg):
@@ -73,6 +90,19 @@ class ExecutionTests(unittest.TestCase):
 
 
 class HarnessTests(unittest.TestCase):
+    def test_pivot_budget_cannot_exceed_five_minutes(self):
+        with patch("sys.argv", ["evaluate_toolkit.py", "pivot-small", "--timeout", "301"]), redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as error:
+                main()
+        self.assertEqual(error.exception.code, 2)
+
+    def test_pivot_has_six_distinct_evidence_cases(self):
+        self.assertEqual(len(PIVOT_CASES), 6)
+        for case in PIVOT_CASES.values():
+            self.assertTrue(case["criteria"])
+        self.assertIn("steer", PIVOT_CASES["pivot-steering"])
+        self.assertIn("followup", PIVOT_CASES["pivot-steering"])
+
     def test_candidate_and_installed_modes_with_explicit_full_access(self):
         for installed in (False, True):
             with self.subTest(installed=installed), tempfile.TemporaryDirectory() as temp:
@@ -117,6 +147,88 @@ class HarnessTests(unittest.TestCase):
                 copied = output / "project/.agents/skills/tdd/reference.md"
                 self.assertEqual(copied.exists(), not installed)
                 self.assertEqual(len(json.loads((output / "source-hashes.json").read_text())), 2)
+
+
+class SteeringProtocolTests(unittest.TestCase):
+    def test_offline_transport_roundtrip_and_timeout(self):
+        # This is a fake RPC server, not evidence of native model behavior.
+        server = '''import json, sys
+for line in sys.stdin:
+    message = json.loads(line)
+    ident = message.get('id')
+    result = {}
+    if ident in (2, 6): result = {'thread': {'id': 'thread-' + str(ident)}}
+    if ident in (3, 7): result = {'turn': {'id': 'turn-' + str(ident)}}
+    if ident == 4: result = {'turnId': 'turn-3'}
+    if ident is not None: print(json.dumps({'id': ident, 'result': result}), flush=True)
+    if ident == 3:
+        print(json.dumps({'method': 'item/started', 'params': {'item': {'type': 'commandExecution'}}}), flush=True)
+    if ident in (4, 7):
+        print(json.dumps({'method': 'turn/completed', 'params': {'turn': {'status': 'completed'}}}), flush=True)
+'''
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp) / "project"
+            project.mkdir()
+            script = project / "app-server"
+            case = {"steer": "correction", "followup": "artifact context"}
+            command = [sys.executable, "exec", "-s", "workspace-write", "initial"]
+            script.write_text(server)
+            with tempfile.TemporaryFile(mode="w+") as output, tempfile.TemporaryFile(mode="w+") as errors:
+                result = execute_steered(command, project, {}, 2, output, errors, case)
+                output.seek(0)
+                events = output.read()
+            self.assertEqual(result["exit_code"], 0)
+            self.assertTrue(result["steer_accepted"])
+            self.assertTrue(result["fresh_context_transfer"])
+            self.assertEqual(classify_trace(events, 0)["status"], "needs-review")
+            script.write_text("import time; time.sleep(10)\n")
+            with tempfile.TemporaryFile(mode="w+") as output, tempfile.TemporaryFile(mode="w+") as errors:
+                result = execute_steered(command, project, {}, 0.1, output, errors, case)
+            self.assertEqual(result["status"], "timeout")
+            self.assertFalse(result["fresh_context_transfer"])
+
+    def make_protocol(self):
+        return SteeringProtocol("/tmp/fixture", "initial", "correction", "artifact context", "workspace-write")
+
+    def test_real_steer_then_fresh_thread_not_transcript_replay(self):
+        protocol = self.make_protocol()
+        requests = protocol.handle({"id": 1, "result": {}})
+        self.assertEqual(requests[1]["method"], "thread/start")
+        start = protocol.handle({"id": 2, "result": {"thread": {"id": "thread-1"}}})[0]
+        self.assertEqual(start["params"]["input"][0]["text"], "initial")
+        protocol.handle({"id": 3, "result": {"turn": {"id": "turn-1"}}})
+        event = {"method": "item/started", "params": {"item": {"type": "commandExecution"}}}
+        steer = protocol.handle(event)[0]
+        self.assertEqual(steer["method"], "turn/steer")
+        self.assertEqual(steer["params"]["expectedTurnId"], "turn-1")
+        self.assertEqual(protocol.handle(event), [])
+        protocol.handle({"id": 4, "result": {"turnId": "turn-1"}})
+        complete = {"method": "turn/completed", "params": {"turn": {"status": "completed"}}}
+        self.assertEqual(protocol.handle(complete)[0]["method"], "thread/start")
+        fresh = protocol.handle({"id": 6, "result": {"thread": {"id": "thread-2"}}})[0]
+        self.assertEqual(fresh["params"]["input"][0]["text"], "artifact context")
+        protocol.handle({"id": 7, "result": {"turn": {"id": "turn-2"}}})
+        protocol.handle(complete)
+        self.assertTrue(protocol.finished)
+        self.assertTrue(protocol.accepted)
+        self.assertEqual(protocol.completed_turns, 2)
+        self.assertIsNone(protocol.error)
+
+    def test_completion_without_steering_is_not_a_pass(self):
+        protocol = self.make_protocol()
+        protocol.handle({"method": "turn/completed", "params": {"turn": {"status": "completed"}}})
+        self.assertTrue(protocol.finished)
+        self.assertIsNotNone(protocol.error)
+        self.assertFalse(protocol.accepted)
+
+    def test_rejected_steer_and_interrupted_turn_stop_explicitly(self):
+        for event in ({"id": 4, "error": {"message": "turn mismatch"}},
+                      {"method": "turn/completed", "params": {"turn": {"status": "interrupted"}}}):
+            protocol = self.make_protocol()
+            protocol.handle(event)
+            self.assertTrue(protocol.finished)
+            self.assertIsNotNone(protocol.error)
+            self.assertEqual(protocol.completed_turns, 0)
 
 
 class GitEvidenceTests(unittest.TestCase):

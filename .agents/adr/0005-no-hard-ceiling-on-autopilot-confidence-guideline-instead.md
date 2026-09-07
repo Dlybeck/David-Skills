@@ -1,5 +1,9 @@
 # Autopilot uses a confidence guideline instead of a hard duration ceiling
 
+[ADR 0010](./0010-human-steered-autonomy.md) refines the continuation design: a verified permitted
+non-AI callback/wait may continue the run; returning control remains the current policy fallback
+when that capability is absent. Confidence never expands the current user-authorized scope.
+
 `autopilot` is unattended work triggered by an explicit handoff. It does not impose an
 arbitrary time or token cutoff because some valid goals take longer than a fixed ceiling.
 

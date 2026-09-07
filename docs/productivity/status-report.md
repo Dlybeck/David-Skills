@@ -26,6 +26,12 @@ conventions are sufficient; the default chat report needs no report folder or do
 
 ## Common questions
 
+**Can I see whether the agent has misunderstood the goal?**
+
+Yes. A substantial report exposes the current interpretation, approach, consequential corrections,
+and evidence, separating adopted direction from suggestions. Reporting a mismatch does not itself
+rewrite the plan or mutate the goal.
+
 **Can it show both what is happening now and where the project is going?**
 
 Yes. It connects each meaningful piece of current work to a milestone and longer-term outcome.

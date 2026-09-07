@@ -63,15 +63,12 @@ file, separate from `/setup`'s issue-tracker/triage/domain scope.
 3. **Dispatch** each claimed ticket whole to a worker subagent on the configured Worker model —
    in its own worktree whenever workers run in parallel. Brief the worker to build it the way
    `/implement` describes — read the ticket, drive `/tdd` at pre-agreed seams, typecheck, run
-   `/code-review`, commit, then mark the ticket resolved. This is a **delegated continuation**
-   of `/implement`'s own process, not the worker invoking it as a skill call (`/implement` is
-   user-invoked; see `.agents/invocation.md`'s "Delegated continuation of a user-invoked skill's
-   own process" for why this doesn't violate that). The brief carries two additions the run
-   depends on:
+   `/code-review`, commit, then mark the ticket resolved, within the dispatch contract's authority.
+   `/implement` is model-invoked and can be selected directly by that authorized worker. This does
+   not authorize additional workers or broaden the Router's role. The brief retains two requirements:
    - **Fix any real `/code-review` finding before committing.** `Status: resolved` means
-     "committed," not "review findings addressed" — `/implement` treats the review as advisory
-     by design — so the brief asks for the fix directly; the Router never verifies it by
-     reading the report.
+     "committed," not proof of review quality. `/implement` now requires real findings to be
+     addressed; the Router still does not perform a second review by reading the report.
    - **Fast-forward the worktree branch to the dispatching branch's tip first.** A fresh
      worktree can spawn stale; starting from the tip is what makes the committed claim visible
      to the worker.

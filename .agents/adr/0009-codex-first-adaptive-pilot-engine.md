@@ -1,5 +1,8 @@
 # Codex-first pilots share an adaptive goal engine
 
+The four targeted invocation changes and human-steering refinement are recorded in
+[ADR 0010](./0010-human-steered-autonomy.md); the original decision below explains their starting point.
+
 ## Context
 
 The original pilots encoded one Claude-specific launch command and largely replayed the interactive
