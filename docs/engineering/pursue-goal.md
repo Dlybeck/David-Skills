@@ -39,9 +39,12 @@ in a primary checkout. Claude Code uses its background `/goal` mechanism and the
 mechanism supplies. Both keep long-running external jobs outside the model loop: the process writes
 its own log and terminal receipt.
 
-Actual continuation after waiting must be verified on the current host within account policy.
-A completed background job is not proof that the conversation will resume. When no permitted
-mechanism exists, the engine records that limitation instead of promising an automatic return.
+The goal stays active through waits. A supported blocking wait keeps the run pending and returns
+control to the agent afterward; it does not require a completion callback or repeated AI checks.
+The engine establishes a continuation mechanism on the current host before unattended work.
+A completed background job alone is not proof that the conversation will resume. When the host
+cannot support continuation, the engine identifies that limitation and leaves autonomy explicitly
+unmet rather than calling ordinary waiting a blocker.
 
 ## Human steering
 
@@ -67,6 +70,13 @@ change the evidence. It does not stop merely because the work is long or difficu
 Only when the contract explicitly grants that capability. The objective never expands its own
 authority.
 
+**Will a long job make me restart the goal manually?**
+
+Waiting alone must not cause a handoff. The agent does useful independent work or waits quietly,
+then continues. Blocking waits and non-AI completion callbacks can provide that continuation;
+repeated model status checks do not. Actual host restrictions still apply, and a short successful
+wait does not establish that hours of waiting or interruption have been tested.
+
 ## It's working if
 
 - The first progress update names the contract, worktree, branch, and validation surface.
@@ -76,6 +86,8 @@ authority.
 - Resumption preserves useful decisions while correcting stale checkpoint claims against current evidence.
 - Your correction changes subsequent work and survives a context transfer.
 - A status question does not become a new objective or withdraw autonomy.
+- A long-running job leads to quiet waiting and further work without a manual restart, when the
+  host supports it; any actual host limitation is named explicitly.
 
 ## Where it fits
 

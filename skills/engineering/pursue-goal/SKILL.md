@@ -106,18 +106,26 @@ corrections when supported; do not treat the user's check-in as withdrawal of au
 
 ## Wait without abandoning the work
 
+Waiting is an execution state, not a reason to pause, block, or end the goal. Preserve the active
+run through the wait and continue meaningful work when the dependency finishes.
+
 For an external command expected to exceed ten minutes, state its expected duration when known,
 launch it as a resumable operating-system process, and give it an exact job handle, local progress
 log, and terminal success/failure receipt. Choose meaningful independent work within scope when it
-does not interfere with the job's resources or evidence. Otherwise use the adapter's verified
-non-AI completion/wait mechanism within host and account limits. Never use model turns, repeated
-status calls, or subagents as a polling loop.
+does not interfere with the job's resources or evidence. Otherwise keep the run pending in the
+adapter's supported blocking wait or use a verified non-AI completion callback within host and
+account limits. A blocking wait does not require a callback and is not recurring AI polling.
+Prefer a wait tied to job completion; a duration-based sleep may also preserve the run. Verify
+the identified job after waking rather than assuming elapsed time proves completion. Never use
+model turns, repeated status calls, or subagents as a polling loop.
 
 After completion, verify the receipt belongs to this job and attempt, distinguish success from
 failure, timeout, or cancellation, and continue with the next meaningful action. A background
-process finishing is not proof that agent continuation works. If no permitted mechanism can
-preserve or resume execution, report that capability boundary honestly; a skill cannot override
-account policy or promise that an ended turn will wake itself.
+process finishing is not proof that agent continuation works. Establish the continuation path
+before an unattended dependency. If no permitted mechanism can preserve or resume execution,
+identify the actual host limitation and preserve the checkpoint; ordinary job duration does not
+establish that limitation. Do not claim an ended turn will wake itself or that a skill can
+override host instructions. A forced handoff leaves the requested autonomy unmet.
 
 ## Apply authority continuously
 

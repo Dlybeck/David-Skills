@@ -17,15 +17,26 @@ the goal. Use only goal controls actually exposed by this host. When a correctio
 written into native goal metadata, keep the updated contract in the existing checkpoint, identify
 the stale metadata, and reconcile both at each continuation.
 
-Before an unattended dependency, establish whether this host provides a permitted interruptible
-wait or non-AI completion callback that actually resumes this run. Test a short task through
-completion and a subsequent agent action; CLI subprocess exit or app-server process events alone
-do not prove that an existing chat resumes. Keep exact process/session identity and receipts.
+Before an unattended dependency, inspect this host's tools for a permitted blocking wait or
+non-AI completion callback that resumes this run. Prefer an interruptible wait so human steering
+remains available. Where exposed, a dedicated sleep tool can keep the current run pending without
+recurring model calls; use its actual duration and interruption contract. A shell `sleep` command
+is insufficient if the shell tool yields early and leaves only a background process.
+
+Verify the selected mechanism with a short task and a subsequent agent action. Keep exact
+process/session identity and receipts. That proves the short lifecycle only; record any untested
+long-duration, timeout, or interruption behavior without treating it as proven failure. CLI
+subprocess exit or app-server events alone do not prove that an ended chat resumes.
 
 Use goal continuations for meaningful work, not status polling.
 Use the verified mechanism within current host wait limits. Do useful independent work when
 available, without interfering with the running experiment. Never replace a native wait with
-recurring goal turns, model status calls, or a polling agent. If the host or account policy
-requires returning control and no completion callback is available, state the missing capability
-and preserve the next action. Do not claim unattended continuation is supported in that case.
-An account-policy amendment needs explicit user approval; plugin instructions cannot supply it.
+recurring goal turns, model status calls, or a polling agent. Keep the goal active while a
+dependency runs; do not mark it blocked to suppress continuation turns or require a user restart
+merely because the wait is long. Missing callbacks do not prevent a supported blocking wait.
+
+If neither mechanism can preserve or resume the run under host instructions, state the exact
+missing capability or binding restriction and preserve the next action. Disclose that unattended
+continuation remains unmet; never invent a pause API or misuse goal completion/blocking to end a
+wait. An account-policy amendment needs explicit user approval; plugin instructions cannot
+supply it.
