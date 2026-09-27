@@ -7,6 +7,9 @@ Implement the understood work authorized by the user in the conversation, curren
 spec, or tickets. A formal spec or ticket is not required. Reuse settled requirements and the
 current authorized workspace; ask only about consequential gaps outside delegated decisions.
 
+Run `/attention-modes` for those questions and `/tool-fit` when connected evidence, a UI preview,
+or an in-chat visual would materially improve implementation or review.
+
 Use /tdd where possible, at agreed seams or with explicitly delegated seam selection.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.

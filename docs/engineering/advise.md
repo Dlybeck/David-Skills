@@ -43,6 +43,8 @@ The word **flow** means one possible composition, not a required sequence. You c
 - **Standalones**, off every flow, reached for on their own terms — the prototype, the questionnaire, the merge conflict you are already sitting in.
 - **A vocabulary layer underneath**, the two references the other skills pull in when the words rather than the process are the problem.
 
+[Attention modes](../productivity/attention-modes.md) adjusts how much discussion you can handle; [tool fit](../productivity/tool-fit.md) checks whether available sources, visuals, or previews would help. They apply across the route you choose. Neither changes the skill, the goal, or what actions are authorized.
+
 ## The phase boundary
 
 The other idea it hands you is the **phase boundary**: a useful moment to decide whether to continue, compact, or hand off. Preserve settled requirements across that choice. A compact checkpoint or self-contained ticket can support a restart; neither a fresh session nor a particular context-size threshold is mandatory for every task.
@@ -94,6 +96,7 @@ Check the changelog for a rename before assuming it is gone. `writing-great-skil
 - Where two skills are close, it explains the trade-off and leaves the choice with you.
 - Any claim it makes about another skill's behaviour shows up in the trace as it reading that skill's `SKILL.md`.
 - You recognise your own situation in what it hands back, rather than the nearest generic scenario.
+- It treats Focused or On the side as a way to collaborate on the selected work, rather than a separate delivery path.
 
 ## Where it fits
 

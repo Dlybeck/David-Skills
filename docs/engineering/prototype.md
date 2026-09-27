@@ -21,6 +21,8 @@ The question picks the branch, and the branches produce very different artifacts
 
 Both keep state in memory, start with no thinking required, and show you the full state after every step. The moment you find yourself hardening one — adding a test, wiring the real database, generalising for a case you might want later — you have stopped prototyping.
 
+The runnable artifact remains the evidence. [Tool fit](../productivity/tool-fit.md) presents an available host preview or accessible interactive view with a short explanation and source path, so you can review it from the chat when the host supports that.
+
 ## The prototype is a primary source
 
 A finished prototype leaves two things, and they go to different places.
@@ -57,6 +59,7 @@ It can be, if you prototype questions you could have answered by talking, or let
 - The UI variants disagree about layout and information hierarchy, not just colour and copy — and the feedback you get is "the header from B with the sidebar from C".
 - It is answered in one sitting. If you're still building it a day later, the question was too big; split it.
 - When it ends, the verdict and runnable evidence are findable, and production code has not changed without authorization.
+- An available preview lets you inspect the prototype from the current chat, with a path back to the runnable artifact.
 
 ## Where it fits
 

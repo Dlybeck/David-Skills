@@ -16,6 +16,10 @@ Wayfinder is **planning** by default: each ticket resolves a decision, and the m
 
 Every map and ticket is an issue, so it has a **name** — its title. In everything the human reads — narration, the map's Decisions-so-far — refer to it by that name, never by a bare id, number, or slug. A wall of `#42, #43, #44` is illegible; names read at a glance. The id and URL don't vanish — a name wraps its link — but they ride _inside_ the name, never stand in for it.
 
+`/grilling` adapts its questions through `/attention-modes`. On the side can make a HITL
+decision easier to discuss in brief turns; it does not let the agent answer the human's side
+or close that ticket before the choice is actually settled.
+
 ## The Map
 
 The map is a single issue on this repo's issue tracker, labelled `wayfinder:map` — the canonical artifact. Its tickets are child issues of the map.

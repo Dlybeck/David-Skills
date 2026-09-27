@@ -1,14 +1,14 @@
 ## What it does
 
-`research` answers a question by reading the sources that own the answer, then leaves a cited Markdown file in the repo. It works only from **[primary sources](https://www.aihero.dev/ai-coding-dictionary/primary-source)** — official docs, source code, specs, first-party APIs — and follows every claim back to the source that owns it, so it will not repeat a blog post's account of an API when the API's own docs are reachable.
+`research` answers a question by inspecting the **[primary sources](https://www.aihero.dev/ai-coding-dictionary/primary-source)** that own the answer: user-provided or connected originals, official docs, source code, specs, and first-party APIs. For current external facts, it searches when needed and opens the actual source. Material claims point back to what was inspected rather than repeating a secondary account.
 
-The durable output is a file, written where the repo already keeps such notes, with a link on each claim. A concise answer in chat can accompany it. The artifact is something you can react to or hand to another agent after the [session](https://www.aihero.dev/ai-coding-dictionary/session) ends.
+The answer appears in chat with source links and meaningful uncertainty. A small lookup needs no extra file. Substantial or delegated reading, requested documentation, and findings needed beyond the [session](https://www.aihero.dev/ai-coding-dictionary/session) get one cited Markdown note in the repo's notes location when a repo exists. Without a checkout, the agent uses an available host artifact or a self-contained chat report.
 
 ## When to reach for it
 
 Type `/research`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) reaches for it automatically when a task turns into reading legwork.
 
-Reach for it when the next step is *finding something out* from outside the working directory — how a third-party API behaves, what a spec actually says, whether a version claim holds — and you'd rather not stall your own thread doing the reading. What you need decides which skill:
+Reach for it when the next step is *finding something out* — how a third-party API behaves, what a connected original says, whether a version claim holds. [Tool fit](../productivity/tool-fit.md) chooses available authorized access to the source, without requiring a particular app or connector. What you need decides which skill:
 
 | What you need | Reach for |
 | --- | --- |
@@ -22,11 +22,11 @@ The line between `research` and `grill-with-docs` is the **shelf life of what co
 
 ## Delegated legwork
 
-Small lookups run directly. Substantial reading can use one **background agent** when useful independent work remains in the main session and the user's delegation budget allows it. Source quality and a useful answer matter more than whether the reading ran in another context.
+Small lookups run directly and return in chat. Substantial reading can use one **background agent** when useful independent work remains in the main session and the user's delegation budget allows it. Source quality and a useful answer matter more than whether the reading ran in another context.
 
 Delegation is at most one level deep. An already-delegated worker researches directly and must not invoke `research` again or spawn another worker.
 
-Where the file lands is decided by the repo, not by the skill: it matches whatever convention already exists for notes, and if there is none it picks somewhere sensible and tells you where. It writes one file per run.
+When a durable note is warranted, its location follows the repo's existing notes convention. If there is none, the agent picks a sensible location and tells you where. The note is one file with citations, linked from the chat answer.
 
 ## Common questions
 
@@ -36,19 +36,19 @@ No. Upstream [issue #530](https://github.com/mattpocock/skills/issues/530) docum
 
 **Where should the file live — and should I commit it?**
 
-Follow the repo's existing notes convention and your retention policy. A dated research file can preserve valuable evidence, but later work should recheck facts that may have changed. The skill does not require either committing or deleting it.
+Small lookups do not create one. For substantial or delegated work in a repo, follow its existing notes convention and your retention policy. Without a repo, use a host artifact when available or keep the complete cited report in chat. A dated file can preserve valuable evidence, but later work should recheck facts that may have changed. The skill does not require either committing or deleting it.
 
 **What counts as a "high-trust" primary source, and who decides?**
 
-The [model](https://www.aihero.dev/ai-coding-dictionary/model) does. The skill names the *kinds* of source that qualify — official docs, source code, specs, first-party APIs — and there is no allowlist, no domain gate, and no verification pass. This was the loudest objection when the skill was first proposed and it has never been answered publicly: "Five research subagents pointed at junk just gives you five confident wrong answers faster. How are you gating what counts as high-trust sources?" The mitigation you actually have is the citation on each claim. Follow two or three of them. If they land on a summary of the thing rather than the thing, the run failed at its one job.
+The [model](https://www.aihero.dev/ai-coding-dictionary/model) judges which original owns the claim; there is no fixed domain allowlist. Connected originals, official docs, source code, specs, and first-party APIs can qualify. The safeguard is inspecting the source itself and citing what was actually read. Follow a couple of links: if they land on a summary of the thing rather than the thing, the run failed at its one job.
 
 **Does a later session reuse what an earlier run found?**
 
-No. Nothing auto-loads a past research file; it is a document sitting in the repo until a human or a skill points at it. This was raised early as the strongest challenge to the design — "the value's the markdown becoming context the agent re-reads later, not the fetch itself. A write-once dead file is just a fancy search" — and the shipped skill does not solve it. In practice the file earns its keep by being fed into the next step deliberately: attach it to a spec, quote it into a grilling session, point a [ticket](https://www.aihero.dev/ai-coding-dictionary/ticket) at it.
+Not automatically. A durable note becomes useful later when a human or another skill points at it: attach it to a spec, bring it into a grilling session, or link it from a [ticket](https://www.aihero.dev/ai-coding-dictionary/ticket). A small lookup answered only in chat has no separate note to reload.
 
 **Why not just ask the agent to go read the docs?**
 
-You can. The skill adds primary-source discipline and a cited artifact, with background reading available when that separation earns its cost. If a short direct answer is all you need, ordinary conversation may be sufficient.
+You can. The skill adds primary-source discipline and makes a durable cited note when the work warrants one, with bounded background reading available when that separation earns its cost. A short direct answer can stay entirely in chat.
 
 **When does it stop reading?**
 
@@ -62,9 +62,9 @@ Wayfinder can resolve ready research directly or through one bounded worker. Ext
 
 - Small lookups stay direct; substantial independent reading may use one background task.
 - No research worker creates another research worker.
-- One new Markdown file shows up, in the folder the repo already uses for notes, and the agent tells you the path.
-- Every claim in it carries a link, and following two at random lands you on an official doc, a spec, or the actual source file — not on someone's write-up of it.
-- You can make the decision you were stuck on from the file alone, without going back to the sources yourself.
+- The answer appears in chat with links to originals actually inspected, plus material uncertainty.
+- Substantial or delegated work leaves one cited note in the repo when there is a repo, or a complete cited artifact or chat report when there is not.
+- The cited answer or note lets you make the decision you were stuck on without reconstructing the research.
 
 ## Where it fits
 

@@ -1,6 +1,6 @@
 ## What it does
 
-`grill-with-docs` interviews you about a plan or design until you and the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) share one understanding of it, and writes the vocabulary and the hard decisions into your repo while it does. It is the same interview [grill-me](../productivity/grill-me.md) runs — a round of questions, then wait, then the next round — pointed at a codebase.
+`grill-with-docs` interviews you about a plan or design until you and the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) share one understanding of it, and writes the vocabulary and the hard decisions into your repo while it does. It is the same interview [grill-me](../productivity/grill-me.md) runs, pointed at a codebase. [Attention modes](../productivity/attention-modes.md) uses deeper rounds when you are Focused and short, broad-first questions when you are On the side.
 
 It is **[stateful](https://www.aihero.dev/ai-coding-dictionary/stateful)**. Every other grilling skill leaves the [session](https://www.aihero.dev/ai-coding-dictionary/session) in your head; this one leaves files on disk. A term gets resolved and it lands in `CONTEXT.md` the moment it resolves, not batched at the end. A decision passes three gates and it lands as an ADR. That is the whole difference, and it is also the source of most of the trouble people have with the skill: the artifacts are real files in a real repo, so they can be absent when you expected them, and they can drift when more than one person is writing them.
 
@@ -24,7 +24,7 @@ The wayfinder split comes down to session count: `/grill-with-docs` for single-s
 
 The skill writes into your repo, so you need to be somewhere it is safe to write. Resolved terms go to a `CONTEXT.md` glossary at the root — or to the relevant context's `CONTEXT.md`, if a `CONTEXT-MAP.md` at the root marks the repo as multi-context. Decisions go to `docs/adr/`. Both are created lazily; nothing exists until the first term or decision crystallises, so there is nothing to scaffold up front.
 
-It also needs two other skills present, because its own `SKILL.md` is one line that delegates to them: [grilling](../productivity/grilling.md) supplies the interview, [domain-modeling](./domain-modeling.md) supplies the writing. Installing `grill-with-docs` alone gets you a skill that does not work.
+It needs two other skills for its core process, because its own `SKILL.md` is one line that delegates to them: [grilling](../productivity/grilling.md) supplies the interview, [domain-modeling](./domain-modeling.md) supplies the writing. [Attention-modes](../productivity/attention-modes.md) and [tool-fit](../productivity/tool-fit.md) add the adaptive conversation and host-tool guidance. The plugin bundles all four; a selective install must include the supporting skills it needs.
 
 ## The paper trail
 

@@ -25,6 +25,8 @@ the narrower skill that fits.
 At each checkpoint the engine compares evidence with the goal, preserves or reverts the result,
 replans, and chooses again. A spec or issues appear only when stable decomposition or coordination
 makes them valuable.
+[Tool fit](../productivity/tool-fit.md) helps it inspect current sources and present results in a
+form the host can show, without making any one app or output format mandatory.
 
 For work spanning sessions, it keeps one compact checkpoint in the project's existing notes,
 plan, or report: the contract, evidence and revision, useful decisions and failed approaches,
@@ -52,6 +54,8 @@ Check in through ordinary conversation. Questions get answers without changing t
 suggestions stay provisional until adopted; clear corrections update the working plan and
 checkpoint. The agent reconciles affected jobs and evidence without reopening settled decisions.
 A stop request stops new work and accounts for identified running work safely.
+[Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
+answer while unrelated authorized work continues.
 
 ## Common questions
 

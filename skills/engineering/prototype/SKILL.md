@@ -28,3 +28,7 @@ The two branches produce very different artifacts — getting this wrong wastes 
    when commits are authorized, preserve it on a review/throwaway branch, out of main. A standalone
    prototype requires neither an issue nor a Git repository. Production implementation is a
    separate action: fold the decision into real code only when the user authorizes that work.
+
+Run `/tool-fit` when presenting the prototype: show an available host preview or accessible
+interactive view with a short explanation and the source path. Preserve the runnable artifact
+even when the user reviews it through the chat.

@@ -21,10 +21,12 @@ The common case is a [grilling](https://www.aihero.dev/ai-coding-dictionary/gril
 
 ## The send, not the subject
 
-The interview is two exchanges, and then it stops.
+The interview begins with one prompt about who will receive the questionnaire and the most important answer their reply should unlock. It then fills only the remaining gaps before drafting.
 
-- **Who is it going to?** Their role, their expertise, their relationship to you. This fixes the tone and how much context the document has to carry — an outside client needs orienting, a teammate does not.
-- **What do you need back?** The concrete decisions or facts you can't resolve alone. This becomes the checklist the finished document is measured against: every item you named gets a question aimed at it.
+[Attention modes](./attention-modes.md) keeps that opening answerable by voice or in one or two sentences when you are On the side. Focused discussion can gather more context in the same exchange.
+
+- **Who is it going to, and what should their reply unlock?** Start with their role and your highest-priority missing decision or fact. Their expertise and relationship to you can sharpen the tone and context when needed.
+- **What else do you need back?** Collect remaining concrete decisions or facts you cannot resolve alone without re-asking the first answer. Every item you name gets a question in the finished document.
 
 Everything after that is drafting. The file lands at `to-questionnaire-<slug>.md` in the current directory. There is no setup, no workspace, and nothing to configure.
 

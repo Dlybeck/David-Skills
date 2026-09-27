@@ -17,6 +17,8 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
+- **[attention-modes](./attention-modes/SKILL.md)** — Adapt questions and handoffs to Focused or On the side attention, including brief or dictated replies.
+- **[tool-fit](./tool-fit/SKILL.md)** — Choose useful host tools for sources, visuals, previews, and artifacts without tying the workflow to one AI app.
 - **[grilling](./grilling/SKILL.md)** — Resolve material decisions through focused interview rounds, reusing settled context.
 - **[writing-for-agents](./writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
 - **[status-report](./status-report/SKILL.md)** — Connect verified progress to long-term project goals directly in chat with useful visuals; export a document or webpage on request.

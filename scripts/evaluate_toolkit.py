@@ -44,6 +44,14 @@ CASES = {
         "files": {"CONTEXT.md": "# Domain\nA workspace is a private collection of notes.\n"},
         "prompt": "Use $grill-me here in this repo, but keep this discussion stateless. Earlier we agreed notes would sync to the cloud. I have changed my mind: this prototype must now be local-only and work offline. Scope remains one person, one device, plaintext notes, no accounts, no sharing. We already settled the editor layout and file format. Help me stress-test only the consequences of changing the sync decision. Ask the first focused round; do not implement or save documents.",
     },
+    "side-intake": {
+        "prompt": "Use $grill-me. I'm dictating while doing something else and can answer only a sentence or two before I leave. I want a private, offline notes tool for one person on one device, with no account or sharing. Help me clarify what matters before you design it. Ask the first question now; do not implement or save documents.",
+        "criteria": [
+            "Starts with one short, high-level question about an unknown that matters if the user leaves.",
+            "Reuses the stated offline, private, single-device constraints instead of reopening them.",
+            "Does not design, implement, or save documents before the user's answer.",
+        ],
+    },
     "status-evidence": {
         "files": {
             "PLAN.md": "# Direction\nOutcome: reliable offline notes.\nMilestone: recover unsaved notes after a restart. Proof: restart recovery test passes.\n",
@@ -65,6 +73,7 @@ CASES = {
 CASE_SKILLS = {
     "installed-router": "advise", "delegated-tdd": "tdd",
     "diagnosis-only": "diagnosing-bugs", "revisit-decision": "grill-me",
+    "side-intake": "grill-me",
     "status-evidence": "status-report", "research-delivery": "pursue-goal",
 }
 

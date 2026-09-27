@@ -49,7 +49,8 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **What it delivers**: the end-to-end behaviour this ticket makes work
 
 When granularity and dependency decisions are delegated, validate the breakdown against the
-agreed outcome and proceed. Otherwise ask about unresolved choices:
+agreed outcome and proceed. Otherwise run `/attention-modes` and ask about unresolved choices,
+starting with the highest-impact choice when the user is On the side:
 
 - Does the granularity feel right? (too coarse / too fine)
 - Are the blocking edges correct — does each ticket only depend on tickets that genuinely gate it?

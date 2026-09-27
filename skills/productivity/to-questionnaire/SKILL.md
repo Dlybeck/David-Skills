@@ -8,9 +8,18 @@ Turn something the user can't answer alone into a **questionnaire** — a Markdo
 
 **Grill the send, not the subject.** Interview the user only about the _send_, which they can always answer: who it goes to, and what they need back. The questions in the document then target the **gap** between what the recipient knows and what the user needs.
 
-1. **Who is it going to?** Ask, in one exchange, the recipient's role, expertise, and relationship to the user. This fixes the questionnaire's tone and how much context it must carry. Done when you know who the recipient is and what they know that the user doesn't.
+Run `/attention-modes` for that interview; a brief On the side reply can give the recipient and
+the most important desired answer first, with finer details gathered only when needed.
 
-2. **What do you need back?** Ask, in one exchange, the specific decisions or facts the user can't resolve alone and needs from this person. Done when you have a concrete list of what the user must walk away able to do or decide.
+1. **Who is it going to, and what should their reply unlock?** Start with the recipient's role
+   and the most important decision or fact the user needs back. In Focused mode, gather expertise
+   and relationship here too; On the side, keep the first prompt answerable in one or two sentences.
+   Done when you know who the recipient is and the purpose of the send.
+
+2. **What else do you need back?** Refine the recipient's expertise and relationship if needed,
+   then ask for the remaining specific decisions or facts the user can't resolve alone. Reuse the
+   first answer instead of asking it again. Done when you have a concrete list of what the user
+   must walk away able to do or decide.
 
 3. **Write the questionnaire.** Draft questions aimed at the gap from steps 1–2, following the Document structure below. Write it to `to-questionnaire-<slug>.md` in the current directory (slug from the topic) and report the path. Done when the file exists and every item the user named in step 2 is covered by a question.
 

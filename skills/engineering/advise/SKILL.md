@@ -21,6 +21,11 @@ or combine stages when their inputs are already available. Internal discipline a
 prerequisites still apply. Read the relevant skill before making a load-bearing claim about it;
 the sketches below are a map, not a substitute for the skill.
 
+**Attention and tools are cross-cutting, not new workflow stages.** `/attention-modes` adapts
+question depth and timing to Focused or On the side attention; it does not choose a different
+skill or expand authority. `/tool-fit` selects useful capabilities available in the current
+host for source access, visuals, and previews without making any one AI app a prerequisite.
+
 ## The main flow: idea → ship
 
 One useful route when an idea still needs shaping. It is not an entrance requirement for
@@ -125,7 +130,7 @@ Off the main flow entirely.
 - **`/prototype`** — a throwaway program answering one design question. Keep its verdict and
   evidence as a **primary source**. It needs no issue or planning pipeline; production integration
   requires separate authority. Reach for it whenever a runnable answer is useful.
-- **`/research`** — investigate **primary sources** and save cited findings. Small lookups run
+- **`/research`** — investigate **primary sources** and present cited findings. Small lookups run
   directly; substantial independent reading can use one background agent within the user's
   budget. Findings can settle the request directly or inform any later practice.
 - **`/to-questionnaire`** — when the thing blocking you isn't in your head or the codebase but in **someone else's**, this writes them a questionnaire to fill in. It's the inverse of `/grill-me`: instead of interviewing you about the subject, it interviews you about the **send** — who it's going to, what you need back — and aims the questions at the gap. What comes back is material for `/grill-with-docs` or `/to-spec`.

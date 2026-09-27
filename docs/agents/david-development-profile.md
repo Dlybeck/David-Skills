@@ -1,6 +1,6 @@
 # David's development profile
 
-Confirmed direction as of 2026-09-07. This is a design reference for developing David Skills,
+Confirmed direction as of 2026-09-27. This is a design reference for developing David Skills,
 not a personality assessment, a new skill, or standing authority to act in other projects.
 The [conversation research](../../.reports/research/2026-09-07-personal-autonomy-feedback.md)
 records the evidence and its limits. Its source keys below refer to that note; raw conversations
@@ -19,6 +19,8 @@ and operational logs are not part of this profile.
 | Continuity | Keep decisions, evidence, failed approaches, current stages, and a next action recoverable. Prefer one useful checkpoint and links to existing artifacts over duplicate reports or repeated expensive work. Waiting must preserve the active goal and autonomous continuation; job duration alone must not force a manual restart. [F2, D1; explicit correction, 2026-09-07] |
 | Cost | Avoid unnecessary delegation and repeated AI status checks. Use useful independent work within scope or supported non-AI waiting; do not invent busywork or disturb an experiment merely to fill time. [F3, A1, D1] |
 | Communication | Keep chat concise and understandable. Reports belong in chat by default, with visuals when they clarify the evidence. Distinguish local, tested, committed, pushed, and deployed results. Offer teaching rather than forcing a lesson into every handoff. [D1, P3, A2] |
+| Attention | Focused discussion can use deep rounds. When David is busy, dictating, or replying briefly, infer On the side and ask the highest-value broad question first; make each reply useful even if he then leaves. A brief "go" lets already-authorized work continue, without inventing authority. [Explicit feedback, 2026-09-27] |
+| Tools | Keep the plugin useful across AI hosts. Check for relevant available search, connected sources, visuals, and previews when they help the task; do not force a capability solely because a host offers it. [Explicit feedback, 2026-09-27] |
 | Boundaries | Preserve protected originals and project invariants. Autonomy preferences do not authorize spending, deployment, deletion, new account access, external writes, or expanding the task. Specific current instructions determine authority. [D1, F5, P2] |
 
 ## Project-specific examples, not global defaults
