@@ -52,7 +52,8 @@ A lesson should be **beautiful** — clean, readable typography and layout — s
 
 The lesson should be short, and completable very quickly. Learners' working memory is very small, and we need to stay within it. But each lesson should give the user a single tangible win that they can build on. It should be directly tied to the mission, and should be in the user's zone of proximal development.
 
-If possible, open the lesson file for the user by running a CLI command.
+Run `/tool-fit` to show a useful preview of the lesson in the current host when possible, with a
+link to the saved lesson. A host-local browser command alone may not reach the user.
 
 Each lesson should link via HTML anchors to other lessons and reference documents.
 
@@ -73,6 +74,9 @@ A shared stylesheet is the first component every workspace earns: every lesson l
 Every lesson should be tied into the mission - the reason that the user is interested in learning about the topic.
 
 If the user is unclear about the mission, or the `MISSION.md` is not populated, your first job should be to question the user on why they want to learn this.
+
+Run `/attention-modes` for that conversation. When the user is On the side, start with the
+real-world outcome they want from learning, then refine the curriculum as replies allow.
 
 Failing to understand the mission will mean knowledge acquisition is not grounded in real-world goals. Lessons will feel too abstract. You will have no way of judging what the user should do next.
 

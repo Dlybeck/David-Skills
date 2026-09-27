@@ -9,7 +9,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[advise](./advise/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
 - **[grill-with-docs](./grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./triage/SKILL.md)** — Move issues through a state machine of triage roles.
-- **[re-architect](./re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
+- **[re-architect](./re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present a visual review in chat or a useful page, then grill through whichever one you pick.
 - **[setup](./setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[delegate](./delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
 - **[autopilot](./autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
@@ -26,7 +26,7 @@ Model- or user-reachable (rich trigger phrasing so the model can reach for them)
 
 - **[prototype](./prototype/SKILL.md)** — Build a throwaway prototype to answer a design question: a single shareable HTML file for state/logic, or several toggleable UI variations.
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: build a feedback loop that goes red on this bug → minimise → hypothesise → instrument → fix → regression-test.
-- **[research](./research/SKILL.md)** — Investigate primary sources and save cited findings; delegate substantial independent reading when useful.
+- **[research](./research/SKILL.md)** — Investigate primary sources and present cited findings; save a durable note when useful.
 - **[tdd](./tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms, stress-test with scenarios, update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: small interfaces, clean seams, testable through the interface.

@@ -47,7 +47,8 @@ requires a saved report.
 
 No. When useful, it includes a diagram, a chart of measured results, or relevant images directly
 in the conversation. The choice follows the evidence rather than a fixed template. A brief update
-can still be plain text; unavailable rendering is disclosed rather than blocking the report.
+can still be plain text. [Tool fit](./tool-fit.md) selects a visual or preview the current host
+can display; unavailable rendering is disclosed rather than blocking the report.
 
 **Does a webpage mean it gets published or updates itself?**
 

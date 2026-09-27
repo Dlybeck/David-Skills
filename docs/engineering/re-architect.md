@@ -1,10 +1,10 @@
 ## What it does
 
-`re-architect` surveys a codebase for **deepening opportunities** — places where a shallow module (an interface nearly as complex as the thing it hides) could become a deep one — writes them up as a self-contained HTML report, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
+`re-architect` surveys a codebase for **deepening opportunities** — places where a shallow module (an interface nearly as complex as the thing it hides) could become a deep one — shows a visual review in chat, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
 
-It never changes the code. The whole run produces one HTML file in your OS temp directory and a conversation; the refactor itself happens later, in a separate [session](https://www.aihero.dev/ai-coding-dictionary/session), through the normal build flow. That is what makes it a survey rather than a refactoring tool, and it is why the skill is worth running on a codebase you are not ready to touch yet.
+The survey does not refactor the code. Its candidate summary and useful before/after visuals appear in the conversation. When a substantial comparison, interaction, or requested export merits a page, it also writes a self-contained HTML report and previews it when the host permits. The refactor itself belongs to later authorized build work; decisions made while grilling may update `CONTEXT.md` or an ADR.
 
-Two filters keep the report from becoming generic cleanup advice. Every candidate has to pass the **deletion test** — would removing this module concentrate complexity behind a smaller interface, or just spread it across callers? Only the "concentrates" cases earn a card. And unless you point it at a specific area, it reads recent commit history first and biases the scan toward paths that are actively changing, on the grounds that a deepening in code nobody touches is a refactor you will never cash in.
+Two filters keep the review from becoming generic cleanup advice. The **deletion test** asks whether removing a shallow module would concentrate complexity behind a smaller interface or just spread it across callers; concentration is the signal for a useful candidate. Unless you point it at a specific area, the skill also reads recent commit history first and biases the scan toward paths that are actively changing, where the payoff is more likely to matter.
 
 ## When to reach for it
 
@@ -29,13 +29,13 @@ Where it is confusable with siblings:
 
 None to run it. It reads `CONTEXT.md` and any ADRs in `docs/adr/` if they exist, and speaks in your domain's own nouns when they do — a candidate reads as "deepen the Order intake module," not "refactor the FooBarHandler."
 
-It writes in two places. The report goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo. During the grilling loop it will add or sharpen terms in `CONTEXT.md`, creating that file if it does not exist, and offer to record a rejected candidate as an ADR so a future run does not re-suggest it.
+The visual review appears in chat. If an HTML page is useful, it goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo, with a preview when possible. During the grilling loop the skill may add or sharpen terms in `CONTEXT.md`, creating it if needed, and offer to record a rejected candidate as an ADR so a future run does not re-suggest it.
 
-## Depth, and the report that hunts for it
+## Depth, and the review that hunts for it
 
-The skill turns on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow one leaks its implementation through an interface nearly as wide as the code beneath it. The report is a hunt for shallowness — pure functions extracted only for testability while the real bugs live in how they are called (no **locality**), modules leaking across their **seams**, a concept you cannot understand without opening five files — and a proposal for the deepening that fixes it.
+The skill turns on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow one leaks its implementation through an interface nearly as wide as the code beneath it. The review is a hunt for shallowness — pure functions extracted only for testability while the real bugs live in how they are called (no **locality**), modules leaking across their **seams**, a concept you cannot understand without opening five files — and a proposal for the deepening that fixes it.
 
-Each candidate is a card: the files involved, the friction, a plain-English solution, the benefit stated in terms of **locality** and **leverage**, a before/after diagram, and a strength badge.
+Each candidate shows the files involved, the friction, a plain-English solution, the benefit stated in terms of **locality** and **leverage**, a before/after diagram when it clarifies the change, and a recommendation strength. [Tool fit](../productivity/tool-fit.md) chooses an in-chat diagram, image, or interactive view the host can show. A page is optional; a temporary local path by itself is not a review visible from another device.
 
 | Badge | What it means for you |
 | --- | --- |
@@ -43,7 +43,7 @@ Each candidate is a card: the files involved, the friction, a plain-English solu
 | `Worth exploring` | Plausible deepening, but the payoff depends on where the code is going next. |
 | `Speculative` | Surfaced for completeness. Most of these are safe to ignore. |
 
-The report ends with a **Top recommendation** — the one it would tackle first — and then the skill stops and asks which candidate you want to explore. Nothing has been decided at that point, and no code has moved.
+The review ends with a **Top recommendation** — the one it would tackle first — and then the skill stops and asks which candidate you want to explore. Nothing has been decided at that point, and no code has moved.
 
 ## What happens after you pick one
 
@@ -53,15 +53,15 @@ Picking a candidate starts a [grilling](../productivity/grilling.md) session ove
 
 **It grilled me for an hour about one idea instead of showing me options. Can I turn that off?**
 
-Yes — say so when you invoke it ("don't grill me, just show the report"). This is the loudest complaint the skill has. One user put it bluntly: they liked it as "a convenient way to get a thorough analysis of improvements," and after the grilling loop was added found it "borderline unusable," reporting sessions where it proposed a single solution and then asked "10's or 100's of questions." The design intent is that the report comes first and the grill only starts on a candidate you chose, but weaker [models](https://www.aihero.dev/ai-coding-dictionary/model) skip straight to interviewing you about the first idea they had. Reports in that thread vary sharply by model, and it is an open issue — the skill does not yet have a documented no-grill mode.
+Yes — say so when you invoke it ("show the options, then stop"). The visual review comes first and the grilling loop starts only after you pick a candidate. [Attention modes](../productivity/attention-modes.md) can also keep later questions short when you are On the side. If the agent starts interviewing you before showing options, ask for the candidate review first.
 
 **The report opened as unstyled raw HTML with no diagrams. What happened?**
 
-The report loads Tailwind and Mermaid from CDNs, so it needs network access when you open it, and it breaks silently when something blocks those scripts. The filed case was a security hook demanding SRI hashes: the agent added them, the CDN served different bytes to the browser than to the `curl` used to compute the hash, and the browser blocked the script. Offline and locked-down environments hit the same wall. The agent cannot see this, because it never renders the page. The workaround is to ask for inline CSS and hand-built SVG diagrams instead of the CDN scaffold. This is an open issue and a real rough edge.
+An optional HTML page uses inline CSS and diagrams, so it remains readable offline or in a locked-down browser. The agent previews and checks the rendering when the host allows it; the candidate summary remains in chat either way.
 
 **It gave me twelve candidates. Do I work through them in the same session or start a new one?**
 
-One candidate per session. Working through several in one conversation fills the [context window](https://www.aihero.dev/ai-coding-dictionary/context-window) with the report, the grilling, the domain-model edits and the code changes all at once. The report only lives in a temp file, so carry the candidate itself rather than the file: pick one, grill it, take the decision into `/to-spec`, and turn the rest into [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) you can pick up independently later. Put the chosen improvement into a spec rather than going straight to implementation. This is a recurring question with no documented workflow in the skill itself.
+Choose one candidate to grill at a time. Working through several in one conversation can fill the [context window](https://www.aihero.dev/ai-coding-dictionary/context-window) with the review and domain decisions. Keep the chosen candidate and its evidence, whether from the chat review or an optional HTML page, as input to later planning or implementation. Other candidates can wait; there is no need to turn every suggestion into a ticket.
 
 **How should I prompt it?**
 
@@ -81,7 +81,7 @@ Rarely, and you should know that going in. The skill is built to output findings
 
 **Does it work in Codex or another harness?**
 
-Partially. The exploration step names Claude Code's `Agent` tool with `subagent_type=Explore` directly, so a [harness](https://www.aihero.dev/ai-coding-dictionary/harness) without that tool may skip the parallel exploration rather than substitute its own. The skill still runs; the scan is just less thorough. A harness-neutral rewrite has been proposed but is not merged.
+Yes. The agent can explore the codebase directly, or delegate a bounded independent area when the host supports subagents and the extra cost is justified. [Tool fit](../productivity/tool-fit.md) adapts the presentation to what the current [harness](https://www.aihero.dev/ai-coding-dictionary/harness) can display. If it creates an HTML page, the in-chat candidate summary still carries the result.
 
 **How do I actually implement deep modules in TypeScript?**
 
@@ -91,9 +91,9 @@ There is no good answer shipped with the skill. The recurring request is for a `
 
 - The candidates name your domain's concepts, not invented class names — "the Order intake module," not "the FooBarHandler."
 - The candidates cluster in files you have edited recently, not in dormant corners of the repo.
-- No code changed during the run. The only new file is the HTML report in your temp directory.
-- It stops after the report and asks which candidate you want, rather than continuing on its own.
-- Each card explains the payoff as locality or leverage, and says which tests get simpler — not just "this is cleaner."
+- The candidate review is visible in chat; an HTML page appears only when it makes the review more useful.
+- It stops after the review and asks which candidate you want, rather than continuing on its own.
+- Each candidate explains the payoff as locality or leverage, and says which tests get simpler — not just "this is cleaner."
 - Rejecting a candidate for a durable reason gets you an offer to record an ADR, so the next run does not re-suggest it.
 
 ## Where it fits

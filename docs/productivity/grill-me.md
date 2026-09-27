@@ -1,6 +1,6 @@
 ## What it does
 
-`grill-me` takes a **loose idea** or a decision you want to revisit and helps you understand it. You do not need a worked-out plan to start. The [session](https://www.aihero.dev/ai-coding-dictionary/session) asks in manageable **rounds**, choosing the highest-impact ready questions from the **frontier** while reusing settled context.
+`grill-me` takes a **loose idea** or a decision you want to revisit and helps you understand it. You do not need a worked-out plan to start. The [session](https://www.aihero.dev/ai-coding-dictionary/session) chooses the highest-impact ready questions from the **frontier** while reusing settled context. [Attention modes](./attention-modes.md) makes that a manageable round when you are Focused or a short, broad-first exchange when you are On the side.
 
 It is **[stateless](https://www.aihero.dev/ai-coding-dictionary/stateless)**. It writes no files and leaves no workspace behind. The only thing it leaves is a sharper version of the idea, in your own head.
 
@@ -45,7 +45,7 @@ There is no target count. It ends when the material decisions in your agreed sco
 Usually the scope was too large. Ask the agent to break the work into smaller pieces first, then grill each one. Very long sessions also drift into the **[dumb zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**, where the [context window](https://www.aihero.dev/ai-coding-dictionary/context-window) is full enough that the questions get worse.
 
 **Can I go back to one question at a time?**
-Yes. Add this to your global `CLAUDE.md`:
+Yes. Say "on the side" when you have little attention, or ask for one question at a time while staying Focused. For a standing preference, add this to your global `CLAUDE.md` or `AGENTS.md`:
 
 ```
 When grilling, ask one question at a time.
@@ -63,7 +63,7 @@ More than for most skills. Grilling leans on the [model](https://www.aihero.dev/
 ## It's working if
 
 - You disagree with something. A session with no pushback from you is a session you didn't need.
-- Questions arrive in a few rounds rather than one long drip, and later rounds clearly build on what you said earlier.
+- Questions arrive in manageable rounds when Focused, or one short broad-first exchange at a time when On the side; later questions build on what you said earlier.
 - You end up somewhere you didn't expect, because a question surfaced a decision you had been making implicitly.
 - At the end you could defend each choice to someone who wasn't there.
 

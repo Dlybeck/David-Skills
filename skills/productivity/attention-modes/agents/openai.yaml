@@ -1,0 +1,3 @@
+interface:
+  display_name: "Attention Modes"
+  short_description: "Adapt questions for focused or brief attention"

@@ -42,12 +42,14 @@ Two honest notes on that list. A glossary suits most topics, but the skill ships
 The word to think with is **storage strength**: long-term retention, as opposed to **fluency**, the in-the-moment recall that feels like mastery while you are reading and is gone a week later. `teach` builds the former through desirable difficulty — retrieval practice, spacing, interleaving. Knowledge comes first, where difficulty is the enemy because it eats the working memory you need in order to understand; then the skill is drilled through a tight feedback loop, where difficulty is the tool.
 
 Two things steer what you get taught. The **mission** — the concrete real-world reason you want this — grounds every lesson; without it the lessons drift abstract and nothing decides what comes next. From the mission and the learning records, `teach` picks the next lesson inside your **zone of proximal development**: challenging enough to take effort, not so far ahead that it stops being learnable.
+When you are [On the side](./attention-modes.md), the mission interview begins with the real-world outcome you want from learning. The agent refines the curriculum as your brief replies allow, while retaining the settled mission between sessions.
 
 It is also why the skill pushes back rather than obliges. A question that needs **wisdom** — real-world judgement — gets an attempted answer and then a pointer to a community where you can test it. A quiz is a gate, not a formality: one user reported saying "thanks a lot" and being told the drill was still live.
 
 ## Lessons, references and components
 
 A **lesson** is one self-contained HTML file, short enough to finish in a sitting, tied to the mission, giving one tangible win. It cites its sources, recommends one primary source to go and read yourself, and links to sibling lessons and reference documents.
+When the host can preview the lesson, the agent shows that preview with a link to the saved file. Opening a browser only on the agent's machine is not enough for a user on another device; [tool fit](./tool-fit.md) chooses the accessible view.
 
 The split worth knowing: lessons are rarely revisited, reference documents are. So the compressed essence of a lesson — the syntax table, the algorithm, the pose sequence, the glossary — belongs in `reference/`, not buried in the lesson that introduced it.
 

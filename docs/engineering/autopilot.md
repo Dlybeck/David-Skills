@@ -12,9 +12,11 @@ selects its loop from the uncertainty it encounters.
 
 You invoke this by typing `/autopilot` — the agent will not reach for it on its own.
 
-Reach for it when the work may take many steps or sessions, you are available for one serious
-understanding round now, and you want the agent to continue from evidence afterward. For a
-last-second handoff with no interview, use [yolopilot](./yolopilot.md).
+Reach for it when the work may take many steps or sessions and you want the agent to continue
+from evidence after an understanding session. [Attention modes](../productivity/attention-modes.md)
+keeps that session usable when you can answer only briefly: On the side starts with the most
+consequential missing intent or boundary. For a last-second handoff with no interview, use
+[yolopilot](./yolopilot.md).
 
 ## The goal contract
 
@@ -40,7 +42,10 @@ contract separately authorizes pushing it; a fallback is not permission to publi
 
 No. The understanding session resolves consequential human decisions, reuses existing answers,
 and leaves delegated technical choices to the agent. Depth follows the ambiguity, not a fixed
-question count.
+question count. If you leave before the contract is complete, the agent can continue useful work
+within existing authority; Autopilot starts its durable goal only after the compact contract is
+confirmed. A clear "just go" can confirm the concrete contract immediately before it, but cannot
+fill in permissions or product choices that were never stated.
 
 **Can I change direction while it works?**
 

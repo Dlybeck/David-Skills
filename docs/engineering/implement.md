@@ -10,6 +10,8 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
+[Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
+
 | Authority available | Delivery |
 | --- | --- |
 | Local edits and tests only | Tested, reviewable local diff |

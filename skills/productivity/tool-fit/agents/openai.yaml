@@ -1,0 +1,3 @@
+interface:
+  display_name: "Tool Fit"
+  short_description: "Use fitting host tools and previews"

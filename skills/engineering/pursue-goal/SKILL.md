@@ -38,7 +38,9 @@ envelope does not require renewed approval.
 
 ## Select the next loop
 
-Choose the loop from the uncertainty in front of the goal, not from the kind of project:
+Choose the loop from the uncertainty in front of the goal, not from the kind of project. Run
+`/tool-fit` when source access or presentation affects the evidence produced. Use
+`/attention-modes` for human steering so a brief check-in does not stall unrelated authorized work.
 
 | Current uncertainty | Loop | Evidence produced |
 | --- | --- | --- |

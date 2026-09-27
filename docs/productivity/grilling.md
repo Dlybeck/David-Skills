@@ -2,7 +2,7 @@
 
 `grilling` stress-tests a plan, decision, or idea before anyone acts on it. Its **design tree** covers the requested decision, not every possible decision about the product. Settled answers are reused; reversible assumptions and deferred choices are made visible.
 
-Each **round** takes a manageable batch from the **frontier**: material decisions whose prerequisites are settled, highest-impact first. Dependent questions wait for a later round. New answers reshape the remaining questions, so a narrow change need not become a whole-product interview.
+Each **round** takes questions from the **frontier**: material decisions whose prerequisites are settled. [Attention modes](./attention-modes.md) sets the load. Focused discussion uses manageable batches; On the side starts with the most useful broad unknown and narrows as brief answers arrive. New answers reshape the remaining questions, so a narrow change need not become a whole-product interview.
 
 ## When to reach for it
 
@@ -24,9 +24,9 @@ Three ideas carry the whole skill.
 
 The **design tree** is the model of the scoped decision and its dependencies. The **frontier** contains questions ready to ask. A **round** is a manageable selection from it, not a requirement to ask every available question at once.
 
-Inside a round every question arrives in a fixed shape: numbered and titled behind a `❓`, then the body, then the agent's recommended answer alone on a `➡️` line. That is what makes a round answerable by number — "1 yes, 2 the second option, 3 no, here's why" — instead of by quoting questions back. The format has one known rough edge: the recommendation sometimes argues *against* the question as it was worded, so agreeing with the recommendation means answering "no" to the question. When that happens, answer the recommendation and say so.
+For a specific choice, questions are numbered and titled behind a `❓`, with the agent's recommended answer on a separate `➡️` line. That lets you answer by number or accept a recommendation in a few words. An opening question about your intent or hard limits may have no recommendation: guessing your priorities would bias the answer. In an On the side exchange, the prompt stays short enough to answer aloud.
 
-Facts are the agent's job: cheap [environment](https://www.aihero.dev/ai-coding-dictionary/environment) lookups happen directly. A [sub-agent](https://www.aihero.dev/ai-coding-dictionary/subagent) is reserved for substantial independent investigation within your budget. Material choices you have not delegated come back to you. Before acting, the agent confirms a compact shared understanding; an explicit confirmation already given counts.
+Facts are the agent's job: cheap [environment](https://www.aihero.dev/ai-coding-dictionary/environment) lookups happen directly. A [sub-agent](https://www.aihero.dev/ai-coding-dictionary/subagent) is reserved for substantial independent investigation within your budget. [Tool fit](./tool-fit.md) can bring an available source or visual into the conversation when it helps you decide. Material choices you have not delegated come back to you. The agent confirms a compact shared understanding before acting on a proposal from the interview; an explicit confirmation already given counts. If you leave first, work already within the task's authority can continue while open human choices remain visible.
 
 The honest limit: the frontier is the agent's judgement, not a computed graph. It can put two questions in one round and only afterwards discover that one answer should have changed the other. There is no guard against that beyond telling it, which reopens the affected branch in the next round.
 
@@ -43,38 +43,39 @@ This page covers the mechanism. The things people most often want are documented
 ## Common questions
 
 **Can I go back to one question at a time?**
-Yes, and a large part of the audience does. Add this to your global `CLAUDE.md`:
+Yes. Say "on the side" when you have little attention or are dictating; the agent will lead with one short, high-value question and refine from there. You can also ask for one question at a time while staying Focused. For a standing preference, add this to your global `CLAUDE.md` or `AGENTS.md`:
 
 ```
 When grilling, ask one question at a time.
 ```
 
-The round-based default is genuinely contested. Practitioners who read slowly, who work in a second language, or who use the sequential format as focus scaffolding all report the one-at-a-time rhythm is better for them, and the opt-out is supported rather than tolerated.
+The round-based default is genuinely contested. Practitioners who read slowly, work in a second language, or use the sequential format as focus scaffolding report that one-at-a-time is better for them. An explicit switch to Focused restores deeper rounds immediately.
 
 **Where did `/batch-grill-me` go?**
-Into this skill. Round-based questioning shipped briefly as a separate skill, then moved into `grilling` itself, so everything built on the primitive — `grill-me`, `grill-with-docs`, `triage`, `wayfinder` — got it at once. There is no `batch-grill-me` to install, and no separate sequential skill either; the `CLAUDE.md` line above is the way back to one-at-a-time.
+Into this skill. Round-based questioning shipped briefly as a separate skill, then moved into `grilling` itself, so everything built on the primitive — `grill-me`, `grill-with-docs`, `triage`, `wayfinder` — got it at once. There is no `batch-grill-me` to install. On the side changes the question load without replacing the interview skill.
 
 **Asking a whole round at once must lose the questions my earlier answers would have raised. Doesn't it?**
 This is the most common objection to the round design, and the frontier is the answer to it: a round only ever contains questions that do not depend on each other, so no answer in a round can invalidate another question in that round. Answers still reshape everything downstream — the next round is recomputed, not pre-written. What you lose is smaller than "all questions at once" implies, and larger than nothing: see the frontier's limit above.
 
 **It ran out of questions and started building.**
-A confirmation gate exists precisely for this: the skill is not finished when the frontier empties, it is finished when you say the understanding is shared. Weaker and faster [models](https://www.aihero.dev/ai-coding-dictionary/model) still break it — this is reported most often on lower-effort or non-frontier models, which collapse "interview until shared understanding" into a couple of questions and an outline. If yours does it, the reliable fix is a line in your own `AGENTS.md` or `CLAUDE.md` telling the agent not to implement without permission.
+A confirmation gate exists for a new proposal from the interview: an empty frontier alone does not authorize acting on it. Weaker and faster [models](https://www.aihero.dev/ai-coding-dictionary/model) still break this — they may collapse the interview into a couple of questions and start building. The agent can continue work the active request already authorized while you are away, but it must leave unsettled human decisions open.
 
 **It answered its own questions instead of asking me.**
-That is a bug in the run, not the intended behaviour, and it was the reason facts and decisions were separated in the skill's text. It shows up most when another skill runs `grilling` inside a resolve-this-ticket frame, where the surrounding task reads as licence to keep moving. The same constraint is why there is no async mode: people have asked for a variant that reads a GitHub issue and posts one consolidated decision memo, and that is a different skill, because a grilling session that nobody answers has produced the agent's opinion rather than yours.
+That is a bug in the run, not the intended behaviour, and it was the reason facts and decisions were separated in the skill's text. It shows up most when another skill runs `grilling` inside a resolve-this-ticket frame, where the surrounding task reads as licence to keep moving. On the side is still a live exchange, even if you answer briefly or leave before every detail is settled. A grilling session that nobody answers has produced the agent's opinion rather than yours.
 
 **Can I cap the number of questions?**
 Yes: state your question budget or ask for only the highest-impact unresolved decisions. The default is scope-based, not a fixed count. If a cap leaves material uncertainty, the agent should name it rather than pretend the discussion is complete. You can narrow the scope, defer a choice, or authorize a reversible assumption.
 
 **I installed `grill-me` on its own and nothing happens.**
-`grill-me` is a one-line skill whose whole body is "run a `/grilling` session", so it needs this skill installed too. The same is true of `grill-with-docs`, which additionally needs [domain-modeling](../engineering/domain-modeling.md). Installing the whole set avoids the problem; installing selectively means installing the primitives as well.
+`grill-me` is a one-line skill whose whole body is "run a `/grilling` session", so it needs this skill installed too. The same is true of `grill-with-docs`, which additionally needs [domain-modeling](../engineering/domain-modeling.md). The adaptive attention and host-tool guidance lives in [attention-modes](./attention-modes.md) and [tool-fit](./tool-fit.md). Installing the whole set includes them; with selective installs, include the supporting skills whose behavior you want.
 
 **`grill-with-docs` ran, but it never loaded `grilling`.**
 A real and unfixed rough edge, reported across [harnesses](https://www.aihero.dev/ai-coding-dictionary/harness) and models: a skill that names another skill does not reliably cause that skill to load, and `grill-with-docs` names two. The tell is a session that asks everything at once with no recommendations attached — that is the model improvising an interview rather than running this one. Asking the agent directly whether it loaded `grilling` and `domain-modeling` usually recovers it.
 
 ## It's working if
 
-- A round arrives as a numbered list, each question with its recommendation on a separate `➡️` line, and you can answer the whole round by number.
+- Specific choices carry a recommendation you can accept or correct in a few words; open questions about your priorities do not invent one.
+- An On the side opening asks the broadest useful missing question first, then gets finer as your answers allow.
 - Nothing in a round needs another question in the same round answered first.
 - Later rounds ask things the first round could not have asked.
 - It looks up facts directly and uses delegated research only when the work and budget justify it.

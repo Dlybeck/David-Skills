@@ -18,6 +18,11 @@ consequential unresolved human choices. Reuse settled answers and distinguish de
 choices from missing product intent. A rich understanding session is useful when the ambiguity
 warrants it, not a checklist to repeat for a small or already-understood task.
 
+`/grilling` uses `/attention-modes`: an On the side opening asks for the most consequential missing
+intent or boundary first. A short handoff still needs a complete, confirmed contract before this
+wrapper starts a durable goal; keep useful independent work within existing authority moving
+while any human-only contract question is open.
+
 Lock one self-contained **goal contract**:
 
 - Objective and observable proof conditions.

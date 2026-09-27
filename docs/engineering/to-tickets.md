@@ -17,6 +17,7 @@ Each slice delivers a complete narrow behavior. Wide mechanical refactors retain
 | Publishing or changing tracker state | Requires authority in the request or current contract |
 
 Reuse the project's tracker conventions; [setup](./setup.md) is optional when different configuration is needed. Without publishing authority, return a draft rather than posting issues. Decomposition itself neither launches workers nor authorizes implementation.
+When a decision remains yours, [On the side](../productivity/attention-modes.md) starts with the one choice that most affects the breakdown; later questions can refine granularity or blocking edges. A brief reply does not authorize publishing the tickets.
 
 ## Common questions
 

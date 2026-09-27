@@ -28,6 +28,7 @@ None to generate one. The wizard it writes runs on bash, and uses `gh` when a st
 A **stage** is one focused task on one screen. The script clears the terminal between stages, so a stage that overflows the screen loses the part that scrolled away. You author stages in dependency order and set `TOTAL_STAGES`, which drives the progress display.
 
 Scoping happens before a line is written. The [skill](https://www.aihero.dev/ai-coding-dictionary/skill) reads the repo instead of asking cold: `.env*`, `docker-compose*`, framework config, and every `secrets.*` / `vars.*` reference in `.github/workflows/` — each of those is a value the wizard has to produce. It then shows you the ordered stage list to confirm, and only after that maps each stage to the exact path a human follows ("Dashboard → Developers → API keys → Reveal test key → copy"). Where it doesn't know the current UI, it asks you or checks the docs rather than inventing clicks.
+If you are [On the side](../productivity/attention-modes.md), it asks the most consequential scoping question first and keeps follow-ups brief. The ordered stage list still needs your confirmation before the script is written.
 
 For each captured value, scoping settles where it lands:
 

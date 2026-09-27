@@ -77,6 +77,7 @@ or a relationship easier to understand: a diagram linking work to outcomes, a ch
 results, or a relevant image comparison. Choose what the evidence supports, not a fixed dashboard
 template. Tables can clarify exact comparisons; status emojis and tables alone are not a
 substitute when a graphical explanation would materially help. Simple updates can stay prose.
+Run `/tool-fit` to choose a visual or preview supported by the current host.
 
 Use an available in-chat visualization capability according to its instructions; otherwise use
 supported inline diagrams or image previews. Check generated visuals against the source evidence

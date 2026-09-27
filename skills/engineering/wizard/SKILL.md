@@ -22,6 +22,8 @@ Work out every manual step the human must take and every value that gets capture
 
 Then show the user the ordered list of stages and the values each produces, and confirm — they may add, drop, or reorder.
 
+Run `/attention-modes` for any scoping questions, while keeping this stage confirmation intact.
+
 **Done when:** every stage is named in order, and for each captured value you know (a) where the human gets it, (b) where it's written (`.env`, a GitHub secret, both, or nowhere — some stages are pure actions), and (c) whether it's secret (hidden entry) or public.
 
 ### 2. Map each stage's journey
