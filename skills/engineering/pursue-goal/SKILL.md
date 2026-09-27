@@ -16,7 +16,8 @@ has earned.
    - **Objective** — the outcome, not a list of steps.
    - **Evidence** — observable conditions that prove the outcome.
    - **Scope** — relevant systems and explicit exclusions.
-   - **Authority** — allowed writes, compute, dependencies, git delivery, and external actions.
+   - **Authority** — allowed writes, compute, git delivery, and external actions; note any
+     exclusion on routine local dependencies or test setup.
    - **Safety boundary** — actions requiring fresh human authority.
    - **Delivery target** — report, research artifact, review branch, integration branch, or another
      named destination.
@@ -136,6 +137,12 @@ envelope may include research, local file changes, tests and evaluations, depend
 local compute, commits, and an authorized push. It never implies permission to spend money,
 introduce credentials, deploy production, delete material data, weaken safeguards, touch `main`,
 or expand into unrelated work.
+
+When the contract authorizes implementation and validation, routine project-compatible local
+toolchain, dependency, and isolated test setup belongs to that work unless explicitly excluded.
+Reuse applicable standing grants recorded in the active conversation or durable instructions;
+do not stop a run merely because a missing local prerequisite needs repair. A host/tool denial
+still requires its own permitted path.
 
 Before each irreversible or externally visible action, verify that the contract names it. Log a
 useful recommendation when it does not.

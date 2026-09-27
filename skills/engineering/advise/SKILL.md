@@ -49,6 +49,8 @@ implementation, research, review, or any standalone skill.
    useful; neither tickets nor a new session are required merely because the work is long.
 
    **`/implement`** uses **`/tdd`** where appropriate and **`/code-review`** over the whole change.
+   A request to implement or fix includes routine local toolchain, dependency, and test-environment
+   preparation. Missing local prerequisites do not route through `/setup` or require renewed approval.
    Commits and ticket resolution require authority; without it, leave a tested local diff.
    **`/tdd`** and **`/code-review`** also work standalone. A conversation or current goal contract,
    including user corrections, can supply the requirements without a formal spec.
@@ -142,5 +144,7 @@ Off the main flow entirely.
 ## Configuration when needed
 
 **`/setup`** — configure the issue tracker, triage labels, and doc layout when a selected skill
-needs that configuration and it is missing. Standalone work does not require setup just because
-it is engineering work. Existing usable project conventions count; custom trackers also work.
+needs that configuration and it is missing. This is not development-environment setup; the agent
+repairs local build and test prerequisites during the task that needs them. Standalone work does
+not require `/setup` just because it is engineering work. Existing usable project conventions
+count; custom trackers also work.

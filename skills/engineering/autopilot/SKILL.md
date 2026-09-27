@@ -27,8 +27,8 @@ Lock one self-contained **goal contract**:
 
 - Objective and observable proof conditions.
 - In-scope systems and explicit exclusions.
-- Allowed file changes, research, dependencies, local compute, tests, evaluations, commits, and
-  external actions.
+- Allowed file changes, research, local compute, tests, evaluations, commits, and external
+  actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
 - Actions that require the human to return.
 
@@ -38,6 +38,10 @@ reviewed `--no-ff` merge into `dev` only when the user confirms that delivery ta
 session and repository gates pass. Keep money, new credentials, production deployment, material
 deletion, safeguard weakening, unrelated scope, and `main` outside the contract unless the user
 grants the specific action explicitly.
+
+When implementation and tests are in scope, routine local toolchain and dependency setup is part
+of that work unless the user excludes it. Reuse an applicable standing grant already present in
+the conversation or durable instructions instead of asking for the same permission again.
 
 Present the objective and endpoint compactly, with supporting scope and authority available in
 the working context, and obtain confirmation. An explicit approval of the same complete contract

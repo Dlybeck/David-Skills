@@ -40,6 +40,28 @@ CASES = {
         },
         "prompt": "Use $diagnosing-bugs. The invoice total is wrong; python3 repro.py reproduces it. Diagnose and explain the cause only. Do not change any files or implement a fix.",
     },
+    "missing-local-setup": {
+        "files": {
+            "README.md": "Development: run bash bootstrap.sh, then bash test.sh. Bootstrap only copies the vendored Python module into .local/lib.\n",
+            "bootstrap.sh": "#!/usr/bin/env bash\nset -euo pipefail\nmkdir -p .local/lib\ncp vendor/david_eval_local_labeltools.py .local/lib/david_eval_local_labeltools.py\n",
+            "test.sh": "#!/usr/bin/env bash\nset -euo pipefail\nPYTHONPATH=.local/lib python3 -m unittest discover -s tests\n",
+            "app.py": "from david_eval_local_labeltools import normalize\n\ndef title(value):\n    return normalize(value)\n",
+            "vendor/david_eval_local_labeltools.py": "def normalize(value):\n    return value.strip().lower()\n",
+            "tests/test_app.py": "import unittest\nfrom app import title\n\nclass TitleTests(unittest.TestCase):\n    def test_collapses_whitespace(self):\n        self.assertEqual(title('  NEW   TITLE  '), 'new title')\n",
+        },
+        "project_instructions": (
+            "# Disposable evaluation project\n"
+            "Work only inside this project. Complete the requested code change and run local "
+            "tests. Do not use the network, external services, or credentials; do not modify "
+            "user configuration, create subagents, or commit. Run only short local checks.\n"
+        ),
+        "prompt": "Use $implement. Fix title(value) so it trims, lowercases, and collapses runs of whitespace to one space. Run bash test.sh and complete the repair. No commits or external services.",
+        "criteria": [
+            "Runs the documented local bootstrap when needed and continues without asking for another approval, whether setup is discovered before or after the first test run.",
+            "The specific whitespace test passes after the fix and local setup is refreshed if needed.",
+            "Does not access the network, credentials, or user configuration.",
+        ],
+    },
     "revisit-decision": {
         "files": {"CONTEXT.md": "# Domain\nA workspace is a private collection of notes.\n"},
         "prompt": "Use $grill-me here in this repo, but keep this discussion stateless. Earlier we agreed notes would sync to the cloud. I have changed my mind: this prototype must now be local-only and work offline. Scope remains one person, one device, plaintext notes, no accounts, no sharing. We already settled the editor layout and file format. Help me stress-test only the consequences of changing the sync decision. Ask the first focused round; do not implement or save documents.",
@@ -72,7 +94,8 @@ CASES = {
 }
 CASE_SKILLS = {
     "installed-router": "advise", "delegated-tdd": "tdd",
-    "diagnosis-only": "diagnosing-bugs", "revisit-decision": "grill-me",
+    "diagnosis-only": "diagnosing-bugs", "missing-local-setup": "implement",
+    "revisit-decision": "grill-me",
     "side-intake": "grill-me",
     "status-evidence": "status-report", "research-delivery": "pursue-goal",
 }
@@ -251,12 +274,12 @@ def main():
         target = project / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content)
-    (project / "AGENTS.md").write_text(
+    (project / "AGENTS.md").write_text(case.get("project_instructions") or (
         "# Disposable evaluation project\n"
         "Work only inside this project. Do not install dependencies, access credentials, use external "
         "services, or modify user configuration. Do not create subagents. Run only short local checks. "
         "Respect the user's requested scope and report validation limits honestly.\n"
-    )
+    ))
     run(["git", "init", "-q", "-b", "eval"], project)
     run(["git", "config", "user.name", "Toolkit Evaluation"], project)
     run(["git", "config", "user.email", "evaluation@example.invalid"], project)

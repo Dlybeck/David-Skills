@@ -1,11 +1,23 @@
 ---
 name: implement
-description: "Build understood, authorized work from a conversation, goal, spec, or tickets with testing and whole-change review. Use when behavior is ready to implement; not for advice, diagnosis-only, or unresolved product intent."
+description: "Build understood, authorized work from a conversation, goal, spec, or tickets, including local build and test setup. Use when behavior is ready to implement; not for advice, diagnosis-only, or unresolved product intent."
 ---
 
 Implement the understood work authorized by the user in the conversation, current goal contract,
 spec, or tickets. A formal spec or ticket is not required. Reuse settled requirements and the
 current authorized workspace; ask only about consequential gaps outside delegated decisions.
+
+An implementation or bug-fix request includes routine local work needed to inspect, build,
+reproduce, and test it. Check project pins and existing environments, then install or repair
+compatible local toolchains and packages, set up isolated test resources, and retry. A missing
+dependency discovered mid-task is setup work, not a reason to stop for another approval. Reuse
+applicable standing user grants from the conversation or durable instructions across tasks; a new
+task does not revoke them. Do not invent a grant from an inaccessible prior conversation.
+
+If setup fails, try another project-compatible local route and continue independent work. Ask
+only when the specific next step needs a human decision, a denied host/tool permission, new
+credentials or account access, spending, production changes, material deletion, or scope beyond
+the request. Skill instructions never override a host permission gate or an explicit task limit.
 
 Run `/attention-modes` for those questions and `/tool-fit` when connected evidence, a UI preview,
 or an in-chat visual would materially improve implementation or review.

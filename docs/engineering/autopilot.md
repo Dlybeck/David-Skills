@@ -47,6 +47,10 @@ within existing authority; Autopilot starts its durable goal only after the comp
 confirmed. A clear "just go" can confirm the concrete contract immediately before it, but cannot
 fill in permissions or product choices that were never stated.
 
+Routine local toolchain and dependency setup belongs to an implementation and test goal unless
+you exclude it. A standing grant already available in the conversation or durable instructions
+does not need to be requested again for each task.
+
 **Can I change direction while it works?**
 
 Yes. Ordinary corrections flow through [pursue-goal](./pursue-goal.md), which updates the working
