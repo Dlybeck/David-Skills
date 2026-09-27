@@ -1,6 +1,6 @@
 ---
 name: diagnosing-bugs
-description: Evidence-driven diagnosis for hard bugs and performance regressions. Use when the user asks to diagnose/debug an unclear failure or slowness; a straightforward known fix need not run the full investigation.
+description: Evidence-driven diagnosis for hard bugs and performance regressions, including local repro setup. Use when the user asks to diagnose/debug an unclear failure or slowness; a straightforward known fix need not run the full investigation.
 ---
 
 # Diagnosing Bugs
@@ -11,6 +11,13 @@ Match the stopping point to the request. For diagnosis-only work, use read-only 
 isolated repro, explain the verified cause and proposed fix, and stop before changing application
 code. Proceed through the fix phases only when implementation is authorized. Reuse an existing
 repro or settled evidence instead of rebuilding it for ceremony.
+
+A diagnosis or repair request includes routine local setup needed to reproduce and validate the
+problem. Inspect project pins and existing environments; install or repair compatible local
+toolchains and packages, keep diagnosis-only setup isolated, and retry before treating the
+environment as unavailable. Reuse applicable standing user grants in the active conversation or
+durable instructions. Honor explicit task limits and host/tool permission gates; ask for a
+specific human-only action only when local setup and independent work cannot get past it.
 
 When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
@@ -57,7 +64,8 @@ The goal is not a clean repro but a **higher reproduction rate**. Loop the trigg
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+After repairing accessible local prerequisites and trying materially different loop options,
+stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
 
 ### Completion criterion — a tight loop that goes red
 

@@ -37,7 +37,11 @@ Phase 1 gets disproportionate effort because it is the only phase that is hard. 
 
 *A* loop is not the goal. **Tight** is: fast (seconds), deterministic (same verdict every run), sharp (asserts your exact symptom, not "didn't crash"), and agent-runnable unattended. A 30-second flaky loop is barely better than none. For a bug that only shows up sometimes, the target is not a clean repro but a **higher reproduction rate** — loop the trigger, parallelise, add stress, inject sleeps, until the flake rate is high enough to debug against.
 
-When it genuinely cannot build one, it is instructed to stop and say so, list what it tried, and ask you for [environment](https://www.aihero.dev/ai-coding-dictionary/environment) access, a captured artifact, or permission to add temporary instrumentation. It should not proceed to hypothesise anyway.
+When it genuinely cannot build one after repairing accessible local prerequisites, it stops,
+lists what it tried, and asks you for [environment](https://www.aihero.dev/ai-coding-dictionary/environment)
+access, a captured artifact, or permission to add temporary instrumentation. Missing local
+toolchains and packages are part of the diagnosis to resolve, not a reason to stop early. It
+should not proceed to hypothesise without a loop.
 
 ## The gates between phases
 
@@ -65,6 +69,13 @@ No. It diagnoses one failure you can already name. Its performance branch is for
 **Does it stop and ask me before it writes the fix?**
 It follows the authority you gave. Diagnosis-only work uses read-only checks or an isolated reproduction, explains the cause, and stops before application changes. If you already asked for the fix, it can continue without asking for the same permission again. New scope or external actions still need their own authority.
 
+**What if the local reproduction environment is missing?**
+
+The agent checks project pins, repairs or installs compatible local prerequisites, and retries
+the reproduction. It reuses applicable standing grants across tasks. It asks only when a host
+permission is denied or a specific human-only step remains, such as new credentials or access to
+an unavailable external environment.
+
 **I already ran `/triage` on this bug report. Is this the same work again?**
 Partly, and neither skill admits it. As one reader put it: "Triage's step 3 is essentially a shallow, bounded instance of diagnosing-bugs Phase 1–2, but neither file mentions the other." Triage does a bounded "is this actually a bug, and what is the surface" pass; this skill does the thorough version. Running triage first is not wasted — its verification often gives you most of Phase 1's raw material — but expect to redo it properly here, and expect no cross-reference to tell you that.
 
@@ -82,6 +93,7 @@ Renamed to `/diagnosing-bugs` in v1.0.0. The old name no longer exists. Anything
 - It shows you a command and its red output before it offers a single theory. If theory arrives first, the skill is not running.
 - The failure it reproduces is the one you reported, not a nearby one it found on the way.
 - It shrinks the repro before it starts guessing, and can tell you why each remaining piece is load-bearing.
+- It repairs accessible local test prerequisites before calling the environment unavailable.
 - You are shown a ranked list of 3–5 hypotheses, each with a prediction you could falsify, before any of them is tested.
 - Every debug log it adds carries a tag like `[DEBUG-a4f2]`, and a grep for that tag comes back empty when it declares done.
 - A diagnosis-only request ends with the cause and no application-code changes; an authorized repair records which hypothesis was right.

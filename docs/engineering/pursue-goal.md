@@ -74,6 +74,12 @@ change the evidence. It does not stop merely because the work is long or difficu
 Only when the contract explicitly grants that capability. The objective never expands its own
 authority.
 
+**Does a missing local dependency stop an implementation run?**
+
+No. Routine project-compatible toolchain, dependency, and isolated test setup is part of an
+authorized implementation goal unless excluded. The agent uses applicable standing grants and
+continues after setup. A real host denial or a new external capability still needs its own path.
+
 **Will a long job make me restart the goal manually?**
 
 Waiting alone must not cause a handoff. The agent does useful independent work or waits quietly,

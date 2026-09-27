@@ -25,6 +25,11 @@ The router names skills; it does not install them. Everything it points at has t
 
 Tracker-dependent work needs a known tracker convention. Existing usable instructions count; [setup](./setup.md) can establish missing configuration. Standalone review, implementation from conversation, research, and other no-tracker work do not require setup.
 
+`setup` configures tracker and domain conventions. Missing local build tools, packages, or test
+environments are repaired within [implement](./implement.md) or
+[diagnosing-bugs](./diagnosing-bugs.md); they are not a reason to invoke `setup` or ask again for
+routine development permission.
+
 ## Optional compositions
 
 The everyday menu covers understanding, pilot handoff, status, clarification, and teaching.

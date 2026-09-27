@@ -11,7 +11,7 @@ from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from evaluate_toolkit import classify_trace, execute, git_snapshot, main, run
+from evaluate_toolkit import CASES, classify_trace, execute, git_snapshot, main, run
 from evaluate_steering import SteeringProtocol, execute_steered
 from pivot_cases import CASES as PIVOT_CASES
 
@@ -90,6 +90,34 @@ class ExecutionTests(unittest.TestCase):
 
 
 class HarnessTests(unittest.TestCase):
+    def test_missing_local_setup_fixture_has_setup_and_bug_signals(self):
+        case = CASES["missing-local-setup"]
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            for relative, content in case["files"].items():
+                target = project / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content)
+
+            missing = subprocess.run(["bash", "test.sh"], cwd=project,
+                                     capture_output=True, text=True)
+            self.assertNotEqual(missing.returncode, 0)
+            self.assertIn("No module named 'david_eval_local_labeltools'", missing.stderr)
+
+            subprocess.run(["bash", "bootstrap.sh"], cwd=project, check=True)
+            buggy = subprocess.run(["bash", "test.sh"], cwd=project,
+                                   capture_output=True, text=True)
+            self.assertNotEqual(buggy.returncode, 0)
+            self.assertIn("AssertionError", buggy.stderr)
+
+            source = project / "vendor/david_eval_local_labeltools.py"
+            source.write_text(source.read_text().replace(
+                "value.strip().lower()", "' '.join(value.split()).lower()"))
+            subprocess.run(["bash", "bootstrap.sh"], cwd=project, check=True)
+            fixed = subprocess.run(["bash", "test.sh"], cwd=project,
+                                   capture_output=True, text=True)
+            self.assertEqual(fixed.returncode, 0, fixed.stderr)
+
     def test_pivot_budget_cannot_exceed_five_minutes(self):
         with patch("sys.argv", ["evaluate_toolkit.py", "pivot-small", "--timeout", "301"]), redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as error:

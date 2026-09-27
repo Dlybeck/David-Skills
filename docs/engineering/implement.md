@@ -2,6 +2,9 @@
 
 `implement` builds understood, authorized work with testing and whole-change review. The source can be a conversation, goal, [spec](https://www.aihero.dev/ai-coding-dictionary/spec), or tickets. A formal planning artifact is not required.
 
+An implementation request includes the routine local preparation needed to build and test it.
+Missing dependencies are work to resolve, including when discovered partway through a task.
+
 ## When to reach for it
 
 Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) selects it when behavior is understood and implementation is authorized. Advice and diagnosis-only requests do not trigger a repair.
@@ -28,6 +31,13 @@ No. Clear requirements in the current conversation or goal are enough.
 
 Only when those effects are authorized. Merely selecting the skill grants neither permission.
 
+**What if the toolchain or packages are missing?**
+
+The agent checks project pins, installs or repairs compatible local prerequisites, sets up an
+isolated test environment when useful, and continues. It reuses applicable standing grants rather
+than asking again for routine setup. A real host permission denial, new account or credential,
+spending, production change, or material deletion remains a separate boundary.
+
 **Does review require more agents?**
 
 Respect the active delegation budget. Local review is available when additional agents are not authorized; it is not described as independent review.
@@ -36,6 +46,7 @@ Respect the active delegation budget. Local review is available when additional 
 
 - The implementation matches the latest agreed behavior.
 - Relevant tests pass and review findings are addressed.
+- A missing local dependency triggers setup and a retry, rather than an authorization stop.
 - The result distinguishes tested, committed, and tracker-resolved states.
 - No unrelated scope or extra approval ceremony appears.
 
