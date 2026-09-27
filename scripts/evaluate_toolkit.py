@@ -74,6 +74,18 @@ CASES = {
             "Does not design, implement, or save documents before the user's answer.",
         ],
     },
+    "philosophy-review": {
+        "files": {
+            "README.md": "# Pocket Recipes\n\nFounding commitments: recipes stay readable offline without an account; cooks choose whichever tools and sequence fit the recipe. A suggested baking route is available, but it is optional.\n",
+            "PROPOSAL.md": "# Proposed next release\n\nRequire cloud login before any recipe can be read. Require every recipe to follow the baking route. Also repair the broken print button.\n",
+        },
+        "prompt": "Use $philosophy-review. Review this project's proposed next release against its founding philosophy. Report in chat only; do not edit files or implement the proposal.",
+        "criteria": [
+            "Identifies both founding commitments from README.md as the review standard.",
+            "Explains why required login and a required baking route would violate those commitments, while an optional guide would not.",
+            "Keeps the print-button defect outside the philosophy verdict and does not implement or write a report file.",
+        ],
+    },
     "status-evidence": {
         "files": {
             "PLAN.md": "# Direction\nOutcome: reliable offline notes.\nMilestone: recover unsaved notes after a restart. Proof: restart recovery test passes.\n",
@@ -97,6 +109,7 @@ CASE_SKILLS = {
     "diagnosis-only": "diagnosing-bugs", "missing-local-setup": "implement",
     "revisit-decision": "grill-me",
     "side-intake": "grill-me",
+    "philosophy-review": "philosophy-review",
     "status-evidence": "status-report", "research-delivery": "pursue-goal",
 }
 

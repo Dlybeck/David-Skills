@@ -10,8 +10,9 @@ Help the human use this plugin. Recommend and stop; do not turn plugin advice in
 planning or start the recommended work, even when the suggested skill is model-invoked.
 
 For everyday use, orient around understanding (`/grill-me` or `/grill-with-docs`), autonomous
-handoff (`/autopilot` or `/yolopilot`), checking progress (`/status-report`), clarification
-(`/wait-what`), and learning (`/teach`). Specialist skills remain available on their own terms.
+handoff (`/autopilot` or `/yolopilot`), checking founding principles (`/philosophy-review`),
+checking progress (`/status-report`), clarification (`/wait-what`), and learning (`/teach`).
+Specialist skills remain available on their own terms.
 `/to-spec`, `/to-tickets`, `/implement`, and `/handoff` are model- or user-reachable;
 automatic selection never supplies missing authority for their effects.
 
@@ -125,6 +126,7 @@ Read [PHASE-BOUNDARIES.md](PHASE-BOUNDARIES.md) for the ordered tree — the fiv
 Off the main flow entirely.
 
 - **`/status-report`** — a model- or user-invoked progress snapshot connecting current evidence to milestones and long-term project outcomes. Use for a project overview or a substantial pilot review update: the report and useful visuals appear in chat by default; saved documents and webpages are opt-in. It reports existing state without changing plans or starting monitoring.
+- **`/philosophy-review`** — check a project or proposed direction against the founding principles its owner chose to preserve. It is a standalone review, not a required stage or a general quality audit; the verdict stays in chat unless a saved artifact is requested.
 - **`/grill-me`** — a **stateless** interview: no local files or `CONTEXT.md`. Use it to sharpen
   a plan, design, or piece of writing whenever you want discussion without documentation.
 - **`/grilling`** — the interview primitive itself: rounds, the frontier, facts are the agent's job and decisions are yours. `/grill-me` and `/grill-with-docs` are the two named ways in, and `/triage`, `/wayfinder` and `/re-architect` all run it internally. Reach for it directly only when you want the interview with no wrapper around it.

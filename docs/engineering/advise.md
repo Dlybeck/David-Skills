@@ -16,6 +16,7 @@ You invoke this by typing `/advise` — the agent won't reach for it on its own.
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
 | A large objective you want pursued autonomously | Whether [autopilot](./autopilot.md) can earn a confirmed contract or [yolopilot](./yolopilot.md) must start provisionally |
 | Current progress is hard to place in the larger project | [status-report](../productivity/status-report.md), which connects verified work to milestones and long-term outcomes directly in chat, with useful visuals |
+| A direction may violate the project's founding principles | [philosophy-review](../productivity/philosophy-review.md), which checks the owner's enduring commitments rather than general code quality |
 | Work is ready for review but not committed | [code-review](./code-review.md), including relevant staged, unstaged, and new files; the request or goal contract can supply its requirements |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 
@@ -46,6 +47,7 @@ The word **flow** means one possible composition, not a required sequence. You c
 - **On-ramps**, for a situation that generates work and then merges onto the main flow: incoming bug reports, something broken, or an effort too foggy and too large to hold in one session.
 - **Autonomous entrances**, where Autopilot or Yolopilot grants an adaptive goal engine different authority based on how the handoff was established.
 - **Standalones**, off every flow, reached for on their own terms — the prototype, the questionnaire, the merge conflict you are already sitting in.
+- **Philosophy review**, a standalone check on whether the current project or a proposed direction still honors its owner-adopted founding principles; it does not add a gate to the flow.
 - **A vocabulary layer underneath**, the two references the other skills pull in when the words rather than the process are the problem.
 
 [Attention modes](../productivity/attention-modes.md) adjusts how much discussion you can handle; [tool fit](../productivity/tool-fit.md) checks whether available sources, visuals, or previews would help. They apply across the route you choose. Neither changes the skill, the goal, or what actions are authorized.
