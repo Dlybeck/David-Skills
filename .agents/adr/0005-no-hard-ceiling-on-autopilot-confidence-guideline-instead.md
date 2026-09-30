@@ -7,6 +7,10 @@ when that capability is absent. Confidence never expands the current user-author
 `autopilot` is unattended work triggered by an explicit handoff. It does not impose an
 arbitrary time or token cutoff because some valid goals take longer than a fixed ceiling.
 
+[ADR 0011](./0011-time-aware-goals-and-deliberate-validation.md) adds user-selected deadlines
+and explicitly agreed reporting while preserving open-ended runs. A deadline chosen by the owner
+is a contract boundary, not an arbitrary default ceiling.
+
 ## Decision
 
 Use the **Confidence guideline** from `CONTEXT.md`: act freely inside the scope locked during

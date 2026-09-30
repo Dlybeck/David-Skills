@@ -63,8 +63,15 @@ optimization loops while preserving the contract.
 
 **Does it run forever if the target cannot be reached?**
 
-No arbitrary time or token ceiling exists. It stops when the target is proved, the next meaningful
-step requires new human authority, or materially different attempts stop changing the evidence.
+It stops when the target is proved, authority is missing, evidence plateaus, or your agreed
+deadline arrives. A run without a deadline keeps the existing open-ended behavior.
+
+**Can I give it a deadline and get reports while it works?**
+
+Yes. Include those choices in the contract: a fixed endpoint, milestone reports, and a maximum
+reporting gap such as 45 minutes. A short update still appears when little has changed. The agent
+gets time facts and chooses its own approach. Exact delivery during waits and stopping at the
+endpoint depend on verified runtime support; hooks alone cannot interrupt a running command.
 
 **Can I keep using the original checkout?**
 

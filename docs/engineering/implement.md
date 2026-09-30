@@ -13,6 +13,9 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
+Do not use the test suite casually. Select checks for changed behavior and risk, preserve passing
+evidence while it remains relevant, and run required full checks before delivery.
+
 [Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
 
 | Authority available | Delivery |
@@ -41,6 +44,11 @@ spending, production change, or material deletion remains a separate boundary.
 **Does review require more agents?**
 
 Respect the active delegation budget. Local review is available when additional agents are not authorized; it is not described as independent review.
+
+**Does every tiny edit trigger another test run?**
+
+No. Another run needs a relevant behavior change, failure, unresolved concern, or delivery gate.
+A comment or wording edit does not automatically invalidate a passing behavior check.
 
 ## It's working if
 

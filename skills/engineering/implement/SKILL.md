@@ -24,7 +24,9 @@ or an in-chat visual would materially improve implementation or review.
 
 Use /tdd where possible, at agreed seams or with explicitly delegated seam selection.
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+Do not use the test suite casually. Choose checks for the behavior changed and the risks involved;
+run the required full suite before delivery. Reuse passing results until a relevant change,
+failure, or unresolved concern justifies another run.
 
 Once done, use /code-review over the whole change, including relevant uncommitted and new files,
 against the originating request and latest corrections. Respect the active delegation budget;

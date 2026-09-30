@@ -24,6 +24,8 @@ Run these steps straight through without pausing for a reply:
      unrelated scope, integration branches, and `main` outside the contract.
    - Apply any narrower authority the user supplied; defaults cannot override an explicit
      no-push, no-commit, read-only, or other boundary.
+   - Preserve any user-supplied deadline and reporting agreement. Resolve a duration once;
+     missing timing choices remain unset rather than invented by the provisional interpretation.
 4. Invoke `/pursue-goal` immediately with the provisional contract. This is delegated continuation
    of the human-triggered Yolopilot process, not a new invocation of the human-only wrapper.
 

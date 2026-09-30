@@ -92,7 +92,19 @@ An inline visual may need a backing file in the environment's response-output lo
 does not require a separate Markdown report, attachment, or hosted page. Keep claims, dates,
 and evidence consistent across any requested formats; the chat response remains self-contained.
 
+## Timed run reports
+
+When the active contract requests milestone/maximum-gap reports, deliver at those boundaries
+without waiting for the user. With unchanged evidence, give a brief account of current work,
+verified progress, next intended work, and why progress is limited. Use existing receipts; reserve
+full visuals for evidence that benefits from them. Reuse one authorized report page when helpful.
+
+At the user deadline, deliver an end-of-run report: outcomes, unmet proof conditions, attempts,
+reasons the goal remains unmet, and exact running jobs with their receipts. Distinguish evidence
+from explanations and proposed next work. A deadline ends the work period, not the completion
+standard. The caller handles timing-state bookkeeping and goal lifecycle controls.
+
 This is a reporting operation: write only report artifacts, leaving source plans, issue status,
 code, and goal lifecycle unchanged. A report request does not start a goal, authorize delivery,
-or schedule monitoring. Run once per invocation or authorized material checkpoint. For an
+or schedule monitoring. Run once per invocation or explicitly authorized reporting boundary. For an
 unchanged single-job status check, return one sentence without another report artifact.

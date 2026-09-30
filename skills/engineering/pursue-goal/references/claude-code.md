@@ -14,3 +14,8 @@ as `/pursue-goal`. Do not create a second worktree around it.
 
 Use `claude agents` or `claude logs` only for a human-requested status check. The background run
 records meaningful progress itself and does not require an AI polling loop.
+
+For an explicitly timed run, use [run timing](timing.md) inside the background session's actual
+workspace and session. Lifecycle hooks supply time facts at work boundaries; they are not timers
+that interrupt a command. Verify report-time continuation and the permitted stop mechanism in
+this harness rather than borrowing a Codex capability or claiming the helper stops the session.

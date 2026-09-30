@@ -497,6 +497,154 @@ with tempfile.TemporaryDirectory() as temp_dir:
           f"(code={proc.returncode}, out={proc.stdout!r}, err={proc.stderr!r})")
 
 
+# Timing is exercised through the same CLI/stdin boundary as the installed hook.
+def timing(args=(), payload=None, now=1000000000, cwd=REPO_ROOT):
+    launcher = (
+        "import runpy,sys; from pathlib import Path; from unittest.mock import patch; "
+        "script=sys.argv.pop(1); instant=float(sys.argv.pop(1)); "
+        "sys.argv[0]=script; sys.path.insert(0, str(Path(script).parent)); "
+        "clock=patch('time.time', return_value=instant); clock.start(); "
+        "runpy.run_path(script, run_name='__main__')"
+    )
+    return subprocess.run(
+        [sys.executable, "-c", launcher, str(HOOKS_DIR / "run-timing.py"),
+         str(now), *args],
+        input=json.dumps(payload) if payload is not None else "",
+        text=True, capture_output=True, cwd=cwd, timeout=10,
+    )
+
+
+with tempfile.TemporaryDirectory() as directory:
+    workspace = Path(directory)
+    started = timing(("start", "--session", "alpha", "--deadline", "2001-09-09T03:46:40Z"),
+                     cwd=workspace)
+    cue = timing(payload={"session_id": "alpha", "hook_event_name": "PostToolUse"},
+                 cwd=workspace)
+    check("timing starts an opt-in session and emits only remaining time",
+          started.returncode == 0 and cue.returncode == 0
+          and json.loads(cue.stdout).get("hookSpecificOutput", {}).get("additionalContext")
+          == "Time remaining: 120 minutes.", started.stderr + cue.stderr)
+
+    event = {"session_id": "alpha", "hook_event_name": "PostToolUse"}
+    for elapsed, expected in ((1, ""), (299, ""), (300, "Time remaining: 115 minutes.")):
+        result = timing(payload=event, now=1000000000 + elapsed, cwd=workspace)
+        actual = (json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"]
+                  if result.stdout else "")
+        check(f"timing cue spacing at {elapsed} seconds", result.returncode == 0 and actual == expected)
+
+    for payload in ({"session_id": "beta", "hook_event_name": "PostToolUse"},
+                    {"session_id": "alpha", "hook_event_name": "PreToolUse"},
+                    {"hook_event_name": "PostToolUse"}, None):
+        result = timing(payload=payload, now=1000000600, cwd=workspace)
+        check(f"timing is silent outside its session/event: {payload}",
+              result.returncode == 0 and result.stdout == "" and result.stderr == "")
+
+    restored = timing(payload={"session_id": "alpha", "hook_event_name": "SessionStart"},
+                      now=1000000301, cwd=workspace)
+    check("timing restores current time to a refreshed context",
+          json.loads(restored.stdout)["hookSpecificOutput"]["additionalContext"]
+          == "Time remaining: 115 minutes.")
+
+    before = json.loads(timing(("status", "--session", "alpha"),
+                              now=1000002699, cwd=workspace).stdout)
+    due = json.loads(timing(("status", "--session", "alpha"),
+                           now=1000002700, cwd=workspace).stdout)
+    reset = json.loads(timing(("report", "--session", "alpha"),
+                             now=1000001200, cwd=workspace).stdout)
+    after = json.loads(timing(("status", "--session", "alpha"),
+                             now=1000002700, cwd=workspace).stdout)
+    check("timing report is due at the 45-minute maximum gap", not before["report_due"] and due["report_due"])
+    check("milestone report resets its clock but preserves the deadline",
+          reset["report_due_at"] == 1000003900 and not after["report_due"]
+          and reset["deadline"] == before["deadline"] == 1000007200)
+
+    replacement = timing(("start", "--session", "alpha", "--deadline", "2001-09-09T05:46:40Z"),
+                         cwd=workspace)
+    check("timing refuses to silently replace an active deadline", replacement.returncode != 0)
+    expired = timing(payload=event, now=1000007200, cwd=workspace)
+    repeated = timing(payload=event, now=1000007201, cwd=workspace)
+    check("deadline cue is immediate and emitted once",
+          json.loads(expired.stdout)["hookSpecificOutput"]["additionalContext"]
+          == "Time remaining: 0 minutes." and repeated.stdout == "")
+    finished = timing(("finish", "--session", "alpha"), now=1000007202, cwd=workspace)
+    quiet = timing(payload=event, now=1000007500, cwd=workspace)
+    check("finished run leaves no active timing cues",
+          not json.loads(finished.stdout)["active"] and quiet.stdout == "")
+
+with tempfile.TemporaryDirectory() as directory:
+    workspace = Path(directory)
+    for deadline in ("2001-09-09T03:46:40", "2001-09-08T00:00:00Z", "nonsense"):
+        result = timing(("start", "--session", "invalid", "--deadline", deadline), cwd=workspace)
+        check(f"timing rejects invalid or ambiguous deadline: {deadline}", result.returncode != 0)
+    timing(("start", "--session", "beta", "--deadline", "2001-09-09T03:46:40Z",
+            "--report-seconds", "0"), cwd=workspace)
+    disabled = json.loads(timing(("status", "--session", "beta"), now=1000004000, cwd=workspace).stdout)
+    check("timed reporting can be disabled independently", disabled["report_due_at"] is None)
+    # Corrupt external state is a fault injection, not an assertion on implementation internals.
+    for state in (workspace / ".reports" / ".run-timing").glob("*.json"):
+        state.write_text("not JSON")
+    corrupt = timing(payload={"session_id": "beta", "hook_event_name": "PostToolUse"}, cwd=workspace)
+    check("corrupt advisory state cannot block tools or invent a cue",
+          corrupt.returncode == 0 and corrupt.stdout == "" and corrupt.stderr == "")
+
+with tempfile.TemporaryDirectory() as directory:
+    workspace = Path(directory)
+    started = timing(("start", "--session", "waiter", "--deadline", "2001-09-09T03:46:40Z"),
+                     cwd=workspace)
+    waited = timing(("wait", "--session", "waiter"), now=1000002700, cwd=workspace)
+    check("OS wait returns when the report is due, without checking a job",
+          waited.returncode == 0 and json.loads(waited.stdout)["reason"] == "report_due",
+          waited.stderr)
+    receipt = workspace / "receipt.json"
+    receipt.write_text('{"exit_status": 1}')
+    available = timing(("wait", "--session", "waiter", "--receipt", str(receipt)),
+                       now=1000000100, cwd=workspace)
+    check("receipt availability is not misreported as job success",
+          json.loads(available.stdout)["reason"] == "receipt_available"
+          and "success" not in json.loads(available.stdout))
+    expiry = timing(("wait", "--session", "waiter", "--receipt", str(receipt)),
+                    now=1000007200, cwd=workspace)
+    check("deadline takes precedence over an available receipt",
+          json.loads(expiry.stdout)["reason"] == "deadline")
+    timing(payload={"session_id": "waiter", "hook_event_name": "PostToolUse"},
+           now=1000007200, cwd=workspace)
+    restored = timing(payload={"session_id": "waiter", "hook_event_name": "SessionStart"},
+                      now=1000007201, cwd=workspace)
+    check("expired deadline remains visible after context refresh",
+          json.loads(restored.stdout)["hookSpecificOutput"]["additionalContext"]
+          == "Time remaining: 0 minutes.")
+
+with tempfile.TemporaryDirectory() as directory:
+    from concurrent.futures import ThreadPoolExecutor
+
+    workspace = Path(directory)
+    timing(("start", "--session", "parallel", "--deadline", "2001-09-09T03:46:40Z"),
+           cwd=workspace)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        cues = list(pool.map(lambda _: timing(payload={
+            "session_id": "parallel", "hook_event_name": "PostToolUse"}, cwd=workspace), range(4)))
+    check("concurrent tool completions emit one cue per interval",
+          sum(bool(result.stdout) for result in cues) == 1
+          and all(result.returncode == 0 for result in cues))
+
+with tempfile.TemporaryDirectory() as directory:
+    from datetime import datetime, timedelta, timezone
+    import time
+
+    workspace = Path(directory)
+    deadline = (datetime.now(timezone.utc) + timedelta(seconds=6)).isoformat()
+    start = subprocess.run([sys.executable, str(HOOKS_DIR / "run-timing.py"), "start",
+                            "--session", "real-wait", "--deadline", deadline,
+                            "--report-seconds", "1"], cwd=workspace, capture_output=True, text=True)
+    began = time.monotonic()
+    result = subprocess.run([sys.executable, str(HOOKS_DIR / "run-timing.py"), "wait",
+                             "--session", "real-wait"], cwd=workspace, capture_output=True,
+                            text=True, timeout=4)
+    elapsed = time.monotonic() - began
+    check("OS wait blocks until its real reporting boundary without model calls",
+          start.returncode == result.returncode == 0
+          and json.loads(result.stdout)["reason"] == "report_due" and 0.5 <= elapsed < 4)
+
 print()
 if _failed:
     print(f"{len(_failed)}/{_total} check(s) failed:")

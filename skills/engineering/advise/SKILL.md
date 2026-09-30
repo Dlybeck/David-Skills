@@ -80,6 +80,11 @@ The human can question or correct a run in ordinary conversation. `/pursue-goal`
 corrections with running work and its checkpoint; `/status-report` exposes current intent and
 evidence without changing the goal. `/wait-what` repairs an explanation, not the goal itself.
 
+A user-chosen deadline and milestone/maximum-gap reports can bound a pilot run. `/pursue-goal`
+owns timing; `/status-report` presents the evidence. Managed-plugin hooks supply only remaining
+time during existing work. Exact reporting during waits and deadline stops depend on verified
+harness support; neither the timing cue nor a report is a new trust mode.
+
 ## On-ramps
 
 A starting situation that generates work, then merges onto the main flow.

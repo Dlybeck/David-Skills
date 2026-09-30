@@ -53,6 +53,12 @@ the revised direction. Broader authority still requires your explicit instructio
 No. It gives the short digest itself and merely offers `/teach`, whose stateful workspace would be
 disproportionate after routine work.
 
+**Can I include a deadline in a last-second handoff?**
+
+Yes. It preserves your deadline and reporting agreement across continuations. It leaves timing
+unset when you have not chosen it. At expiry, the end-of-run report distinguishes verified
+results, unfinished work, attempted approaches, reasons, and any jobs still running.
+
 ## It's working if
 
 - The warning and provisional interpretation appear before mutation, without waiting for a reply.

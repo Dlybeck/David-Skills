@@ -67,7 +67,27 @@ wrapper without duplicating the execution discipline.
 **When does it stop?**
 
 When the proof passes, new human authority is required, or materially different attempts no longer
-change the evidence. It does not stop merely because the work is long or difficult.
+change the evidence. A user-selected deadline is also a stopping boundary; time expiring never
+counts as proof that the goal succeeded.
+
+**How often does the agent hear about remaining time?**
+
+Managed-plugin hooks normally supply only remaining time at five-minute spacing during existing
+tool activity, and restore it after a context refresh. They are silent until that chat has an
+agreed deadline. The agent decides what the clock means for its current work. Editable skill
+copies without plugin hooks use the host's available clock instead.
+
+**What if nothing has changed before the next scheduled report?**
+
+An explicitly agreed maximum-gap report still arrives: current work, verified progress, intended
+next work, and why progress is limited. Milestone reports reset the reporting clock. Reports use
+existing evidence and do not require your reply before the run continues. Exact delivery during
+a long wait needs verified host support; the timer helper is not a chat-wakeup service.
+
+**Will it rerun the whole test suite after every small edit?**
+
+Checks follow changed behavior and delivery risk. Passing evidence is reused until a relevant
+change or unresolved concern invalidates it. Required delivery checks still run.
 
 **Can it decide to deploy or merge because that would finish the goal?**
 
@@ -91,7 +111,8 @@ wait does not establish that hours of waiting or interruption have been tested.
 
 - The first progress update names the contract, worktree, branch, and validation surface.
 - Research can become a prototype, benchmark, or delivery slice without a forced pipeline reset.
-- Updates report material evidence transitions rather than unchanged status.
+- Updates report material evidence transitions, plus brief unchanged-progress reports when
+  your reporting agreement requires them.
 - The final receipt ties every completion claim to observable proof.
 - Resumption preserves useful decisions while correcting stale checkpoint claims against current evidence.
 - Your correction changes subsequent work and survives a context transfer.

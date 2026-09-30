@@ -21,6 +21,8 @@ has earned.
    - **Safety boundary** — actions requiring fresh human authority.
    - **Delivery target** — report, research artifact, review branch, integration branch, or another
      named destination.
+   - **Timing**, when requested — the user's deadline and milestone/maximum-gap reporting
+     agreement. Resolve a duration once; preserve that endpoint across continuations.
 2. Read exactly one harness adapter before activating durable continuation:
    - Codex: [references/codex.md](references/codex.md)
    - Claude Code: [references/claude-code.md](references/claude-code.md)
@@ -69,9 +71,15 @@ After every material result:
 1. Compare the new evidence with the goal's proof conditions.
 2. Preserve useful artifacts and revert failed optimization changes.
 3. Update the plan and select the next loop; do not preserve a stale pipeline for ceremony's sake.
-4. Run the smallest credible validation now, then broaden validation as delivery risk grows.
+4. Do not use the test suite casually. Run checks justified by changed behavior or delivery risk;
+   reuse passing evidence until a relevant change, failure, or unresolved concern invalidates it.
 5. Record only a material transition: hypothesis resolved, checkpoint reached, direction changed,
    authority needed, completed, or failed.
+
+For an agreed timed run, use [run timing](references/timing.md). The clock supplies time facts;
+the agent chooses its approach from the conversation. Deliver `/status-report` at meaningful
+milestones and within the agreed maximum gap. A brief unchanged-progress report still counts;
+reset the reporting clock only after delivery. Reports continue the run without requiring a reply.
 
 For work that must survive sessions, maintain one compact checkpoint in the project's existing
 notes location: stable contract, current evidence and revision, decisions/failed approaches worth
@@ -155,10 +163,14 @@ Stop only at one of these boundaries:
 - **Authority boundary** — the next meaningful step requires a human decision or new capability.
 - **Evidence plateau** — materially different attempts no longer change the evidence, and the next
   step would repeat an already-tested route rather than reduce uncertainty.
+- **User deadline** — the agreed endpoint has arrived; report verified outcomes, unmet proof,
+  attempted work, reasons, and the state of running jobs. Expiry is not completion.
 
-There is no arbitrary turn, token, or duration ceiling. Difficulty is not a stopping condition.
-When stopping, run the broadest validation justified by the changes, inspect the whole result
-against the contract, and leave a concise receipt containing outcome, evidence, validation,
+There is no invented turn, token, or duration ceiling; a user-selected deadline is a contract
+boundary. Difficulty is not a stopping condition.
+Before delivery, run the validation required by the changes and contract while within the
+agreed work period. At deadline expiry, use existing evidence and disclose unfinished checks;
+do not start a fresh suite. Leave a concise receipt containing outcome, evidence, validation,
 delivery location, assumptions, residual risks, and the exact stopping boundary.
 Offer an explanation or the optional user-invoked `/teach` path when there is useful learning.
 Recommend a next stage if warranted; activate it only on user direction, not to fill available time.

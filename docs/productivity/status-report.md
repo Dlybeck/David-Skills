@@ -20,6 +20,8 @@ it when a task calls for a project progress report.
 | Requesting a document | A concise chat overview and saved Markdown snapshot |
 | Requesting a webpage | The same evidence presented as a readable webpage |
 | Checking whether one running job has changed | A short status answer; no full report needed |
+| An agreed report is due but progress is unchanged | A brief account of current work, progress, intended next work, and the reason for the wait or stall |
+| The run's deadline arrives | An end-of-run report separating results, unmet goals, attempts, reasons, and running jobs |
 
 It uses available project evidence and any linked long-term plan. Existing planning and tracking
 conventions are sufficient; the default chat report needs no report folder or document tool.
@@ -59,6 +61,12 @@ report remains a dated snapshot. It does not start background monitoring.
 
 No. It uses whatever evidence and project direction already exist. Research findings and
 failed experiments can count as useful progress when they settle a project question.
+
+**Will a timed report stop the agent until I reply?**
+
+No. Reporting exposes the current work so you can steer it; the caller continues within the
+agreed scope and deadline. A milestone report resets the maximum-gap clock. Standalone use of
+this skill still runs once and never starts recurring monitoring.
 
 ## It's working if
 

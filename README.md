@@ -114,6 +114,12 @@ sources and presentation; neither mode nor tool availability grants new action a
 
 ## Why These Skills Exist
 
+Autonomous runs can carry a user-chosen deadline and milestone/maximum-gap reports. Managed
+hooks supply only remaining time, normally at five-minute spacing during tool activity; the agent
+chooses its approach. Reports stay in chat unless another destination is requested. Exact timing
+during waits depends on verified host support. Testing follows changed behavior and delivery
+risk: do not use the test suite casually.
+
 This collection targets common failure modes in Claude Code, Codex, and other coding agents.
 
 ### #1: The Agent Doesn't Do What You Want

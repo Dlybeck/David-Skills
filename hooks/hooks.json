@@ -18,7 +18,15 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/delegate-recommend.py\"" }
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/delegate-recommend.py\"" },
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/run-timing.py\"", "timeout": 3 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/run-timing.py\"", "timeout": 3 }
         ]
       }
     ]

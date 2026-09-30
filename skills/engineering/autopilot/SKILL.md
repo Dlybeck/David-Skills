@@ -31,6 +31,8 @@ Lock one self-contained **goal contract**:
   actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
 - Actions that require the human to return.
+- Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
+  maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 
 The normal personal-practice envelope may authorize research, local changes, tests and evaluations,
 dependency installation, local compute, feature-branch commits, and pushes. It may authorize a

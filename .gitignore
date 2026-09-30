@@ -19,3 +19,6 @@ __pycache__/
 /reference/
 /assets/
 /learning-records/
+
+# Per-chat run clocks, never source or report evidence
+/.reports/.run-timing/

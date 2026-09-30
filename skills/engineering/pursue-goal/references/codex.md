@@ -29,6 +29,9 @@ long-duration, timeout, or interruption behavior without treating it as proven f
 subprocess exit or app-server events alone do not prove that an ended chat resumes.
 
 Use goal continuations for meaningful work, not status polling.
+For an explicitly timed run, use [run timing](timing.md); the helper's clock and wait process
+do not pause or complete the native goal. Verify the permitted deadline lifecycle control and
+report-time continuation separately from process completion before promising exact timing.
 Use the verified mechanism within current host wait limits. Do useful independent work when
 available, without interfering with the running experiment. Never replace a native wait with
 recurring goal turns, model status calls, or a polling agent. Keep the goal active while a
