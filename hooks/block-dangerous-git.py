@@ -395,17 +395,69 @@ def shell_segments(tokens):
             segment.append(token)
 
 
+def heredoc_word(line, start):
+    """Read one complete delimiter word, with shell quote removal only.
+
+    Complex or multiline words are uncertain: callers must keep the remaining
+    source rather than treating a guessed prefix as a body boundary.
+    """
+    index = start
+    while index < len(line) and line[index] in " \t":
+        index += 1
+    start = index
+    quote = None
+    quoted = False
+    delimiter = []
+    if line[index:index + 1] == "#":
+        return None  # An unquoted word-initial # starts a shell comment.
+    while index < len(line):
+        char = line[index]
+        if char == "\n":
+            break
+        if char == "\\" and quote != "'":
+            quoted = True
+            if index + 1 == len(line) or line[index + 1] == "\n":
+                return None
+            following = line[index + 1]
+            if quote == '"' and following not in '$`"\\':
+                delimiter.append("\\")
+            delimiter.append(following)
+            index += 2
+            continue
+        if char in "\"'":
+            if quote == char:
+                quote = None
+            elif quote is None:
+                quote = char
+            else:
+                delimiter.append(char)
+            quoted = True
+        elif quote is None:
+            if char in " \t;&|()<>":
+                break
+            if char == "`" or (char == "$" and line[index + 1:index + 2] in {"(", "'", '"'}):
+                return None
+            delimiter.append(char)
+        else:
+            delimiter.append(char)
+        index += 1
+    if quote is not None or index == start:
+        return None
+    return index, "".join(delimiter), quoted
+
+
 def executable_commands(source):
     """Read shell command positions, inline -c code, and simple here-docs."""
     # A here-doc is data unless consumed by a supported interpreter on this
     # command line. No external files are opened and no code is executed.
-    heredoc = re.compile(r"<<(-?)\s*(['\"]?)([A-Za-z_]\w*)\2")
+    heredoc = re.compile(r"(?<!<)<<(?!<)(-?)")
     lines = source.splitlines(keepends=True)
     index = 0
     shell_source = []
     quote = None
     escaped = False
     word_start = True
+    uncertain_tail = None
     while index < len(lines):
         line = lines[index]
         # Redirection operators inside a search pattern/string are inert.
@@ -435,17 +487,60 @@ def executable_commands(source):
             elif quote is None:
                 unquoted.add(position)
                 word_start = char.isspace() or char in ";&|()<>"
-        match = next((item for item in heredoc.finditer(line) if item.start() in unquoted), None)
-        if not match:
+        matches = [item for item in heredoc.finditer(line) if item.start() in unquoted]
+        if not matches:
+            shell_source.append(line)
+            index += 1
+            continue
+        match = matches[0]
+        word = heredoc_word(line, match.end()) if len(matches) == 1 else None
+        end = index + 1
+        terminator_end = end
+        if word is not None:
+            word_end, delimiter, quoted = word
+            while end < len(lines):
+                candidate = lines[end].removesuffix("\n")
+                if match[1]:
+                    candidate = candidate.lstrip("\t")
+                terminator_end = end
+                # Bash joins unquoted body lines before checking the marker.
+                # Keep both physical bounds so joined terminator lines are not
+                # included in the body passed to a supported interpreter.
+                while not quoted and lines[terminator_end].endswith("\n"):
+                    backslashes = len(candidate) - len(candidate.rstrip("\\"))
+                    if not backslashes % 2:
+                        break
+                    terminator_end += 1
+                    if terminator_end == len(lines):
+                        break
+                    following = lines[terminator_end].removesuffix("\n")
+                    if match[1]:
+                        following = following.lstrip("\t")
+                    candidate = candidate[:-1] + following
+                if terminator_end == len(lines):
+                    end = len(lines)
+                    break
+                if candidate == delimiter:
+                    break
+                end = terminator_end + 1
+        if word is None or end == len(lines):
+            # Never drop later lines on a guessed delimiter, multiple bodies,
+            # or a missing terminator. Inspect the uncertain tail line by line
+            # as well, so unfinished quoting cannot hide a following command.
+            if uncertain_tail is None:
+                uncertain_tail = index + 1
+            if word is not None and not quoted:
+                for substitution in command_substitutions("".join(lines[index + 1:]), heredoc=True):
+                    yield from executable_commands(substitution)
             shell_source.append(line)
             index += 1
             continue
         body = []
         index += 1
-        while index < len(lines) and lines[index].strip("\t\r\n" if match[1] else "\r\n") != match[3]:
+        while index < end:
             body.append(lines[index].lstrip("\t") if match[1] else lines[index])
             index += 1
-        index += 1
+        index = terminator_end + 1
         # A header can follow a multiline quoted argument. Tokenize the whole
         # retained prefix so a closing quote has its matching opening quote.
         header = "".join(shell_source) + line[:match.start()]
@@ -457,12 +552,16 @@ def executable_commands(source):
         segments = list(shell_segments(tokens))
         if segments:
             yield from executable_argv(segments[-1][0], input_source=code)
-        if not match[2]:
+        if not quoted:
             for substitution in command_substitutions(code, heredoc=True):
                 yield from executable_commands(substitution)
         # Retain commands after the delimiter declaration (e.g. cat <<EOF;
         # git push ...), while dropping the data redirection itself.
-        shell_source.append(line[:match.start()] + line[match.end():])
+        shell_source.append(line[:match.start()] + line[word_end:])
+    if uncertain_tail is not None:
+        for line in lines[uncertain_tail:]:
+            for command, _ in executable_commands(line):
+                yield command, True
     source = shell_without_comments("".join(shell_source))
     for substitution in command_substitutions(source):
         yield from executable_commands(substitution)

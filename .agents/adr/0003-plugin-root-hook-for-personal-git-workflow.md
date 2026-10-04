@@ -41,6 +41,14 @@ across shell lines before detecting here-docs. In unquoted here-doc bodies, quot
 are data and do not suppress command substitutions; backslash escapes still apply. Quoted
 delimiters suppress the outer shell's body expansions, while a supported interpreter consuming
 that body is inspected as executable code. See the [Bash here-document expansion rules](https://www.gnu.org/s/bash/manual/html_node/Redirections.html#Here-Documents).
+Here-strings (`<<<`) do not start heredoc bodies. The scanner reads complete delimiter
+words, including punctuation and shell quote removal, and only removes a body after finding
+its exact closing delimiter (with leading tab stripping for `<<-`). Unquoted body lines join
+at escaped newlines before delimiter comparison; quoted bodies keep those lines literal.
+Missing, multiline, or otherwise unrecognized delimiters (including dollar-prefixed quote
+forms) and multiple heredocs on one header retain their source;
+the remaining lines are also inspected independently in an uncertain context. This can block
+literal write commands in unproved data bodies rather than silently hide subsequent commands.
 
 Supported executable forms include command lists/groups and common control prefixes,
 leading literal redirections,
@@ -58,7 +66,7 @@ editing PRs targeting main is still allowed. No submitted Python is evaluated or
 
 The parser does not model shell/Python execution completely. Computed argv, runtime aliases,
 mutable variables, indirect calls, `exec`/`eval` in Python, external script/module contents,
-computed/file-fed pipelines into interpreters, complex/multiple here-docs, unsupported launcher options,
+computed/file-fed pipelines or here-string input into interpreters, complex/multiple here-docs, unsupported launcher options,
 other interpreter APIs (for example Node child_process or os.execv), Git aliases/configured
 refspecs, HTTP/SDK writes, and tools outside the `Bash` matcher can escape inspection.
 Python control flow is not evaluated, so a literal process call in an uncalled function can
