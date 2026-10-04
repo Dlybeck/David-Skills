@@ -36,6 +36,11 @@ The Git guard is a local backstop, not complete command or API enforcement. It r
 arguments to read-only searches, `printf`, and `git log` are data; command substitutions inside
 them still run and are inspected. PR proposal arguments also remain data. Direct pushes,
 destructive commands, and verified main PR merges retain their existing policy.
+Shell comments retain their terminating newline as a command separator. Quote state carries
+across shell lines before detecting here-docs. In unquoted here-doc bodies, quote characters
+are data and do not suppress command substitutions; backslash escapes still apply. Quoted
+delimiters suppress the outer shell's body expansions, while a supported interpreter consuming
+that body is inspected as executable code. See the [Bash here-document expansion rules](https://www.gnu.org/s/bash/manual/html_node/Redirections.html#Here-Documents).
 
 Supported executable forms include command lists/groups and common control prefixes,
 leading literal redirections,

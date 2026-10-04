@@ -73,10 +73,55 @@ def shell_operator(token):
     return bool(token) and not isinstance(token, ShellWord) and set(token) <= set(";&|()\n")
 
 
+def shell_without_comments(source):
+    """Remove word-initial shell comments, preserving their newline boundary."""
+    output = []
+    quote = None
+    escaped = False
+    comment = False
+    word_start = True
+    index = 0
+    while index < len(source):
+        char = source[index]
+        index += 1
+        if comment:
+            if char == "\n":
+                output.append(char)
+                comment = False
+                word_start = True
+            continue
+        # A continuation joins words before comment recognition, but a
+        # backslash inside a comment cannot consume its terminating newline.
+        if char == "\\" and quote != "'" and not escaped and source[index:index + 1] == "\n":
+            index += 1
+            continue
+        if escaped:
+            output.append(char)
+            escaped = False
+            word_start = False
+        elif char == "\\" and quote != "'":
+            output.append(char)
+            escaped = True
+            word_start = False
+        elif char in "\"'":
+            output.append(char)
+            if quote == char:
+                quote = None
+            elif quote is None:
+                quote = char
+            word_start = False
+        elif quote is None and char == "#" and word_start:
+            comment = True
+        else:
+            output.append(char)
+            word_start = quote is None and (char.isspace() or char in ";&|()<>")
+    return "".join(output)
+
+
 def shell_tokens(command):
     # Shell line continuations disappear before word splitting. Removing
     # them even inside literals is conservative for this text guard.
-    command = command.replace("\\\n", "")
+    command = shell_without_comments(command).replace("\\\n", "")
     # shlex removes quotes, so a literal ';' would otherwise become syntax.
     # Protect quoted/escaped punctuation through tokenization, then restore it.
     replacements = {}
@@ -88,12 +133,7 @@ def shell_tokens(command):
     protected = []
     quote = None
     escaped = False
-    comment = False
     for char in command:
-        if comment:
-            protected.append(char)
-            comment = char != "\n"
-            continue
         if escaped:
             protected.append(replacements.get(char, char))
             escaped = False
@@ -110,8 +150,8 @@ def shell_tokens(command):
             protected.append(replacements.get(char, char))
         else:
             protected.append(char)
-            comment = char == "#"
     lexer = shlex.shlex("".join(protected), posix=True, punctuation_chars=";&|()\n<>")
+    lexer.commenters = ""  # Comments are already removed without eating newlines.
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
     result = []
@@ -199,12 +239,17 @@ def python_commands(source):
                     yield command, changed or context_changed
 
 
-def command_substitutions(source):
+def command_substitutions(source, heredoc=False):
     """Find shell substitutions outside single quotes, including in double quotes.
 
     Nested parentheses are balanced; this is not a full shell grammar (for
     example, complex case statements and arithmetic expansion are unsupported).
+    In an unquoted heredoc, quote characters in the body are ordinary data;
+    only backslash escapes suppress substitutions. Inside $(...), normal
+    shell quoting still controls the balancing of parentheses.
     """
+    if heredoc:
+        source = source.replace("\\\n", "")
     quote = None
     index = 0
     while index < len(source):
@@ -212,9 +257,9 @@ def command_substitutions(source):
         if char == "\\" and quote != "'":
             index += 2
             continue
-        if char == "'" and quote != '"':
+        if not heredoc and char == "'" and quote != '"':
             quote = None if quote == "'" else "'"
-        elif char == '"' and quote != "'":
+        elif not heredoc and char == '"' and quote != "'":
             quote = None if quote == '"' else '"'
         elif quote != "'" and (source.startswith("$(", index) or char == "`"):
             start = index + (2 if char == "$" else 1)
@@ -358,25 +403,38 @@ def executable_commands(source):
     lines = source.splitlines(keepends=True)
     index = 0
     shell_source = []
+    quote = None
+    escaped = False
+    word_start = True
     while index < len(lines):
         line = lines[index]
         # Redirection operators inside a search pattern/string are inert.
-        quote = None
-        escaped = False
+        # Carry lexical state between header lines; heredoc bodies are data
+        # and must not alter the surrounding shell's quote/comment state.
         unquoted = set()
         for position, char in enumerate(line):
             if escaped:
                 escaped = False
+                if char != "\n":
+                    word_start = False
                 continue
             if char == "\\" and quote != "'":
                 escaped = True
+                if line[position + 1:position + 2] != "\n":
+                    word_start = False
             elif char in "\"'":
                 if quote == char:
                     quote = None
                 elif quote is None:
                     quote = char
+                word_start = False
+            elif quote is None and char == "#" and word_start:
+                # A comment cannot introduce a heredoc or change quote state.
+                word_start = True
+                break
             elif quote is None:
                 unquoted.add(position)
+                word_start = char.isspace() or char in ";&|()<>"
         match = next((item for item in heredoc.finditer(line) if item.start() in unquoted), None)
         if not match:
             shell_source.append(line)
@@ -388,22 +446,24 @@ def executable_commands(source):
             body.append(lines[index].lstrip("\t") if match[1] else lines[index])
             index += 1
         index += 1
-        header = line[:match.start()]
+        # A header can follow a multiline quoted argument. Tokenize the whole
+        # retained prefix so a closing quote has its matching opening quote.
+        header = "".join(shell_source) + line[:match.start()]
         try:
             tokens = shell_tokens(header)
         except ValueError:
             tokens = []
         code = "".join(body)
         segments = list(shell_segments(tokens))
-        for position, (segment, pipe_input) in enumerate(segments):
-            yield from executable_argv(segment, code if position == len(segments) - 1 else pipe_input)
+        if segments:
+            yield from executable_argv(segments[-1][0], input_source=code)
         if not match[2]:
-            for substitution in command_substitutions(code):
+            for substitution in command_substitutions(code, heredoc=True):
                 yield from executable_commands(substitution)
         # Retain commands after the delimiter declaration (e.g. cat <<EOF;
         # git push ...), while dropping the data redirection itself.
         shell_source.append(line[:match.start()] + line[match.end():])
-    source = "".join(shell_source)
+    source = shell_without_comments("".join(shell_source))
     for substitution in command_substitutions(source):
         yield from executable_commands(substitution)
     try:
