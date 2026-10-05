@@ -17,11 +17,12 @@ is a separate input; default to private reporting. Local committed branches can 
 a PR exists. Uncommitted work belongs to `/code-review`, not a purported pinned-head review.
 
 If this context contains implementation discussion or earlier reviewer conclusions, dispatch one
-new reviewer with only those inputs, this skill, and access to source/guidance. Use the host's
-documented fresh-context control (Codex native delegation: `fork_turns: "none"`; Claude Code:
-a new isolated agent/session with an explicit brief). Verify the isolation capability rather than
-assuming a tool name guarantees it. If unavailable or outside the delegation budget, report the
-independence gate unmet; local self-review may help but cannot settle it.
+new reviewer with only those inputs, this skill, and access to source/guidance. Before dispatch,
+read the current host adapter: [Codex](references/codex.md) or
+[Claude Code](references/claude-code.md). On other hosts, inspect the documented fresh-context
+control. Verify isolation rather than assuming a tool name guarantees it. If unavailable or
+outside the delegation budget, report the independence gate unmet; local self-review may help
+but cannot settle it.
 
 The dispatched reviewer is already the reviewer: perform the review directly, spawn no additional
 agents, never fix code, and return findings to the developer. Read requirements as primary scope
