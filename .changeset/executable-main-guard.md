@@ -9,3 +9,5 @@ Preserve command boundaries after comments and multiline quoted text, and inspec
 in unquoted heredoc bodies without treating body quote characters as shell quoting.
 Distinguish here-strings from heredocs, read complete delimiter words, and preserve and
 conservatively inspect remaining commands when a heredoc body boundary cannot be established.
+Ignore parentheses inside word-initial shell comments while locating command substitutions,
+preserving newline boundaries and quoted, escaped, or within-word literal hashes.

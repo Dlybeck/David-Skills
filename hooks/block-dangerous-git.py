@@ -251,24 +251,56 @@ def command_substitutions(source, heredoc=False):
     if heredoc:
         source = source.replace("\\\n", "")
     quote = None
+    word_start = True
+    comment = False
     index = 0
     while index < len(source):
         char = source[index]
+        if comment:
+            if char == "\n":
+                comment = False
+                word_start = True
+            index += 1
+            continue
         if char == "\\" and quote != "'":
+            if source[index + 1:index + 2] != "\n":
+                word_start = False
             index += 2
             continue
+        if not heredoc and quote is None and char == "#" and word_start:
+            comment = True
+            index += 1
+            continue
+        opening = index + 1
+        if char == "$":
+            while source.startswith("\\\n", opening):
+                opening += 2
         if not heredoc and char == "'" and quote != '"':
             quote = None if quote == "'" else "'"
+            word_start = False
         elif not heredoc and char == '"' and quote != "'":
             quote = None if quote == '"' else '"'
-        elif quote != "'" and (source.startswith("$(", index) or char == "`"):
-            start = index + (2 if char == "$" else 1)
+            word_start = False
+        elif quote != "'" and ((char == "$" and source[opening:opening + 1] == "(") or char == "`"):
+            start = opening + 1 if char == "$" else index + 1
             end = start
             depth = 1
             inner_quote = None
+            inner_word_start = True
+            inner_comment = False
             while end < len(source):
                 current = source[end]
-                if current == "\\":
+                if inner_comment:
+                    if current == "\n":
+                        inner_comment = False
+                        inner_word_start = True
+                    end += 1
+                    continue
+                if current == "\\" and inner_quote != "'":
+                    # A continuation joins words; a quoted/escaped # cannot
+                    # start a comment. Backslashes inside comments are data.
+                    if source[end + 1:end + 2] != "\n":
+                        inner_word_start = False
                     end += 2
                     continue
                 if char == "`" and current == "`":
@@ -278,17 +310,27 @@ def command_substitutions(source, heredoc=False):
                         inner_quote = None
                     elif inner_quote is None:
                         inner_quote = current
+                    inner_word_start = False
                 elif inner_quote is None and char == "$":
-                    if current == "(":
+                    if current == "#" and inner_word_start:
+                        inner_comment = True
+                    elif current == "(":
                         depth += 1
+                        inner_word_start = True
                     elif current == ")":
                         depth -= 1
                         if depth == 0:
                             break
+                        inner_word_start = True
+                    else:
+                        inner_word_start = current in " \t\n;&|<>"
                 end += 1
             if end < len(source):
                 yield source[start:end]
                 index = end
+            word_start = False
+        elif not heredoc and quote is None:
+            word_start = char in " \t\n;&|()<>"
         index += 1
 
 
@@ -562,9 +604,12 @@ def executable_commands(source):
         for line in lines[uncertain_tail:]:
             for command, _ in executable_commands(line):
                 yield command, True
-    source = shell_without_comments("".join(shell_source))
+    source = "".join(shell_source)
+    # Inspect original substitution boundaries before removing continuations:
+    # a backslash in an inner comment must not eat its terminating newline.
     for substitution in command_substitutions(source):
         yield from executable_commands(substitution)
+    source = shell_without_comments(source)
     try:
         tokens = shell_tokens(source)
     except ValueError:

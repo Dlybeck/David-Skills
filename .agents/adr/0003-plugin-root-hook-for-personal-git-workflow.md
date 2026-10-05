@@ -49,6 +49,12 @@ Missing, multiline, or otherwise unrecognized delimiters (including dollar-prefi
 forms) and multiple heredocs on one header retain their source;
 the remaining lines are also inspected independently in an uncertain context. This can block
 literal write commands in unproved data bodies rather than silently hide subsequent commands.
+While balancing `$(...)`, word-initial comments ignore parentheses, quotes, and backslashes
+through their terminating newline. Quoted/escaped hashes and hashes within a word remain data;
+escaped newlines outside comments preserve whether a new word can start. This also applies to
+command substitutions found in unquoted heredoc bodies, whose substitution code uses shell
+comment rules even though the outer body does not. Substitution boundaries are inspected
+before general continuation preprocessing, including `$(` openings split across continuations.
 
 Supported executable forms include command lists/groups and common control prefixes,
 leading literal redirections,
