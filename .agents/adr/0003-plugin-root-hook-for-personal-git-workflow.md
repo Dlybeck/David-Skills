@@ -61,6 +61,16 @@ leading literal redirections,
 absolute executable paths, plain `command`/`exec`/`sudo`/`env` wrappers, shell `-c`/`-lc`,
 literal `eval`, simple shell/Python here-docs (including after command prefixes), and literal
 `echo`/common `printf` output piped directly into a supported interpreter.
+Shell stdin recognition consumes `--` and separates actual unquoted redirection operators
+and their targets from argv, including Bash `&>`/`&>>` output redirections. Attached IO
+numbers (`2>file`) are syntax; spaced or quoted
+numbers and quoted/escaped operator-looking words remain operands. Complete heredoc headers
+retain script operands on either side of the declaration. A body on fd 0 is inspected as
+shell code only when stdin is selected (including `-s` with positional arguments); `-c`
+selects its inline code, and an actual script operand selects external script contents.
+Heredocs on other descriptors or overridden by a later stdin redirection are data for this
+inspection. Redirected file/descriptor contents are not opened or analyzed. Python argv
+strings do not acquire shell-redirection semantics merely by containing operator text.
 Inline Python (`-c` or stdin here-doc)
 is parsed with the standard-library AST. Literal list/tuple argv and shell strings passed to
 `subprocess.run`, `call`, `check_call`, `check_output`, `Popen`, or `os.system`/`popen` are

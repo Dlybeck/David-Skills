@@ -11,3 +11,5 @@ Distinguish here-strings from heredocs, read complete delimiter words, and prese
 conservatively inspect remaining commands when a heredoc body boundary cannot be established.
 Ignore parentheses inside word-initial shell comments while locating command substitutions,
 preserving newline boundaries and quoted, escaped, or within-word literal hashes.
+Inspect supported shell heredoc stdin after end-of-options and redirections, retaining real
+script operands, descriptor ordering and literal operator-looking argv as data.

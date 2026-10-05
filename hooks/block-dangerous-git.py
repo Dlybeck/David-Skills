@@ -69,6 +69,15 @@ class ShellWord(str):
     """A quoted/escaped word that must not become shell punctuation."""
 
 
+class ShellRedirection(str):
+    """An unquoted redirection operator, including an attached IO number."""
+
+    @property
+    def fd(self):
+        number, operator = re.match(r"([0-9]*)([<>]|&>)", self).groups()
+        return int(number) if number else (0 if operator == "<" else 1)
+
+
 def shell_operator(token):
     return bool(token) and not isinstance(token, ShellWord) and set(token) <= set(";&|()\n")
 
@@ -133,33 +142,57 @@ def shell_tokens(command):
     protected = []
     quote = None
     escaped = False
-    for char in command:
+    word_start = True
+    fd_marker = chr(max(ord(value) for value in replacements.values()) + 1)
+    while fd_marker in command:
+        fd_marker = chr(ord(fd_marker) + 1)
+    for index, char in enumerate(command):
         if escaped:
             protected.append(replacements.get(char, char))
             escaped = False
+            word_start = False
         elif char == "\\" and quote != "'":
             protected.append(char)
             escaped = True
+            word_start = False
         elif char in "\"'":
             protected.append(char)
             if quote == char:
                 quote = None
             elif quote is None:
                 quote = char
+            word_start = False
         elif quote:
             protected.append(replacements.get(char, char))
         else:
+            # Only unquoted, adjacent digits are an IO number: `2>file`.
+            # Spaced or quoted numbers (`2 >file`, `"2">file`) stay argv.
+            if word_start and re.match(r"[0-9]+(?=[<>])", command[index:]):
+                protected.append(fd_marker)
             protected.append(char)
+            word_start = char in " \t\r\n;&|()<>"
     lexer = shlex.shlex("".join(protected), posix=True, punctuation_chars=";&|()\n<>")
     lexer.commenters = ""  # Comments are already removed without eating newlines.
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
     result = []
+    pending_fd = ""
     for token in lexer:
+        if token.startswith(fd_marker):
+            pending_fd = token[1:]
+            continue
         is_word = any(value in token for value in replacements.values())
         for char, replacement in replacements.items():
             token = token.replace(replacement, char)
-        result.append(ShellWord(token) if is_word else token)
+        if not is_word and re.fullmatch(r"[<>]+|[<>]&|>\||&>>?", token):
+            result.append(ShellRedirection(pending_fd + token))
+        else:
+            if pending_fd:
+                result.append(pending_fd)
+            result.append(ShellWord(token) if is_word else token)
+        pending_fd = ""
+    if pending_fd:
+        result.append(pending_fd)
     return result
 
 
@@ -346,9 +379,8 @@ def executable_argv(tokens, input_source=None):
             assignments = True
             tokens = tokens[1:]
             continue
-        offset = 1 if tokens[0].isdigit() and len(tokens) > 1 else 0
-        if not isinstance(tokens[offset], ShellWord) and re.fullmatch(r"[<>]+|[<>]&", tokens[offset]):
-            tokens = tokens[offset + 2:]
+        if isinstance(tokens[0], ShellRedirection):
+            tokens = tokens[2:]
         else:
             break
     if not tokens:
@@ -365,7 +397,20 @@ def executable_argv(tokens, input_source=None):
                 yield command, changed or assignments or program in {"env", "sudo"}
         return
     if program in SHELLS:
+        # Redirections are shell syntax, not interpreter argv. Only strip
+        # operators tagged by shell_tokens; Python list argv and quoted
+        # operator-looking script names are ordinary operands.
+        arguments = [tokens[0]]
+        position = 1
+        while position < len(tokens):
+            if isinstance(tokens[position], ShellRedirection):
+                position += 2  # Operator plus its target/descriptor.
+            else:
+                arguments.append(tokens[position])
+                position += 1
+        tokens = arguments
         index = 1
+        read_stdin = False
         while index < len(tokens):
             argument = tokens[index]
             if argument in {"--rcfile", "--init-file", "-o", "-O"}:
@@ -373,14 +418,19 @@ def executable_argv(tokens, input_source=None):
                     assignments = True  # Startup code can change PR lookup context.
                 index += 2
                 continue
-            if argument == "--" or not argument.startswith("-"):
+            if argument == "--":
+                index += 1
+                break
+            if not argument.startswith("-"):
                 break  # External script operands end interpreter option parsing.
             if not argument.startswith("--") and "c" in argument and index + 1 < len(tokens):
                 for command, changed in executable_commands(tokens[index + 1]):
                     yield command, changed or assignments
                 return
+            if not argument.startswith("--") and "s" in argument:
+                read_stdin = True
             index += 1
-        if input_source is not None and index == len(tokens):
+        if input_source is not None and (read_stdin or index == len(tokens)):
             for command, changed in executable_commands(input_source):
                 yield command, changed or assignments
         return
@@ -583,17 +633,33 @@ def executable_commands(source):
             body.append(lines[index].lstrip("\t") if match[1] else lines[index])
             index += 1
         index = terminator_end + 1
-        # A header can follow a multiline quoted argument. Tokenize the whole
-        # retained prefix so a closing quote has its matching opening quote.
-        header = "".join(shell_source) + line[:match.start()]
+        # Tokenize the complete header, including operands after the heredoc.
+        # A unique delimiter marker locates its command segment without
+        # confusing a later command on the same line with the stdin consumer.
+        marker = "__DAVID_SKILLS_HEREDOC__"
+        while marker in source:
+            marker += "_"
+        header = "".join(shell_source) + line[:match.start()] + "<<" + marker + line[word_end:]
         try:
             tokens = shell_tokens(header)
         except ValueError:
             tokens = []
         code = "".join(body)
-        segments = list(shell_segments(tokens))
-        if segments:
-            yield from executable_argv(segments[-1][0], input_source=code)
+        for segment, _ in shell_segments(tokens):
+            if marker not in segment:
+                continue
+            position = segment.index(marker)
+            redirect = segment[position - 1]
+            if not isinstance(redirect, ShellRedirection):
+                continue
+            stdin_code = code if redirect.fd == 0 else None
+            # A later stdin redirection overrides this heredoc. Its file or
+            # computed contents remain outside static interpreter inspection.
+            for token in segment[position + 1:]:
+                if isinstance(token, ShellRedirection) and token.fd == 0:
+                    stdin_code = None
+            argv = segment[:position - 1] + segment[position + 1:]
+            yield from executable_argv(argv, input_source=stdin_code)
         if not quoted:
             for substitution in command_substitutions(code, heredoc=True):
                 yield from executable_commands(substitution)
