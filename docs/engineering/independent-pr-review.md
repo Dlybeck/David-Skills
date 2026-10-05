@@ -1,15 +1,20 @@
 ## What it does
 
 `independent-pr-review` checks a complete proposed change for actionable defects using a fresh
-[subagent](https://www.aihero.dev/ai-coding-dictionary/subagent) or isolated review session. It reads
+[subagent](https://www.aihero.dev/ai-coding-dictionary/subagent) or isolated review
+[session](https://www.aihero.dev/ai-coding-dictionary/session). It reads
 the exact committed head, full base diff, and applicable repository guidance without inheriting the
 implementation discussion or earlier reviewer conclusions.
 
 ## When to reach for it
 
-Type `/independent-pr-review`, or the agent reaches for it after authorized implementation when a
-committed proposal needs independent defect review. Local committed branches work before a PR
-exists. Use [code-review](./code-review.md) for the separate Standards/Spec axes or uncommitted work.
+Type `/independent-pr-review`, or the
+[agent](https://www.aihero.dev/ai-coding-dictionary/agent) reaches for it when the task fits.
+
+| Situation | Review practice |
+| --- | --- |
+| Committed proposal needing fresh actionable defect review, with or without a PR | `independent-pr-review` |
+| Separate Standards/Spec checks, including uncommitted work | [code-review](./code-review.md) |
 
 ## Prerequisites
 

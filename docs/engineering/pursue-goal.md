@@ -59,12 +59,8 @@ answer while unrelated authorized work continues.
 
 ## Independent delivery review
 
-Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
-A fresh reviewer checks the full base diff without implementation history; the developer repairs
-and tests within scope, then receives another fresh review. Ordinary findings remain separate from
-Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
-The settled PR follows exact-head checks, while material blockers surface earlier. Review never
-supplies posting or merge authority.
+When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh
+ordinary review and the authorized repair loop. Research-only reports need no fabricated PR.
 
 ## Common questions
 

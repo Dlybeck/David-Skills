@@ -68,12 +68,10 @@ Two of those are routinely got wrong, which is why the router carries the order 
 
 ## Independent delivery review
 
-Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
-A fresh reviewer checks the full base diff without implementation history; the developer repairs
-and tests within scope, then receives another fresh review. Ordinary findings remain separate from
-Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
-The settled PR follows exact-head checks, while material blockers surface earlier. Review never
-supplies posting or merge authority.
+| Review needed | Practice |
+| --- | --- |
+| Fresh defect review and repair loop for a committed proposal | [independent-pr-review](./independent-pr-review.md) |
+| Separate Standards and Spec axes, including local work in progress | [code-review](./code-review.md) |
 
 ## Common questions
 
