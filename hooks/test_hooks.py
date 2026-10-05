@@ -18,6 +18,8 @@ Future hooks land with their own table of cases added to this file, not a
 new test file.
 """
 import json
+import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -97,9 +99,291 @@ def dispatch_payload(tool_name, command=None):
 
 
 # ---------------------------------------------------------------------------
-# block-dangerous-git.py: push-to-main and PR-to-main, plain/quoted/
-# interpolation-adjacent spellings, all must block.
+# block-dangerous-git.py: pushes to main block; proposed PRs to main allow
+# human review without updating the protected branch.
 # ---------------------------------------------------------------------------
+
+# Only the guard receives these command strings; the proposed command is never
+# executed. This catches the observed subprocess argv bypass at the JSON seam.
+for command, expected in (
+    ("python3 -c 'import subprocess; subprocess.run([\"git\", \"push\", \"--set-upstream\", \"origin\", \"main\"])'", 2),
+    ('rg -n "git push --set-upstream origin main" hooks', 0),
+):
+    code, err = run_hook_bash("block-dangerous-git.py", command)
+    check(f"executable Python main push: {command!r}", code == expected,
+          f"(code={code}, err={err!r})")
+
+# Guard-only fixtures: no submitted Python/shell source is run, even when the
+# hook allows it. The fixture directory has no remote and no protected refs.
+with tempfile.TemporaryDirectory() as temp_dir:
+    fixture = Path(temp_dir)
+    python_cases = [
+        ('import subprocess as sp; sp.run(["git", "push", "origin", "HEAD:main"])', 2),
+        ('from subprocess import run as launch; launch(args=("git", "push", "origin", "main"))', 2),
+        ('import subprocess; args = ["git", "push", "origin", "main"]; subprocess.run(args)', 2),
+        ('import subprocess; subprocess.run("git push origin main".split())', 2),
+        ('import shlex as lex, subprocess; subprocess.run(lex.split("git push origin main"))', 2),
+        ('import subprocess; subprocess.call(["/usr/bin/git", "push", "origin", "main"])', 2),
+        ('import subprocess; subprocess.check_call(["git", "push", "--all", "origin"])', 2),
+        ('import subprocess; subprocess.check_output(["git", "reset", "--hard"])', 2),
+        ('import subprocess; subprocess.Popen(["git", "push", "origin", "main"])', 2),
+        ('import subprocess; subprocess.run("git push origin main", shell=True)', 2),
+        ('import subprocess; subprocess.run(["git push origin main", "ignored"], shell=True)', 2),
+        ('import subprocess; subprocess.run(["bash", "-lc", "git push origin main"])', 2),
+        ('import os; os.system("git push origin main")', 2),
+        ('from os import popen; popen("git push origin main")', 2),
+        ('import subprocess; subprocess.run(["git", "push"], cwd="/tmp/other")', 2),
+        ('import subprocess; subprocess.run(["git", "push", "origin", "feature/main-page"])', 0),
+        ('import subprocess; subprocess.run(["git", "push", "origin", "HEAD:feature/auth"], cwd="/tmp/other")', 0),
+        ('import subprocess; subprocess.run(["gh", "pr", "create", "--base", "main", "--title", "x"])', 0),
+        ('import subprocess; subprocess.run(["gh", "pr", "edit", "5", "--base=main"])', 0),
+        ('import subprocess; subprocess.run(["rg", "git push origin main", "."])', 0),
+        ('import subprocess; subprocess.run(["git", "log", "--grep=git push origin main"])', 0),
+        ('import subprocess; subprocess.run("git push origin main")', 0),  # shell=False: not split into argv
+        ('print("subprocess.run([\\\"git\\\", \\\"push\\\", \\\"origin\\\", \\\"main\\\"])")', 0),
+        ('# git push origin main\nprint("git push origin main")', 0),
+    ]
+    for source, expected in python_cases:
+        for command in ("python3 -c " + shlex.quote(source),
+                        "python3 - <<'PY'\n" + source + "\nPY\n"):
+            code, err = run_hook_bash("block-dangerous-git.py", command, cwd=fixture)
+            check(f"Python executable/data boundary: {command!r}", code == expected,
+                  f"(code={code}, err={err!r})")
+
+    shell_cases = [
+        ('sh -- <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh > /dev/null <<\'EOF\'\ngit reset --hard\nEOF\n', 2),
+        ('sh &>/dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh &>>/dev/null <<\'EOF\'\ngit reset --hard\nEOF\n', 2),
+        ('sh &>/dev/null <<\'EOF\'\nrg "git push origin main" .\nEOF\n', 0),
+        ('sh &>>/dev/null <<\'EOF\'\nrg "git reset --hard" .\nEOF\n', 0),
+        ('sh "&>" <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh "&>>" <<\'EOF\'\ngit reset --hard\nEOF\n', 0),
+        ('sh -- <<\'EOF\'\nrg "git push origin main" .\nEOF\n', 0),
+        ('sh > /dev/null <<\'EOF\'\nrg "git reset --hard" .\nEOF\n', 0),
+        ('sh -- inspect.sh <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh > /dev/null inspect.sh <<\'EOF\'\ngit reset --hard\nEOF\n', 0),
+        ('sh inspect.sh > /dev/null <<\'EOF\'\ngit reset --hard\nEOF\n', 0),
+        ('sh <<\'EOF\' inspect.sh\ngit push origin main\nEOF\n', 0),
+        ('sh -- <<\'EOF\' inspect.sh\ngit push origin main\nEOF\n', 0),
+        ('sh 0<<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh 00<<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh 3<<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh <<\'EOF\' 01>/dev/null\ngit push origin main\nEOF\n', 2),
+        ('sh <<\'EOF\' </dev/null\ngit push origin main\nEOF\n', 0),
+        ('sh <<\'EOF\' 0<&3\ngit reset --hard\nEOF\n', 0),
+        ('sh </dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh 2>/dev/null -- <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh 2 > /dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh "2">/dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh \\2>/dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh 12>>/dev/null -- <<\'EOF\'\ngit clean -fd\nEOF\n', 2),
+        ('sh 2>&1 -- <<\'EOF\'\ngit reset --hard\nEOF\n', 2),
+        ('sh -- > /dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh -- "-c" <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh -- ">" <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh -- \\> <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh -s -- positional <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh -s -- positional <<\'EOF\'\nrg "git push origin main" .\nEOF\n', 0),
+        ('sh -c "rg main ." <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('sh <<\'EOF\' -c "rg main ."\ngit push origin main\nEOF\n', 0),
+        ('sh > /dev/null -c "git push origin main"', 2),
+        ('sh > /dev/null -c "rg \'git push origin main\' ."', 0),
+        ('sh <<\'EOF\'; printf safe\ngit push origin main\nEOF\n', 2),
+        ('sh -- <<\'EOF\'; printf safe\nrg "git push origin main" .\nEOF\n', 0),
+        ('cat <<\'EOF\'; sh --\ngit push origin main\nEOF\n', 0),
+        ('env sh -- 2>/dev/null <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('> /dev/null sh -- <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('sh <<\'EOF\'\nprintf "__DAVID_SKILLS_HEREDOC__"\nEOF\n', 0),
+        ('rg ">" .; printf "%s" "sh -- <<EOF git push origin main"', 0),
+        ('python3 -c \'import subprocess; subprocess.run(["sh", ">", "/dev/null", "-c", "git push origin main"])\'', 0),
+        ('python3 -c \'import subprocess; subprocess.run(["sh", "--", "-c", "git push origin main"])\'', 0),
+        ('printf \'%s\\n\' "$(true # (\ngit push origin main\n)"\n', 2),
+        ('printf \'%s\\n\' "$(true # )\ngit push origin main\n)"\n', 2),
+        ('printf \'%s\\n\' "$(true # (\ngit reset --hard\n)"\n', 2),
+        ('printf \'%s\\n\' "$(true # )\ngit clean -fd\n)"\n', 2),
+        ('printf \'%s\\n\' "$(true # (\nrg \'git push origin main\' .\n)"\n', 0),
+        ('printf \'%s\\n\' "$(true # )\nrg \'git push origin main\' .\n)"\n', 0),
+        ('printf "%s" "$(true # ( git push origin main\nprintf safe\n)"', 0),
+        ('printf "%s" "$(true # ) git reset --hard\nprintf safe\n)"', 0),
+        ("printf '%s' '$(true # (\ngit push origin main\n)'", 0),
+        ('printf "%s" "\\$(true # )\ngit push origin main\n)"', 0),
+        ('printf "%s" "$(true;# (\ngit push origin main\n)"', 2),
+        ('printf "%s" "$(true\t# )\ngit reset --hard\n)"', 2),
+        ('printf "%s" "$(true # (\\\ngit push origin main\n)"', 2),
+        ('printf "%s" "$(true # )\\\ngit clean -fd\n)"', 2),
+        ('printf "%s" "$(true \\\n# (\ngit push origin main\n)"', 2),
+        ('printf "%s" "$(true \\\n# )\nrg \'git push origin main\' .\n)"', 0),
+        ('printf "%s" "$(printf \'%s\' word\\\n#)"', 0),
+        ('printf "%s" "$(printf \'%s\' word#\\(\ngit push origin main\n)"', 2),
+        ('printf "%s" "$(printf \'%s\' \'# (\'; git push origin main)"', 2),
+        ('printf "%s" "$(printf \'%s\' \'# )\'; rg \'git push origin main\' .)"', 0),
+        ('printf "%s" "$(true # unmatched \' \" ( )\ngit push origin main\n)"', 2),
+        ('printf "%s" "$(true # unmatched \' \" ( )\nrg \'git push origin main\' .\n)"', 0),
+        ('printf "%s" "$( (true # ( )\ngit push origin main\n)\n)"', 2),
+        ('printf "%s" "$( (true # ) (\nrg \'git push origin main\' .\n)\n)"', 0),
+        ('cat <<EOF\n\'$(true # (\ngit push origin main\n)\'\nEOF\n', 2),
+        ('cat <<EOF\n\'$(true # )\nrg \'git push origin main\' .\n)\'\nEOF\n', 0),
+        ('cat <<\'EOF\'\n$(true # (\ngit push origin main\n)\nEOF\n', 0),
+        ('printf "%s" "$\\\n(git push origin main)"', 2),
+        ('printf "%s" "$\\\n(git reset --hard)"', 2),
+        ('printf "%s" "$\\\n(rg \'git push origin main\' .)"', 0),
+        ("printf '%s' '$\\\n(git push origin main)'", 0),
+        ('printf "%s" "\\$\\\n(git push origin main)"', 0),
+        ('printf "%s" "$\\\n\\\n(git push origin main)"', 2),
+        ('cat <<<word\ngit push origin main\n', 2),
+        ('cat <<<word\ngit reset --hard\n', 2),
+        ('cat <<<"git push origin main"\nrg "git push origin main" .', 0),
+        ('cat <<<word\nrg "git push origin main" .', 0),
+        ('cat <<<"first\ngit push origin main\nlast"\nrg main .', 0),
+        ('cat <<<"first\ngit push origin main\nlast"; git push origin main', 2),
+        ('cat <<<\'<<EOF.txt\'\ngit push origin main', 2),
+        ('rg "<<<word" .\ngit push origin main', 2),
+        ('rg "<<<word" .', 0),
+        # Complete punctuation/quoted/escaped delimiter words, not prefixes.
+        ('cat <<EOF.txt\nEOF.txt\ngit push origin main\n', 2),
+        ('cat <<EOF.txt\nEOF.txt\ngit clean -fd\n', 2),
+        ('cat <<EOF.txt\ngit push origin main\nEOF.txt\n', 0),
+        ('cat <<EOF.txt\n$(git push origin main)\nEOF.txt\n', 2),
+        ('cat <<EOF.txt\n\\$(git push origin main)\nEOF.txt\n', 0),
+        ('cat <<\'EOF.txt\'\n$(git push origin main)\nEOF.txt\n', 0),
+        ('cat <<\'EOF.txt\'\nEOF.txt\ngit push origin main', 2),
+        ('cat <<"EOF.txt"\n$(git push origin main)\nEOF.txt\n', 0),
+        ('cat <<"EOF.txt"\nEOF.txt\ngit reset --hard', 2),
+        ('cat <<EOF\\.txt\n$(git push origin main)\nEOF.txt\n', 0),
+        ('cat <<EOF\\.txt\nEOF.txt\ngit push origin main', 2),
+        ('cat <<EO"F.txt"\n$(git push origin main)\nEOF.txt\n', 0),
+        ('cat <<EO"F.txt"\nEOF.txt\ngit push origin main', 2),
+        ('cat <<"EOF\\q"\ngit push origin main\nEOF\\q\n', 0),
+        ('cat <<EOF\u00a0txt\ngit push origin main\nEOF\u00a0txt\n', 0),
+        ('cat <<EOF\u00a0txt\nEOF\u00a0txt\ngit push origin main', 2),
+        ('cat <<EOF.txt\r\ngit push origin main\nEOF.txt\r\n', 0),
+        ('cat <<EOF.txt\r\nEOF.txt\r\ngit push origin main', 2),
+        ('cat <<# comment\ngit push origin main\n#\n', 2),
+        ('cat <<$\'EOF\'\nEOF\ngit push origin main\n$EOF\n', 2),
+        ('cat <<$\'EOF\'\nEOF\nrg "git push origin main" .\n$EOF\n', 0),
+        ('cat <<$"EOF"\nEOF\ngit reset --hard\n$EOF\n', 2),
+        ('cat <<$"EOF"\nEOF\nrg "git push origin main" .\n$EOF\n', 0),
+        ('cat <<EOF\nE\\\nOF\ngit push origin main\nEOF\n', 2),
+        ('cat <<EOF\nE\\\nOF\ngit reset --hard\nEOF\n', 2),
+        ('cat <<EOF\nE\\\nOF\nrg "git push origin main" .\nEOF\n', 0),
+        ('cat <<\'EOF\'\nE\\\nOF\ngit push origin main\nEOF\n', 0),
+        ('cat <<\'EOF\'\nE\\\nOF\nEOF\ngit push origin main', 2),
+        ('cat <<EOF\nE\\\\\nOF\ngit push origin main\nEOF\n', 0),
+        ('cat <<EOF\n\'$\\\n(git push origin main)\'\nEOF\n', 2),
+        ('cat <<EOF\n\\$(git push origin main)\\\ntext\nEOF\n', 0),
+        ('cat <<\'EOF marker.txt\'\ngit push origin main\nEOF marker.txt\n', 0),
+        ('cat <<\'EOF marker.txt\'\nEOF marker.txt\ngit push origin main', 2),
+        ('cat <<\'\'\ngit push origin main\n\n', 0),
+        ('cat <<\'\'\n\ngit push origin main', 2),
+        ('cat <<-EOF.txt\n\tgit push origin main\n\tEOF.txt\n', 0),
+        ('cat <<-EOF.txt\n\tEOF.txt\ngit push origin main', 2),
+        ('cat <<EOF.txt; git push origin main\nEOF.txt\n', 2),
+        ('printf "first\n<<EOF.txt\n"; cat <<EOF.txt\ngit push origin main\nEOF.txt\n', 0),
+        ('sh <<\'EOF.txt\'\ngit push origin main\nEOF.txt\n', 2),
+        ('sh <<\'EOF.txt\'\nrg "git push origin main" .\nEOF.txt\n', 0),
+        # Unproved body boundaries retain and conservatively inspect the tail.
+        ('cat <<EOF.txt\nEOF\ngit push origin main', 2),
+        ('cat <<EOF.txt\nEOF\nrg "git push origin main" .', 0),
+        ('cat <<\'EOF.txt\'\n\"\ngit push origin main', 2),
+        ('cat <<\'EOF.txt\'\nrg "git push origin main" .', 0),
+        ('cat <<"EOF\nmarker"\ngit push origin main', 2),
+        ('cat <<"EOF\nmarker"\nrg "git push origin main" .', 0),
+        ('cat <<EOF.txt\nEOF.txt \ngit push origin main', 2),
+        ('cat <<-EOF.txt\n\tEOF.txt\t\ngit push origin main', 2),
+        ('cat <<\ngit push origin main', 2),
+        ('cat <<\nrg "git push origin main" .', 0),
+        ('cat <<ONE <<TWO\nONE\n\"\nTWO\ngit push origin main', 2),
+        ('cat <<ONE <<TWO\nONE\nTWO\nrg "git push origin main" .', 0),
+        ('true # ordinary comment\ngit push origin main', 2),
+        ('true # comment with <<EOF\ngit push origin main', 2),
+        ('true # ordinary comment\n\ngit push origin main', 2),
+        ('true # ordinary comment\\\ngit push origin main', 2),
+        ('true \\\n# ordinary comment\ngit push origin main', 2),
+        ('true \\\n# ordinary comment <<EOF\ngit push origin main', 2),
+        ('true # git push origin main\nrg "git push origin main" .', 0),
+        ('true # $(git push origin main)\nprintf x', 0),
+        ('printf "%s" "# literal"\ngit push origin main', 2),
+        ('printf "%s" word#literal\ngit push origin main', 2),
+        ('printf "%s" \\#literal\ngit push origin main', 2),
+        ('printf "x\n<<PY\n"; git push origin main', 2),
+        ("printf 'x\n<<PY\n'; git push origin main", 2),
+        ('printf "x\n<<PY\n"\ngit push origin main', 2),
+        ('printf "x\n<<PY\n"; rg "git push origin main" .', 0),
+        ("printf 'x\n<<PY\n'; rg 'git push origin main' .", 0),
+        ('printf "x\n<<PY\n"; cat <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('printf "x\n"; sh <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('printf "x\n"; sh <<\'EOF\'\nrg "git push origin main" .\nEOF\n', 0),
+        ('true # quote \" <<PY\ngit push origin main', 2),
+        ("cat <<EOF\n'$(git push origin main)'\nEOF\n", 2),
+        ('cat <<EOF\n"$(git push origin main)"\nEOF\n', 2),
+        ("cat <<EOF\n'`git push origin main`'\nEOF\n", 2),
+        ('cat <<EOF\n# $(git push origin main)\nEOF\n', 2),
+        ('cat <<EOF\n\\$(git push origin main)\nEOF\n', 0),
+        ('cat <<EOF\n\\`git push origin main\\`\nEOF\n', 0),
+        ('cat <<EOF\n\\\\$(git push origin main)\nEOF\n', 2),
+        ('cat <<EOF\n$\\\n(git push origin main)\nEOF\n', 2),
+        ("cat <<'EOF'\n'$(git push origin main)'\nEOF\n", 0),
+        ('cat <<"EOF"\n"$(git push origin main)"\nEOF\n', 0),
+        ('cat <<\'EOF\'\n# literal unmatched quote \"\nEOF\ngit push origin main', 2),
+        ('cat <<-EOF\n\t\'$(git push origin main)\'\n\tEOF\n', 2),
+        ('cat <<EOF\n$(printf "%s" "git push origin main")\nEOF\n', 0),
+        ('/usr/bin/git push origin main', 2),
+        ('> /tmp/log git push origin main', 2),
+        ('2>/tmp/log git push origin main', 2),
+        ('2>&1 git push origin main', 2),
+        ('GIT_TRACE=1 > /tmp/log git push origin main', 2),
+        ('> /tmp/log GIT_TRACE=1 git push origin main', 2),
+        ('GIT_TRACE=1 > /tmp/log rg "git push origin main" .', 0),
+        ('command git push origin main', 2),
+        ('if true; then git push origin main; fi', 2),
+        ('for item in one; do git push origin main; done', 2),
+        ('{ git push origin main; }', 2),
+        ('env git push origin main', 2),
+        ('env GH_REPO=other/project git push origin main', 2),
+        ('sudo git push origin main', 2),
+        ('sh -c \'git push origin "ma"in\'', 2),
+        ('bash --norc -c \'git push origin main\'', 2),
+        ('bash --noprofile --norc -lc \'git push origin main\'', 2),
+        ('bash --rcfile /tmp/bashrc -c \'git push origin main\'', 2),
+        ('bash -o posix -c \'git push origin main\'', 2),
+        ('bash --norc -c \'rg "git push origin main" .\'', 0),
+        ('bash inspect.sh -c \'git push origin main\'', 0),
+        ('python3 inspect.py -c \'import subprocess; subprocess.run(["git","push","origin","main"])\'', 0),
+        ('bash -lc \'rg "git push origin main" hooks\'', 0),
+        ('eval \'git push origin main\'', 2),
+        ('rg "$(git push origin main)" .', 2),
+        ('printf "%s" "`git push origin main`"', 2),
+        ("rg '$(git push origin main)' .", 0),
+        ('rg -n "git push --set-upstream origin main" hooks', 0),
+        ('grep -R "gh pr merge 5 --auto" .', 0),
+        ('printf "%s\\n" "git push origin main"', 0),
+        ("printf '%s\\n' ';' git push origin main", 0),
+        ("rg -n ';' git push origin main", 0),
+        ("rg -n '|' git push origin main", 0),
+        ("rg -n \\; git push origin main", 0),
+        ("printf '%s\\n' 'git push origin main' | sh", 2),
+        ("echo 'git push origin main' | bash", 2),
+        ("printf 'git push origin main\\n' | sh", 2),
+        ("printf '%s\\n' 'git push origin main' | rg push", 0),
+        ("printf '%s\\n' 'import subprocess; subprocess.run([\"git\",\"push\",\"origin\",\"main\"])' | python3 -", 2),
+        ('git log --grep="git push origin main"', 0),
+        ('cat <<\'EOF\'\ngit push origin main\nEOF\n', 0),
+        ('rg "<<PY" .\ngit push origin main', 2),
+        ('rg "<<PY" .', 0),
+        ('cat <<EOF\n$(git push origin main)\nEOF\n', 2),
+        ('sh <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('env python3 - <<\'PY\'\nimport subprocess\nsubprocess.run(["git", "push", "origin", "main"])\nPY\n', 2),
+        ('cd /tmp && python3 - <<\'PY\'\nimport subprocess\nsubprocess.run(["git", "push", "origin", "main"])\nPY\n', 2),
+        ('true && sh <<\'EOF\'\ngit push origin main\nEOF\n', 2),
+        ('rg "git push origin main" .; git push origin main', 2),
+        ('rg "git push origin main" . && git push origin HEAD:feature/auth', 0),
+        ('gh pr create --base main --title "gh pr merge 5 --auto"', 0),
+    ]
+    for command, expected in shell_cases:
+        code, err = run_hook_bash("block-dangerous-git.py", command, cwd=fixture)
+        check(f"shell executable/data boundary: {command!r}", code == expected,
+              f"(code={code}, err={err!r})")
 
 BLOCK_PUSH_TO_MAIN = [
     'git -C /tmp/repo push',
@@ -118,6 +402,9 @@ BLOCK_PUSH_TO_MAIN = [
     'git push origin "refs/heads/main"',
     'git push -u origin main',
     'git push origin HEAD:main',
+    'git \\\n push origin main',
+    'git push \\\n origin HEAD:main',
+    'bash -lc "git \\\n push origin main"',
 ]
 
 for cmd in BLOCK_PUSH_TO_MAIN:
@@ -125,18 +412,167 @@ for cmd in BLOCK_PUSH_TO_MAIN:
     check(f"block-dangerous-git blocks push-to-main: {cmd!r}",
           code == 2 and "main" in err, f"(code={code}, err={err!r})")
 
-BLOCK_PR_TO_MAIN = [
+PASS_PR_TO_MAIN = [
     'gh pr create --base main --title "x"',
     'gh pr create --base "main" --title "x"',
     "gh pr create --base 'main' --title x",
+    'gh pr create --draft --base=main --head dev --title x',
+    'gh pr create -B main --head dev --title x',
+    'gh pr create --base m"ai"n --title x',
+    'cd /tmp/repo && gh pr create --base main --title x',
+    'gh pr create --base main --title x; gh pr edit 5 --base main',
+    'bash -lc \"gh pr create --base main --title x\"',
     'gh pr edit 5 --base=main',
     'gh pr edit 5 --base="main"',
 ]
 
-for cmd in BLOCK_PR_TO_MAIN:
+for cmd in PASS_PR_TO_MAIN:
     code, err = run_hook_bash("block-dangerous-git.py", cmd)
-    check(f"block-dangerous-git blocks PR-to-main: {cmd!r}",
-          code == 2 and "main" in err, f"(code={code}, err={err!r})")
+    check(f"block-dangerous-git allows PR-to-main: {cmd!r}",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+# Merge policy uses only a read-only lookup. A stand-in gh records argv so
+# tests prove repository/selector routing without network or actual merges.
+with tempfile.TemporaryDirectory() as temp_dir:
+    fixture = Path(temp_dir)
+    fake_gh = fixture / "gh"
+    calls = fixture / "calls.jsonl"
+    fake_gh.write_text(
+        f"#!{sys.executable}\n"
+        "import json, os, sys, time\n"
+        "with open(os.environ['TEST_GH_CALLS'], 'a') as log:\n"
+        "    log.write(json.dumps(sys.argv[1:]) + '\\n')\n"
+        "time.sleep(float(os.environ.get('TEST_GH_DELAY', '0')))\n"
+        "print(os.environ['TEST_GH_RESPONSE'])\n"
+        "sys.exit(int(os.environ.get('TEST_GH_EXIT', '0')))\n",
+        encoding="utf-8",
+    )
+    fake_gh.chmod(0o755)
+    environment = dict(os.environ, PATH=f"{fixture}{os.pathsep}{os.environ['PATH']}",
+                       TEST_GH_CALLS=str(calls))
+
+    def merge_hook(command, response='{"baseRefName":"main"}', exit_code=0, delay=0):
+        calls.write_text("", encoding="utf-8")
+        process = subprocess.run(
+            [sys.executable, str(HOOKS_DIR / "block-dangerous-git.py")],
+            input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}),
+            capture_output=True, text=True, cwd=REPO_ROOT, timeout=10,
+            env=dict(environment, TEST_GH_RESPONSE=response,
+                     TEST_GH_EXIT=str(exit_code), TEST_GH_DELAY=str(delay)),
+        )
+        lookups = [json.loads(line) for line in calls.read_text().splitlines()]
+        return process, lookups
+
+    MERGE_CASES = [
+        ("gh pr merge 5", ["5"]),
+        ("gh pr merge --squash 5", ["5"]),
+        ('gh pr merge "5" --rebase', ["5"]),
+        ("gh pr merge 5 --merge --auto", ["5"]),
+        ("gh pr merge 5 --admin", ["5"]),
+        ("gh pr merge --squash", []),
+        ("gh pr merge feature/auth --rebase", ["feature/auth"]),
+        ("gh pr merge 5 -R other/project --squash", ["5", "--repo", "other/project"]),
+        ("gh --repo=other/project pr merge 5 --auto", ["5", "--repo", "other/project"]),
+        ("gh -R other/project pr merge 5", ["5", "--repo", "other/project"]),
+        ("gh pr merge 5 -Rother/project", ["5", "--repo", "other/project"]),
+        ("gh pr merge https://github.com/other/project/pull/5 --squash",
+         ["https://github.com/other/project/pull/5"]),
+        ("gh pr merge 5 --subject 'merge review' --body-file /tmp/body --match-head-commit abc",
+         ["5"]),
+        ("true && gh pr merge 5 --squash", ["5"]),
+        ("gh pr view 5; gh pr merge 5 --auto", ["5"]),
+        ("true\ngh pr merge 5 --rebase", ["5"]),
+        ('bash -lc "gh pr merge 5 --squash"', ["5"]),
+        ('sh -c \'gh pr merge "5" --auto\'', ["5"]),
+        ('sh -c \'gh pr m"er"ge 5 --auto\'', ["5"]),
+        ('bash -lc \'gh p"r" merge 5 --squash\'', ["5"]),
+        ('bash -lc \'g"h" pr merge 5 --squash\'', ["5"]),
+        ('sh -c \'g\\h pr merge 5 --auto\'', ["5"]),
+        ('gh \\\n pr merge 5 --squash', ["5"]),
+        ('gh pr \\\n merge 5 --auto', ["5"]),
+        ('bash -lc "gh \\\n pr merge 5 --squash"', ["5"]),
+        ('(gh pr merge 5 --squash)', ["5"]),
+        ('gh pr m"er"ge 5 --rebase', ["5"]),
+    ]
+    for command, target in MERGE_CASES:
+        for base, expected_code in (("main", 2), ("dev", 0), ("feature/main-page", 0)):
+            process, lookups = merge_hook(command, json.dumps({"baseRefName": base}))
+            check(f"PR merge base {base}: {command!r}",
+                  process.returncode == expected_code
+                  and ("human-gated" in process.stderr if expected_code else process.stderr == "")
+                  and lookups == [["pr", "view", *target, "--json", "baseRefName"]],
+                  f"(code={process.returncode}, err={process.stderr!r}, calls={lookups!r})")
+
+    for response, exit_code in (
+        ('{"baseRefName":"dev"}', 1), ("", 0), ("not json", 0),
+        ("null", 0), ("[]", 0), ("{}", 0), ('{"baseRefName":7}', 0),
+        ('{"baseRefName":""}', 0), ('{"baseRefName":" main "}', 0),
+    ):
+        process, _ = merge_hook("gh pr merge 5 --squash", response, exit_code)
+        check(f"PR merge blocks failed/malformed lookup: {response!r}/{exit_code}",
+              process.returncode == 2 and "cannot verify" in process.stderr,
+              process.stderr)
+    process, _ = merge_hook("gh pr merge 5 --squash", delay=6)
+    check("PR merge lookup timeout blocks", process.returncode == 2 and "cannot verify" in process.stderr)
+
+    for command in (
+        "gh pr merge 5 6", "gh pr merge 5 --unknown-flag", "gh pr merge 5 --repo",
+        "gh pr merge '$PR'", "gh pr merge 5 --repo '$REPO'", "gh pr merge '5",
+        "cd /tmp/other && gh pr merge 5", "GH_REPO=other/project gh pr merge 5",
+        "env GH_REPO=other/project gh pr merge 5",
+        "gh pr merge 5 -R first/project --repo second/project",
+        'bash -lc "cd /tmp/other && gh pr merge 5 --squash"',
+        'sh -c \'c"d" /tmp/other && gh pr m"er"ge 5 --auto\'',
+        'bash -lc "c\\d /tmp/other && gh pr merge 5"',
+        'bash -lc "git -C /tmp/other status && gh pr merge 5"',
+        'bash -lc "GH_REPO=other/project gh pr merge 5"',
+        "pushd /tmp/other && gh pr merge 5", "git switch other && gh pr merge --squash",
+        "gh pr edit 5 --base main && gh pr merge 5 --squash",
+        "gh pr create --base main --title x; gh pr merge --auto",
+        'bash -lc "gh pr edit 5 --base main; gh pr merge 5 --auto"',
+        'gh(){ command gh -R other/project "$@"; }; gh pr merge 5',
+        "alias gh='gh -R other/project'; gh pr merge 5",
+        "gh repo set-default other/project && gh pr merge 5 --squash",
+        'bash -lc "gh repo set-default other/project && gh pr merge 5"',
+        "git remote set-url origin https://github.com/other/project && gh pr merge 5",
+        "git config remote.origin.url https://github.com/other/project && gh pr merge 5",
+        "gh config set host other.host && gh pr merge 5",
+        "GH_REPO=other/project bash -c 'gh pr merge 5'",
+        "GH_REPO=other/project sh <<'SH'\ngh pr merge 5\nSH\n",
+        "GH_REPO=other/project eval 'gh pr merge 5'",
+        "bash --rcfile /tmp/config -c 'gh pr merge 5'",
+        ". /tmp/config && gh pr merge 5",
+        "python3 -c 'import subprocess; subprocess.run([\"gh\", \"pr\", \"merge\", \"5\", \"--auto\"])'",
+        "python3 - <<'PY'\nimport subprocess\nsubprocess.run(['gh', 'pr', 'merge', '5'])\nPY\n",
+    ):
+        process, lookups = merge_hook(command, '{"baseRefName":"dev"}')
+        check(f"PR merge blocks ambiguous context/target: {command!r}",
+              process.returncode == 2 and "cannot verify" in process.stderr and lookups == [],
+              f"(code={process.returncode}, err={process.stderr!r}, calls={lookups!r})")
+
+    process, lookups = merge_hook('rg "gh pr merge 5 --auto" .', "not json")
+    check("inert merge search performs no PR lookup", process.returncode == 0 and lookups == [])
+    process, lookups = merge_hook('rg "git push origin main" .; gh pr merge 5', '{"baseRefName":"dev"}')
+    check("inert search preserves verified non-main merge", process.returncode == 0
+          and lookups == [["pr", "view", "5", "--json", "baseRefName"]])
+
+    process, lookups = merge_hook("gh pr merge 5 && gh pr merge 6", '{"baseRefName":"dev"}')
+    check("PR merge verifies every shell-composed target", process.returncode == 0
+          and lookups == [["pr", "view", str(number), "--json", "baseRefName"] for number in (5, 6)])
+    for command in PASS_PR_TO_MAIN:
+        process, lookups = merge_hook(command, "not json")
+        check(f"proposed main PR requires no merge lookup: {command!r}",
+              process.returncode == 0 and process.stderr == "" and lookups == [])
+
+    for command in (
+        "gh pr create --base main --title x && git push origin main",
+        "gh pr edit 5 --base main; git push origin HEAD:main",
+        "gh pr create --base main --title x\ngit push origin main",
+        'bash -lc "gh pr create --base main --title x; git push origin main"',
+    ):
+        process, lookups = merge_hook(command)
+        check(f"proposed PR does not authorize composed main push: {command!r}",
+              process.returncode == 2 and "pushes directly to main" in process.stderr and lookups == [])
 
 # Feature-branch pushes and feature/main-page-style lookalikes must pass,
 # quoted or not -- the boundary behavior the fix must not break.
