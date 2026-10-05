@@ -66,6 +66,15 @@ The other idea it hands you is the **phase boundary**: a useful moment to decide
 
 Two of those are routinely got wrong, which is why the router carries the order rather than the list. `/handoff` reads like the general bridge between windows and is not: portability is the whole of what it buys. `/compact` is the bottom of the tree rather than the first reach, because the four questions above it are each cheaper or more precise.
 
+## Independent delivery review
+
+Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
+A fresh reviewer checks the full base diff without implementation history; the developer repairs
+and tests within scope, then receives another fresh review. Ordinary findings remain separate from
+Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
+The settled PR follows exact-head checks, while material blockers surface earlier. Review never
+supplies posting or merge authority.
+
 ## Common questions
 
 **Can an autonomous run have a deadline and regular reports?**

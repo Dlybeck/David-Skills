@@ -35,6 +35,15 @@ workspace.
 A retrospective spec is exceptional rather than automatic. It pays only when the run exposes a
 lasting product decision, unresolved requirement, or coordination need.
 
+## Independent delivery review
+
+Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
+A fresh reviewer checks the full base diff without implementation history; the developer repairs
+and tests within scope, then receives another fresh review. Ordinary findings remain separate from
+Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
+The settled PR follows exact-head checks, while material blockers surface earlier. Review never
+supplies posting or merge authority.
+
 ## Common questions
 
 **Is this just Autopilot without questions?**

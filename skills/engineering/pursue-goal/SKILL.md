@@ -155,6 +155,15 @@ still requires its own permitted path.
 Before each irreversible or externally visible action, verify that the contract names it. Log a
 useful recommendation when it does not.
 
+## Review implementation before delivery
+
+For completed source changes, retain whole-change /code-review Standards and Spec checks, then
+invoke /independent-pr-review and follow its developer continuation loop on the exact committed
+proposal. It owns fresh reviewer isolation, ordinary findings, authorized actionable comments,
+repairs and fresh full-base re-review, and deadlock escalation. Carry this gate through either
+pilot; research-only reports need no fabricated PR. Present a settled PR only after its gates pass,
+while reporting material progress and blockers earlier. The loop adds no merge or posting authority.
+
 ## Stop deliberately
 
 Stop only at one of these boundaries:

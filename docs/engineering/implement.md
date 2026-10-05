@@ -24,6 +24,15 @@ evidence while it remains relevant, and run required full checks before delivery
 | Commits authorized | Commit on the authorized branch |
 | Ticket update authorized and acceptance passes | Resolve the originating ticket |
 
+## Independent delivery review
+
+Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
+A fresh reviewer checks the full base diff without implementation history; the developer repairs
+and tests within scope, then receives another fresh review. Ordinary findings remain separate from
+Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
+The settled PR follows exact-head checks, while material blockers surface earlier. Review never
+supplies posting or merge authority.
+
 ## Common questions
 
 **Must I create a spec or tickets first?**

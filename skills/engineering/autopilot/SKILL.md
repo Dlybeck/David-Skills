@@ -67,7 +67,10 @@ Before any authorized integration into `dev`:
 
 1. Rebase or merge the current `dev` state according to repository policy.
 2. Run the contract's full validation surface and a whole-change `/code-review`.
-3. Fix every real finding and rerun affected gates.
+3. Fix every real finding and rerun affected gates. Invoke /independent-pr-review and complete its
+   developer continuation loop over the exact whole committed proposal before integration. Keep
+   its ordinary findings separate from Standards/Spec checks; reconcile the pinned review after
+   any base or head change.
 4. Merge `--no-ff` from the feature branch, push only the authorized refs, and verify the remote.
 
 If any integration permission or gate is absent, leave the work on its review branch and report

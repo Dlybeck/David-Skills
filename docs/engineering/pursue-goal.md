@@ -57,6 +57,15 @@ A stop request stops new work and accounts for identified running work safely.
 [Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
 answer while unrelated authorized work continues.
 
+## Independent delivery review
+
+Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
+A fresh reviewer checks the full base diff without implementation history; the developer repairs
+and tests within scope, then receives another fresh review. Ordinary findings remain separate from
+Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
+The settled PR follows exact-head checks, while material blockers surface earlier. Review never
+supplies posting or merge authority.
+
 ## Common questions
 
 **Why is this model-invoked when the pilots are human-invoked?**

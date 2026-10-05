@@ -36,6 +36,15 @@ full validation and review gates pass. It never inherits authority over `main`.
 An unmet integration gate leaves work on the review branch. That branch stays local unless the
 contract separately authorizes pushing it; a fallback is not permission to publish.
 
+## Independent delivery review
+
+Completed committed proposals also use [independent-pr-review](./independent-pr-review.md).
+A fresh reviewer checks the full base diff without implementation history; the developer repairs
+and tests within scope, then receives another fresh review. Ordinary findings remain separate from
+Standards/Spec. Authorized actionable comments are consolidated; clean reviews stay quiet.
+The settled PR follows exact-head checks, while material blockers surface earlier. Review never
+supplies posting or merge authority.
+
 ## Common questions
 
 **Do I need to answer every technical question before leaving?**
