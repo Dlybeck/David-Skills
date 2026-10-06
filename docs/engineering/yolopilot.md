@@ -19,12 +19,16 @@ better than waiting. Whenever you can stay for an understanding round, use
 ## The delivery boundary
 
 Yolopilot may research, modify local files, install dependencies, use local compute, run tests and
-evaluations, and make small commits within your stated restrictions. It pushes its feature branch
-only when your authority allows it and a remote is available; otherwise delivery stays local.
+evaluations, and make small commits within your stated restrictions. Feature pushes require your authority and an available remote.
 Repository guidance identifies branch ownership; the active request and applicable standing
-grants determine authority. Missing policy or authority leaves integration unresolved. Money,
-credentials, production, material deletion, safeguards and unrelated scope remain boundaries.
-Human-owned promotion requires its explicit approval, and task restrictions override defaults.
+grants determine authority. Money, credentials, production, material deletion, safeguards and
+unrelated scope remain boundaries; explicit task restrictions override defaults.
+
+| Boundary | Delivery |
+| --- | --- |
+| Existing grant for an agent-owned target and all gates passing | Complete integration and verify the delivered ref and CI |
+| Human-owned promotion | Prepare the exact proposal for its explicit human approval |
+| Missing policy or integration authority | Preserve a review branch within push authority, or keep the result local |
 
 ## The learning digest
 
@@ -39,8 +43,7 @@ lasting product decision, unresolved requirement, or coordination need.
 ## Independent delivery review
 
 A review branch completes [independent-pr-review](./independent-pr-review.md) before its settled
-receipt. That loop routes settled work to an authorized agent-owned target or preserves a
-reviewable branch at a missing-authority or human-owned approval boundary.
+receipt. That loop applies the delivery boundary above.
 
 ## Common questions
 

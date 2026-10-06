@@ -65,7 +65,7 @@ discipline; the initial agreement does not prevent its owner from changing direc
 
 ## Delivery
 
-Follow [the shared developer loop](../independent-pr-review/references/developer-loop.md) for
+Invoke /independent-pr-review and follow its shared developer continuation loop for
 policy-driven delivery after full validation, whole-change Standards/Spec checks and fresh ordinary
 independent review. Synchronize the authorized integration target, re-pin and re-review any changed
 proposal, then use the repository's required merge strategy and verify remote refs and CI.

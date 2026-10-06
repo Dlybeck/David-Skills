@@ -37,11 +37,16 @@ No. Ordinary defect findings remain separate from those two axes and from develo
 **Will it post findings or merge automatically?**
 
 Commenting depends on the active request's explicit authority. Delivery follows repository branch
-ownership and applicable standing grants after all gates pass. Agent-owned integration needs no
-repeat approval; human-owned promotion requires its stated human decision. Missing policy or
-authority preserves a reviewable result, and explicit task restrictions win. Tests and clean review
-cannot supply authority. Installation remains separate: updated source does not prove an active
-installed skill changed.
+ownership and applicable standing grants after all gates pass; explicit task restrictions win.
+
+| Boundary | Settled result |
+| --- | --- |
+| Authorized agent-owned integration | Complete and verify integration without repeat approval |
+| Human-owned promotion | Request its stated human decision on the exact proposal |
+| Missing policy or authority | Preserve a reviewable result and identify the dependent decision |
+
+Tests and clean review cannot supply authority. Installation remains separate: updated source
+does not prove an active installed skill changed.
 
 **What if reviewer and developer keep disagreeing?**
 

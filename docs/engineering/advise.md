@@ -69,9 +69,13 @@ Two of those are routinely got wrong, which is why the router carries the order 
 ## Independent delivery review
 
 Settled delivery follows repository branch ownership and applicable standing grants through the
-shared review loop. Both pilots can complete authorized agent-owned integration after all gates
-pass; human-owned promotion requires its approval. Missing policy or authority leaves a
-reviewable result, and explicit task restrictions win.
+shared review loop. Explicit task restrictions win.
+
+| Boundary | Route for either pilot |
+| --- | --- |
+| Authorized agent-owned integration | Complete integration after every gate passes |
+| Human-owned promotion | Prepare its exact proposal for approval |
+| Missing policy or authority | Preserve a reviewable result and name the unresolved decision |
 
 
 | Review needed | Practice |

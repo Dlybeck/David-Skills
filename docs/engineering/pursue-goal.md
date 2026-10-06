@@ -61,8 +61,9 @@ answer while unrelated authorized work continues.
 
 When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh
 ordinary review and the authorized repair loop. Repository branch ownership and applicable
-standing grants determine delivery; human-owned promotion and explicit task restrictions retain
-their boundaries. Research-only reports need no fabricated PR.
+standing grants determine delivery, and explicit task restrictions retain their boundaries. The
+shared loop in [independent-pr-review](./independent-pr-review.md) explains each delivery route.
+Research-only reports need no fabricated PR.
 
 ## Common questions
 

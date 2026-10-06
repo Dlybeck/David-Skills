@@ -132,6 +132,16 @@ def main() -> int:
         errors,
     )
     require_text(
+        "skills/engineering/yolopilot/agents/openai.yaml",
+        ("within existing authority", "deliver within repository policy and applicable authority"),
+        errors,
+    )
+    require_text(
+        "skills/engineering/README.md",
+        ("work unattended within existing authority and repository integration policy",),
+        errors,
+    )
+    require_text(
         "skills/engineering/pursue-goal/references/codex.md",
         ("native goal", "linked worktree", "not status polling"),
         errors,

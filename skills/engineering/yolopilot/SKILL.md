@@ -46,7 +46,7 @@ whole-change `/code-review`, using the provisional contract and subsequent corre
 Fix real findings and complete /independent-pr-review's developer continuation loop on the exact
 committed proposal; ordinary findings supplement the separate Standards/Spec axes.
 
-Follow [the shared developer loop](../independent-pr-review/references/developer-loop.md) to route
+Invoke /independent-pr-review and follow its shared developer continuation loop to route
 settled work. Without an applicable integration grant, leave a review branch within push authority
 or a local result when push is unavailable. With existing authority for an agent-owned target,
 complete its integration and verification after all gates pass, without another human dev handoff.
