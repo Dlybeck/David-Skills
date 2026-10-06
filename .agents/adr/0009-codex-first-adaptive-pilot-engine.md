@@ -3,6 +3,12 @@
 The four targeted invocation changes and human-steering refinement are recorded in
 [ADR 0010](./0010-human-steered-autonomy.md); the original decision below explains their starting point.
 
+Delivery authority is refined by the current repository-policy routing in the shared independent
+review loop: a provisional Yolopilot objective does not remove an applicable standing integration
+grant. Human-owned promotion and explicit task restrictions remain boundaries. The review-only
+statement in the original decision below records the initial default, not a prohibition on
+already-authorized agent-owned integration.
+
 ## Context
 
 The original pilots encoded one Claude-specific launch command and largely replayed the interactive

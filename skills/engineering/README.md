@@ -13,7 +13,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[setup](./setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[delegate](./delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
 - **[autopilot](./autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
-- **[yolopilot](./yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended without merging into `dev` on its own.
+- **[yolopilot](./yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended within existing authority and repository integration policy.
 - **[wayfinder](./wayfinder/SKILL.md)** — Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
 
 ## Model-invoked

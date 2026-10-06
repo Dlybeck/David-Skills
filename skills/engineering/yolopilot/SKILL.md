@@ -1,13 +1,14 @@
 ---
 name: yolopilot
-description: Start an autonomous long-horizon run immediately from a provisional interpretation, then leave a review branch and explain what the run learned.
+description: Start an autonomous long-horizon run immediately from a provisional interpretation, then deliver within repository policy and existing authority and explain what the run learned.
 disable-model-invocation: true
 ---
 
 # Yolopilot
 
 Enter only through an explicit last-second human handoff. Yolopilot skips Autopilot's understanding
-session, so it trades upfront alignment for a narrower delivery boundary and a stronger audit trail.
+session, so its objective starts provisional and its default delivery stops at a review branch.
+Applicable standing integration grants still apply; skipping grilling creates no new authority.
 
 ## Launch without waiting
 
@@ -21,7 +22,10 @@ Run these steps straight through without pausing for a reply:
    - Allow research, local file changes, tests and evaluations, dependency installation, local
      compute, small feature-branch commits, and a pushed review branch.
    - Keep money, new credentials, production deployment, material deletion, safeguard weakening,
-     unrelated scope, integration branches, and `main` outside the contract.
+     unrelated scope, and human-owned promotions outside the contract. Integration is excluded
+     by default; include an agent-owned target only when repository policy and an applicable
+     standing grant or explicit approval already authorize it. Missing policy or authority
+     leaves integration unresolved; branch names are not grants.
    - Apply any narrower authority the user supplied; defaults cannot override an explicit
      no-push, no-commit, read-only, or other boundary.
    - Preserve any user-supplied deadline and reporting agreement. Resolve a duration once;
@@ -35,18 +39,19 @@ or expanding authority remains a human boundary, even when a broader move looks 
 Use `/pursue-goal`'s steering discipline when the human checks in: incorporate clear corrections,
 retain provisional assumptions as history, and do not turn a question into a changed objective.
 
-## Review-branch boundary
+## Delivery boundary
 
-Commit in small, intelligible steps. Before stopping, run the relevant full validation surface and
-one `/code-review` over the entire branch, using the contract with subsequent user corrections as
-the spec. Fix every real
-finding, push the feature branch only within the active contract, and leave it unmerged for human
-review. Complete /independent-pr-review's developer continuation loop on the exact committed
-proposal before presenting it as settled; its ordinary findings supplement the separate axes.
-With no push authority or no remote, leave the result local and state that limitation.
+Commit in small, intelligible steps. Before delivery, run the relevant full validation surface and
+whole-change `/code-review`, using the provisional contract and subsequent corrections as the spec.
+Fix real findings and complete /independent-pr-review's developer continuation loop on the exact
+committed proposal; ordinary findings supplement the separate Standards/Spec axes.
 
-Yolopilot never merges into `dev` or another integration branch. A later, explicit approval may
-authorize the merge as a separate action.
+Invoke /independent-pr-review and follow its shared developer continuation loop to route
+settled work. Without an applicable integration grant, leave a review branch within push authority
+or a local result when push is unavailable. With existing authority for an agent-owned target,
+complete its integration and verification after all gates pass, without another human dev handoff.
+Human-owned promotion still requires its explicit approval. Neither the provisional interpretation
+nor the Yolopilot label can widen authority or override an explicit task restriction.
 
 ## Postflight
 

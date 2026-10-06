@@ -54,7 +54,7 @@ implementation, research, review, or any standalone skill.
    preparation. Missing local prerequisites do not route through `/setup` or require renewed approval.
    Commits and ticket resolution require authority; without it, leave a tested local diff.
    Committed proposals also use **`/independent-pr-review`**: a fresh full-base actionable defect
-   review and authorized developer repair/re-review loop before presenting the settled PR. It keeps
+   review and authorized developer repair/re-review loop before policy-driven settled delivery. It keeps
    ordinary findings separate from Standards/Spec and does not grant comment or merge authority.
    **`/tdd`**, **`/code-review`**, and **`/independent-pr-review`** also work standalone. A conversation or current goal contract,
    including user corrections, can supply the requirements without a formal spec.
@@ -73,9 +73,9 @@ decisions. Do not infer a universal safe context size from another model's token
 
 ## Running autonomously
 
-**`/autopilot`** — long-horizon work whose authority is earned through a pre-departure `/grilling` session. It locks a goal contract, then `/pursue-goal` selects research, discovery, delivery, and optimization loops until the evidence proves the goal, new human authority is required, or the evidence plateaus. It may integrate into `dev` only when the locked contract authorizes that delivery target and every gate passes.
+**`/autopilot`** — long-horizon work whose authority is earned through a pre-departure `/grilling` session. It locks a goal contract, then `/pursue-goal` selects research, discovery, delivery, and optimization loops until the evidence proves the goal, new human authority is required, or the evidence plateaus. It records applicable standing integration grants in the locked contract and follows repository branch ownership after every delivery gate passes.
 
-**`/yolopilot`** — the same long-horizon engine entered without grilling. It states a provisional interpretation and starts immediately, learning and refining inside that interpretation. It may push a review branch but never merges it. Its postflight gives a short account of assumptions, actions, evidence, and lessons, then offers an immediate explanation or the optional `/teach` path for durable learning.
+**`/yolopilot`** — the same long-horizon engine entered without grilling. It states a provisional interpretation and starts immediately, learning and refining inside that interpretation. Its default delivery is a review branch; existing repository policy and applicable integration grants can authorize agent-owned integration after every gate passes. Human-owned promotions still require their approval. Its postflight gives a short account of assumptions, actions, evidence, and lessons, then offers an immediate explanation or the optional `/teach` path for durable learning.
 
 **`/pursue-goal`** — the model-invoked engine under both pilots. It is not another trust mode and normally is not the human entry point. It keeps the goal contract stable while choosing whichever loop reduces the current uncertainty.
 

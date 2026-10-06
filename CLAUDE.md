@@ -37,7 +37,11 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 
 ## Release flow
 
-Feature work is merged into `dev` and validated there. David alone promotes the tested `dev` tip
+`dev` is the agent-owned integration branch. Agents have a standing grant to integrate scoped
+feature work there after fresh independent review, required tests, and exact-head CI pass; verify
+the delivered ref and integration CI. A dev-target PR is traceability, not a request for David to
+review or approve it. Explicit task restrictions override this grant. David alone promotes the tested
+`dev` tip
 to `main`; that push is the human release approval. The repository does not use a version or
 release pull request.
 

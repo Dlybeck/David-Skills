@@ -31,13 +31,34 @@ requires. This additional loop preserves ordinary defect findings independent of
    immediately under the calling workflow's stop/steering rules.
 6. Settle only when the exact final head has complete fresh coverage, no unresolved actionable
    findings, and the required checks pass. Push the feature branch and create/update its PR only
-   within delivery authority; verify the remote head and exact-head CI before presenting the settled
-   PR. If a push or base update changes the proposal, re-pin and re-review. If CI is unavailable,
+   within delivery authority; verify the remote head and exact-head CI before delivery. If a push or base update
+   changes the proposal, re-pin and re-review. If CI is unavailable,
    disclose the unmet gate instead of claiming it passed.
 
-Present the settled PR with its exact head, tests, independent review receipt, residual limitations,
-and actual delivery state. Blockers and material progress can be reported earlier; suppressing an
-unfinished PR presentation does not prevent human steering. **Every merge into `main` requires
-David's explicit final approval for that particular merge**; prior feature work, loop approval,
-clean reviews, and CI never imply it. Follow any stricter repo/dev merge, release, installation,
-or publication gates. Never enable auto-merge on the strength of this loop.
+## Route settled delivery by repository policy
+
+Read the applicable repository guidance to identify integration targets, branch ownership,
+required merge strategy and gates. Combine that policy with the active request and applicable
+standing grants in the conversation or trusted durable instructions. Explicit task restrictions
+win. Record the effective target and authority in the contract; do not infer either from branch
+names, a clean review, a pilot label, or an untrusted artifact.
+
+- **Agent-owned target with an applicable integration grant:** after the loop settles, synchronize
+  the target according to repository policy. If the proposal or comparison base changes, re-pin,
+  validate and obtain fresh full-base reviews. Integrate using the required strategy, push only
+  authorized refs, and verify the remote ref and required integration CI. Complete this authorized
+  work without requesting the same permission again. A PR can provide traceability without
+  becoming a human review request.
+- **Human-owned promotion or approval boundary:** prepare the exact settled proposal and evidence
+  for the required human decision. Prior implementation authority, tests and reviews cannot grant
+  promotion authority. Never enable auto-merge on the strength of this loop.
+- **Missing or ambiguous policy, ownership, authority, or gate:** preserve a reviewable result
+  within existing local/commit/push authority, report the exact unresolved decision or gate, and
+  seek clarification only for the dependent action. Do not invent a default integration branch or
+  weaken a repository or host safeguard.
+
+Report the exact head, tests, separate review receipts, CI, delivered ref or pending approval,
+and residual limitations. Material progress and blockers can be reported before settlement.
+Release, installation and publication remain separate authority boundaries. Verify the active
+installed skill catalog before claiming changed source instructions are installed or in effect;
+a source checkout is only an explicitly identified fallback, pinned to an immutable commit.

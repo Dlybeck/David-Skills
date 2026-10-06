@@ -1,6 +1,6 @@
 # David Skills
 
-David's private, personal fork of [mattpocock/skills](https://github.com/mattpocock/skills) — agent skills for real engineering, adapted to David's git practices and issue-tracking conventions. This collection encodes a personal working environment: some skills assume a `dev` integration branch with `main` human-gated, and the managed plugins carry Git guardrail hooks. Those assumptions are declared rather than hidden (see [.agents/adr/0006](./.agents/adr/0006-personal-practice-assumptions-hold-in-every-install.md)).
+David's private, personal fork of [mattpocock/skills](https://github.com/mattpocock/skills) — agent skills for real engineering, adapted to David's git practices and issue-tracking conventions. This collection encodes a personal working environment: the reusable delivery loop follows repository branch ownership and applicable standing grants; this repository uses agent-owned `dev` with human-owned `main` promotion, and the managed plugins carry Git guardrail hooks. Those assumptions are declared rather than hidden (see [.agents/adr/0006](./.agents/adr/0006-personal-practice-assumptions-hold-in-every-install.md)).
 
 Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process. But while doing so, they take away your control and make bugs in the process hard to resolve.
 
@@ -244,7 +244,7 @@ Skills for daily code work.
 - **[setup](./skills/engineering/setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[delegate](./skills/engineering/delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
 - **[autopilot](./skills/engineering/autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
-- **[yolopilot](./skills/engineering/yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended without merging into `dev` on its own.
+- **[yolopilot](./skills/engineering/yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended within existing authority and repository integration policy.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of decision tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
 
 **Model-invoked**

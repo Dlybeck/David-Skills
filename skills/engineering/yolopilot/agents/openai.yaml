@@ -1,6 +1,6 @@
 interface:
   display_name: "Yolopilot"
-  short_description: "No-grilling unattended work, never auto-merged"
-  default_prompt: "Use $yolopilot to start this long-horizon task immediately and leave a review branch."
+  short_description: "No-grilling work within existing authority"
+  default_prompt: "Use $yolopilot to start this long-horizon task immediately and deliver within repository policy and applicable authority."
 policy:
   allow_implicit_invocation: false

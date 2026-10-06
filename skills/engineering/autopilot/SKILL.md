@@ -36,10 +36,12 @@ Lock one self-contained **goal contract**:
 
 The normal personal-practice envelope may authorize research, local changes, tests and evaluations,
 dependency installation, local compute, feature-branch commits, and pushes. It may authorize a
-reviewed `--no-ff` merge into `dev` only when the user confirms that delivery target during this
-session and repository gates pass. Keep money, new credentials, production deployment, material
-deletion, safeguard weakening, unrelated scope, and `main` outside the contract unless the user
-grants the specific action explicitly.
+reviewed integration into the agent-owned target identified by repository policy when an
+applicable standing grant or explicit task approval authorizes it and all gates pass. Record that
+existing grant without requiring fresh permission for every run. Keep money, new credentials,
+production deployment, material deletion, safeguard weakening, unrelated scope, and human-owned
+promotions outside the contract unless the specific action is explicitly authorized. Branch
+names alone grant no authority; missing policy or authority leaves integration unresolved.
 
 When implementation and tests are in scope, routine local toolchain and dependency setup is part
 of that work unless the user excludes it. Reuse an applicable standing grant already present in
@@ -63,19 +65,14 @@ discipline; the initial agreement does not prevent its owner from changing direc
 
 ## Delivery
 
-Before any authorized integration into `dev`:
+Invoke /independent-pr-review and follow its shared developer continuation loop for
+policy-driven delivery after full validation, whole-change Standards/Spec checks and fresh ordinary
+independent review. Synchronize the authorized integration target, re-pin and re-review any changed
+proposal, then use the repository's required merge strategy and verify remote refs and CI.
 
-1. Rebase or merge the current `dev` state according to repository policy.
-2. Run the contract's full validation surface and a whole-change `/code-review`.
-3. Fix every real finding and rerun affected gates. Invoke /independent-pr-review and complete its
-   developer continuation loop over the exact whole committed proposal before integration. Keep
-   its ordinary findings separate from Standards/Spec checks; reconcile the pinned review after
-   any base or head change.
-4. Merge `--no-ff` from the feature branch, push only the authorized refs, and verify the remote.
-
-If any integration permission or gate is absent, leave the work on its review branch and report
-the unmet condition. Push that branch only when the contract explicitly authorizes the push;
-otherwise leave it local. `main` remains human-gated.
+If policy, integration permission or a required gate is absent, retain the review branch within
+existing commit/push authority and report the unmet condition. Human-owned promotion remains
+subject to its explicit approval boundary; the confirmed goal does not override task restrictions.
 
 ## Return
 
