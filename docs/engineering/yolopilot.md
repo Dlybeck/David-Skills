@@ -2,8 +2,8 @@
 
 `yolopilot` starts a durable autonomous run immediately from the agent's stated best interpretation
 of a loose handoff. It uses the same [pursue-goal](./pursue-goal.md) engine as Autopilot but replaces
-upfront alignment with a stricter delivery boundary: it leaves a review branch and never
-merges it.
+upfront alignment with a provisional objective. Its default delivery is a review branch; existing
+standing integration grants remain available under repository policy.
 
 Its defining behavior is **refine afterward**. The run preserves what it initially assumed, learns
 from research and experiments, and explains the difference at postflight.
@@ -16,14 +16,15 @@ Reach for it when the handoff is genuinely last-second and a useful provisional 
 better than waiting. Whenever you can stay for an understanding round, use
 [autopilot](./autopilot.md); a jointly locked contract earns broader delivery authority.
 
-## The review-branch boundary
+## The delivery boundary
 
 Yolopilot may research, modify local files, install dependencies, use local compute, run tests and
 evaluations, and make small commits within your stated restrictions. It pushes its feature branch
 only when your authority allows it and a remote is available; otherwise delivery stays local.
-It cannot merge into `dev` or another
-integration branch. Money, credentials, production, material deletion, safeguards, unrelated scope,
-and `main` remain human boundaries.
+Repository guidance identifies branch ownership; the active request and applicable standing
+grants determine authority. Missing policy or authority leaves integration unresolved. Money,
+credentials, production, material deletion, safeguards and unrelated scope remain boundaries.
+Human-owned promotion requires its explicit approval, and task restrictions override defaults.
 
 ## The learning digest
 
@@ -38,14 +39,16 @@ lasting product decision, unresolved requirement, or coordination need.
 ## Independent delivery review
 
 A review branch completes [independent-pr-review](./independent-pr-review.md) before its settled
-receipt. That loop preserves Yolopilot's boundary: leave the branch unmerged for human review.
+receipt. That loop routes settled work to an authorized agent-owned target or preserves a
+reviewable branch at a missing-authority or human-owned approval boundary.
 
 ## Common questions
 
 **Is this just Autopilot without questions?**
 
 It shares the engine, but not the authority. Autopilot can earn a confirmed integration target;
-Yolopilot always stops at a review branch.
+Yolopilot starts provisionally. Both honor existing integration grants; neither creates new
+authority simply by its name.
 
 **What if its initial interpretation turns out wrong?**
 
@@ -68,7 +71,7 @@ results, unfinished work, attempted approaches, reasons, and any jobs still runn
 
 - The warning and provisional interpretation appear before mutation, without waiting for a reply.
 - Git history makes each material decision easy to inspect.
-- The final branch is validated, reviewed, and unmerged; it is pushed only when authorized.
+- The final result is validated, independently reviewed, and delivered only to an authorized target.
 - The learning digest says what changed in the agent's understanding.
 
 ## Where it fits

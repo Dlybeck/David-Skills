@@ -28,7 +28,9 @@ evidence while it remains relevant, and run required full checks before delivery
 
 Committed delivery also passes [independent-pr-review](./independent-pr-review.md) before the
 settled result. Its repair loop supplements the separate Standards/Spec checks within existing
-commenting and delivery authority.
+commenting and delivery authority. Repository policy and applicable standing grants route settled
+work to agent-owned integration or a human-owned approval boundary; a dev-target traceability PR
+does not itself require another human handoff.
 
 ## Common questions
 

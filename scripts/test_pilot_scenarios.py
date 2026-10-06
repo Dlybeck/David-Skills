@@ -18,6 +18,13 @@ EXPECTED_IDS = {
     "human-authority-boundary",
     "dirty-checkout-isolation",
     "yolopilot-learning-postflight",
+    'agent-owned-dev-standing-grant',
+    'human-owned-main-promotion',
+    'custom-branch-policy',
+    'missing-policy',
+    'explicit-no-integration',
+    'installed-source-distinction',
+
 }
 
 
@@ -66,6 +73,33 @@ def main() -> int:
         elif not all(isinstance(item, str) and item.strip() for item in assertions):
             errors.append(f"{label}: assertions must be non-empty strings")
 
+    routing_ids = {
+        "agent-owned-dev-standing-grant": "integrate-dev",
+        "human-owned-main-promotion": "request-promotion-approval",
+        "custom-branch-policy": "integrate-staging",
+        "missing-policy": "retain-review-branch",
+        "explicit-no-integration": "retain-local-commit",
+        "installed-source-distinction": "report-source-only",
+    }
+    for scenario in scenarios:
+        if not isinstance(scenario, dict) or scenario.get("id") not in routing_ids:
+            continue
+        identifier = scenario["id"]
+        for field in ("repository_policy", "task_authority"):
+            if not isinstance(scenario.get(field), str) or not scenario[field].strip():
+                errors.append(f"{identifier}: missing routing input {field}")
+        if scenario.get("expected_route") != routing_ids[identifier]:
+            errors.append(f"{identifier}: inconsistent expected routing outcome")
+
+    # This validates fixture/source contracts, not execution of a model. A fresh Spec
+    # review evaluates these inputs against the final instructions before delivery.
+    require_text(
+        "skills/engineering/independent-pr-review/references/developer-loop.md",
+        ("Agent-owned target", "Human-owned promotion", "Missing or ambiguous policy",
+         "Explicit task restrictions", "installed skill catalog", "immutable commit"),
+        errors,
+    )
+
     if ids != EXPECTED_IDS:
         errors.append(
             "pilot scenarios: ids differ; missing="
@@ -89,12 +123,12 @@ def main() -> int:
     )
     require_text(
         "skills/engineering/autopilot/SKILL.md",
-        ("Invoke `/pursue-goal`", "merge into `dev`", "`main`"),
+        ("Invoke `/pursue-goal`", "applicable standing grant", "Human-owned promotion"),
         errors,
     )
     require_text(
         "skills/engineering/yolopilot/SKILL.md",
-        ("without pausing for a reply", "never merges", "quick learning digest", "/teach"),
+        ("without pausing for a reply", "standing integration grants", "quick learning digest", "/teach"),
         errors,
     )
     require_text(

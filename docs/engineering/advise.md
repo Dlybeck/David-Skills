@@ -68,6 +68,12 @@ Two of those are routinely got wrong, which is why the router carries the order 
 
 ## Independent delivery review
 
+Settled delivery follows repository branch ownership and applicable standing grants through the
+shared review loop. Both pilots can complete authorized agent-owned integration after all gates
+pass; human-owned promotion requires its approval. Missing policy or authority leaves a
+reviewable result, and explicit task restrictions win.
+
+
 | Review needed | Practice |
 | --- | --- |
 | Fresh defect review and repair loop for a committed proposal | [independent-pr-review](./independent-pr-review.md) |

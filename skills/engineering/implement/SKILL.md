@@ -37,7 +37,8 @@ Commit only when the request or active contract authorizes it, on the authorized
 Otherwise leave a reviewable local diff. Invocation alone does not authorize Git delivery.
 
 For a committed proposal, invoke /independent-pr-review and follow its developer continuation
-loop before presenting the settled result. Preserve the separate Standards/Spec findings above.
+loop before settled delivery, including its repository-policy routing and applicable standing
+integration grants. Human-owned promotion and explicit task restrictions remain boundaries. Preserve the separate Standards/Spec findings above.
 Use a fresh reviewer with only pinned source, guidance, and settled requirements; ordinary findings
 are additional evidence, not developer self-review. Missing commit or independent-review authority
 leaves that gate explicitly unmet. Posting, pushing, and PR creation remain separately authorized.

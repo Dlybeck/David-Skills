@@ -29,16 +29,16 @@ open-ended discovery may learn faster through cited research and experiments fir
 
 ## Delivery authority
 
-Autopilot may commit and push a feature branch inside the confirmed contract. It may merge into
-`dev` only when that exact delivery target was authorized during the understanding session and the
-full validation and review gates pass. It never inherits authority over `main`.
+Autopilot records repository policy and applicable standing grants in the confirmed contract.
+It completes authorized agent-owned integration after validation, independent review and CI,
+without asking again for the same permission. Human-owned promotion retains its approval boundary.
 
 An unmet integration gate leaves work on the review branch. That branch stays local unless the
 contract separately authorizes pushing it; a fallback is not permission to publish.
 
 ## Independent delivery review
 
-Before authorized `dev` integration, [independent-pr-review](./independent-pr-review.md) settles
+Before authorized integration, [independent-pr-review](./independent-pr-review.md) settles
 the exact committed proposal after Standards/Spec checks. It adds no integration authority.
 
 ## Common questions

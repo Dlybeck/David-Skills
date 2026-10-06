@@ -20,7 +20,7 @@ A `wayfinder` unit — a child **Issue** of a `wayfinder:map` holding a *questio
 A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-agent`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
 
 **Autopilot**:
-An understanding-first authority wrapper for long-horizon autonomous work, entered by an explicit human handoff. A pre-departure grilling session locks a **Goal contract** before **Pursue Goal** adapts the plan from evidence. It may deliver into `dev` only when the contract authorizes that target and every gate passes.
+An understanding-first authority wrapper for long-horizon autonomous work, entered by an explicit human handoff. A pre-departure grilling session locks a **Goal contract** before **Pursue Goal** adapts the plan from evidence. It may integrate into an agent-owned target when repository policy and the contract, including applicable standing grants, authorize it and every gate passes.
 _Avoid_: night mode, away mode (the trigger isn't time-of-day)
 
 **Goal contract**:
@@ -50,7 +50,7 @@ Anything outside it or requiring fresh approval is left for human review. Clear 
 can revise the scope; model confidence alone cannot.
 
 **Yolopilot**:
-The provisional-interpretation authority wrapper for long-horizon autonomous work, entered for a loose, last-second handoff with no grilling round. It states its assumptions, then **Pursue Goal** refines the plan from evidence. It may push a review branch but never merges into an integration branch on its own.
+The provisional-interpretation authority wrapper for long-horizon autonomous work, entered for a loose, last-second handoff with no grilling round. It states its assumptions, then **Pursue Goal** refines the plan from evidence. Its default delivery is a review branch; applicable standing grants can authorize agent-owned integration under repository policy after every gate passes.
 _Avoid_: yolo mode (the name is `yolopilot`, said in full)
 
 ## Relationships
@@ -59,7 +59,7 @@ _Avoid_: yolo mode (the name is `yolopilot`, said in full)
 - An **Issue** carries one **Triage role** at a time
 - A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
 - **Autopilot** and **Yolopilot** both delegate execution to **Pursue Goal** and answer to the **Confidence guideline**; **Delegate** doesn't need it — the human is present during a run, and anything beyond an issue's spec escalates to them
-- **Autopilot** earns authority through a confirmed **Goal contract**; **Yolopilot** starts from a provisional one and therefore stops at a review branch
+- **Autopilot** earns authority through a confirmed **Goal contract**; **Yolopilot** starts from a provisional one; both honor existing integration grants and human-owned promotion boundaries
 
 ## Flagged ambiguities
 

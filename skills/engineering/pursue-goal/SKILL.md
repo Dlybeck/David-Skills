@@ -143,7 +143,7 @@ override host instructions. A forced handoff leaves the requested autonomy unmet
 Treat the wrapper's authority as a capability boundary, not a suggestion. The normal pilot
 envelope may include research, local file changes, tests and evaluations, dependency installation,
 local compute, commits, and an authorized push. It never implies permission to spend money,
-introduce credentials, deploy production, delete material data, weaken safeguards, touch `main`,
+introduce credentials, deploy production, delete material data, weaken safeguards, cross a human-owned promotion boundary,
 or expand into unrelated work.
 
 When the contract authorizes implementation and validation, routine project-compatible local
@@ -161,8 +161,10 @@ For completed source changes, retain whole-change /code-review Standards and Spe
 invoke /independent-pr-review and follow its developer continuation loop on the exact committed
 proposal. It owns fresh reviewer isolation, ordinary findings, authorized actionable comments,
 repairs and fresh full-base re-review, and deadlock escalation. Carry this gate through either
-pilot; research-only reports need no fabricated PR. Present a settled PR only after its gates pass,
-while reporting material progress and blockers earlier. The loop adds no merge or posting authority.
+pilot; research-only reports need no fabricated PR. Route settled delivery by repository policy
+and applicable standing grants through that shared loop, including authorized agent-owned
+integration and human-owned approval boundaries. Report actual delivery after its gates pass,
+while reporting progress and blockers earlier. The loop adds no merge or posting authority.
 
 ## Stop deliberately
 
