@@ -53,7 +53,10 @@ implementation, research, review, or any standalone skill.
    A request to implement or fix includes routine local toolchain, dependency, and test-environment
    preparation. Missing local prerequisites do not route through `/setup` or require renewed approval.
    Commits and ticket resolution require authority; without it, leave a tested local diff.
-   **`/tdd`** and **`/code-review`** also work standalone. A conversation or current goal contract,
+   Committed proposals also use **`/independent-pr-review`**: a fresh full-base actionable defect
+   review and authorized developer repair/re-review loop before presenting the settled PR. It keeps
+   ordinary findings separate from Standards/Spec and does not grant comment or merge authority.
+   **`/tdd`**, **`/code-review`**, and **`/independent-pr-review`** also work standalone. A conversation or current goal contract,
    including user corrections, can supply the requirements without a formal spec.
 
    **`/delegate`** dispatches this same step instead of you driving it: one bounded run claims each frontier ticket, hands it whole to a worker subagent, and tracks only whether it resolved — over when the frontier is drained. Reach for it when several tickets are ready and independent.
@@ -100,6 +103,13 @@ A starting situation that generates work, then merges onto the main flow.
   When the map clears, **it hands off, it doesn't build**. Preserve its linked decisions in the
   implementation context. `/to-spec` can consolidate them when that would help; `/to-tickets`
   supplies decomposition when needed. None of these artifacts grants execution authority.
+
+## Choosing a review
+
+- **`/code-review`** checks Standards and Spec independently, including in-scope uncommitted work.
+- **`/independent-pr-review`** hunts actionable defects at an exact committed head/full base diff,
+  with no implementation conversation or prior reviewer conclusions. After implementation its
+  developer continuation loop repairs and re-reviews within authority; clean passes stay private.
 
 ## Codebase health
 

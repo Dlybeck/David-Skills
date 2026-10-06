@@ -36,6 +36,12 @@ that the review was not independent. Fix real findings and rerun affected checks
 Commit only when the request or active contract authorizes it, on the authorized branch.
 Otherwise leave a reviewable local diff. Invocation alone does not authorize Git delivery.
 
+For a committed proposal, invoke /independent-pr-review and follow its developer continuation
+loop before presenting the settled result. Preserve the separate Standards/Spec findings above.
+Use a fresh reviewer with only pinned source, guidance, and settled requirements; ordinary findings
+are additional evidence, not developer self-review. Missing commit or independent-review authority
+leaves that gate explicitly unmet. Posting, pushing, and PR creation remain separately authorized.
+
 If a ticket supplied the work, its acceptance conditions pass, and tracker updates are authorized,
 mark it resolved per the project's issue-tracker convention. Otherwise report the result without
 changing its status. End with evidence, validation limits, and the actual delivery state.

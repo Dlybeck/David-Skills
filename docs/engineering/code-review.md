@@ -11,7 +11,7 @@ Type `/code-review`, or the agent reaches for it automatically when you ask to r
 | Your situation | Reach for |
 | --- | --- |
 | A diff exists and you want to know if it is built right *and* is the right thing | `code-review` |
-| You want bugs hunted in the diff — null paths, races, off-by-one | Claude Code's own built-in review, not this one (see the name clash below) |
+| You want bugs hunted in the diff — null paths, races, off-by-one | [independent-pr-review](./independent-pr-review.md) for a fresh pinned-head defect review |
 | Nothing is written yet and you want it written test-first | [tdd](./tdd.md) |
 | A whole spec needs building, review included | [implement](./implement.md), which calls this skill itself |
 | The whole codebase has drifted, not one diff | [re-architect](./re-architect.md) |

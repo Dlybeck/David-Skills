@@ -24,6 +24,12 @@ evidence while it remains relevant, and run required full checks before delivery
 | Commits authorized | Commit on the authorized branch |
 | Ticket update authorized and acceptance passes | Resolve the originating ticket |
 
+## Independent delivery review
+
+Committed delivery also passes [independent-pr-review](./independent-pr-review.md) before the
+settled result. Its repair loop supplements the separate Standards/Spec checks within existing
+commenting and delivery authority.
+
 ## Common questions
 
 **Must I create a spec or tickets first?**

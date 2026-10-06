@@ -41,7 +41,9 @@ Commit in small, intelligible steps. Before stopping, run the relevant full vali
 one `/code-review` over the entire branch, using the contract with subsequent user corrections as
 the spec. Fix every real
 finding, push the feature branch only within the active contract, and leave it unmerged for human
-review. With no push authority or no remote, leave the result local and state that limitation.
+review. Complete /independent-pr-review's developer continuation loop on the exact committed
+proposal before presenting it as settled; its ordinary findings supplement the separate axes.
+With no push authority or no remote, leave the result local and state that limitation.
 
 Yolopilot never merges into `dev` or another integration branch. A later, explicit approval may
 authorize the merge as a separate action.

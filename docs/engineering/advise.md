@@ -66,6 +66,13 @@ The other idea it hands you is the **phase boundary**: a useful moment to decide
 
 Two of those are routinely got wrong, which is why the router carries the order rather than the list. `/handoff` reads like the general bridge between windows and is not: portability is the whole of what it buys. `/compact` is the bottom of the tree rather than the first reach, because the four questions above it are each cheaper or more precise.
 
+## Independent delivery review
+
+| Review needed | Practice |
+| --- | --- |
+| Fresh defect review and repair loop for a committed proposal | [independent-pr-review](./independent-pr-review.md) |
+| Separate Standards and Spec axes, including local work in progress | [code-review](./code-review.md) |
+
 ## Common questions
 
 **Can an autonomous run have a deadline and regular reports?**

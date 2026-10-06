@@ -35,6 +35,11 @@ workspace.
 A retrospective spec is exceptional rather than automatic. It pays only when the run exposes a
 lasting product decision, unresolved requirement, or coordination need.
 
+## Independent delivery review
+
+A review branch completes [independent-pr-review](./independent-pr-review.md) before its settled
+receipt. That loop preserves Yolopilot's boundary: leave the branch unmerged for human review.
+
 ## Common questions
 
 **Is this just Autopilot without questions?**

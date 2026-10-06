@@ -57,6 +57,11 @@ A stop request stops new work and accounts for identified running work safely.
 [Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
 answer while unrelated authorized work continues.
 
+## Independent delivery review
+
+When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh
+ordinary review and the authorized repair loop. Research-only reports need no fabricated PR.
+
 ## Common questions
 
 **Why is this model-invoked when the pilots are human-invoked?**

@@ -36,6 +36,11 @@ full validation and review gates pass. It never inherits authority over `main`.
 An unmet integration gate leaves work on the review branch. That branch stays local unless the
 contract separately authorizes pushing it; a fallback is not permission to publish.
 
+## Independent delivery review
+
+Before authorized `dev` integration, [independent-pr-review](./independent-pr-review.md) settles
+the exact committed proposal after Standards/Spec checks. It adds no integration authority.
+
 ## Common questions
 
 **Do I need to answer every technical question before leaving?**
