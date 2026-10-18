@@ -22,9 +22,9 @@ gh auth setup-git
 
 <canonical-block name="claude-code">
 
-```
-/plugin marketplace add Dlybeck/David-Skills
-/plugin install david-skills@david-skills
+```bash
+claude plugin marketplace add Dlybeck/David-Skills
+claude plugin install david-skills@david-skills
 ```
 
 </canonical-block>
@@ -32,9 +32,9 @@ gh auth setup-git
 Add the marketplace once. To update a later release, refresh the catalog and then update the
 qualified plugin:
 
-```
-/plugin marketplace update david-skills
-/plugin update david-skills@david-skills
+```bash
+claude plugin marketplace update david-skills
+claude plugin update david-skills@david-skills
 ```
 
 ## Codex — the plugin

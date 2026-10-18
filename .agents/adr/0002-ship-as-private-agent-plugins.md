@@ -15,9 +15,9 @@ travel with the skills.
 
 The canonical Claude Code route is:
 
-```
-/plugin marketplace add Dlybeck/David-Skills
-/plugin install david-skills@david-skills
+```bash
+claude plugin marketplace add Dlybeck/David-Skills
+claude plugin install david-skills@david-skills
 ```
 
 Both harnesses ship every promoted skill. The router is harness-neutral (`advise`), while
