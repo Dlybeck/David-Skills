@@ -27,11 +27,10 @@ Pick the plugin for the agent you use. Installing an editable file copy as well 
 <summary><strong>Claude Code</strong></summary>
 
 ```bash
-claude plugin marketplace add Dlybeck/David-Skills
-claude plugin install david-skills@david-skills
+claude plugin install david-skills --marketplace Dlybeck/David-Skills
 ```
 
-Not in Claude Code's official marketplace — that listing (`mattpocock-skills`) is Matt's unmodified original. This is a private single-plugin marketplace baked into this repo; add it once, then install from it.
+Not in Claude Code's official marketplace — that listing (`mattpocock-skills`) is Matt's unmodified original. This is a private single-plugin marketplace baked into this repo; the install command adds it for you.
 
 To update later:
 

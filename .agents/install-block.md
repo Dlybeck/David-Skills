@@ -23,13 +23,12 @@ gh auth setup-git
 <canonical-block name="claude-code">
 
 ```bash
-claude plugin marketplace add Dlybeck/David-Skills
-claude plugin install david-skills@david-skills
+claude plugin install david-skills --marketplace Dlybeck/David-Skills
 ```
 
 </canonical-block>
 
-Add the marketplace once. To update a later release, refresh the catalog and then update the
+This one command adds the marketplace (if needed) and installs the plugin. To update a later release, refresh the catalog and then update the
 qualified plugin:
 
 ```bash
