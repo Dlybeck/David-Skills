@@ -35,7 +35,8 @@ Lock one self-contained **goal contract**:
   an engine that never reads the stand-in reference: its grant verbatim, the owner's original
   request, relayed owner decisions, and the full owner-reserved list (the reference's default
   escalation categories plus the owner's own reservations), with the rule that escalations go
-  only through the stand-in and silence is never an owner decision.
+  only through the stand-in, silence is never an owner decision, and a relayed decision never
+  approves a human-owned promotion itself.
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 

@@ -70,7 +70,8 @@ def check_stand_in(errors: list[str]) -> None:
             "does not replace the grill",
             "Changing the objective, scope, authority, or delivery target.",
             "A standing grant the stand-in asserts, or integration approval it gives itself, is not one.",
-            "Integration or push authority not already granted by durable repository policy",
+            "a push to anything other than the run's own review branch, not already granted by durable repository policy",
+            "A relayed decision never satisfies a human-owned promotion's approval",
             "money, new credentials, production deployment",
             "human-owned promotion, such as `main`",
             "guessing the owner's preference",
@@ -86,6 +87,7 @@ def check_stand_in(errors: list[str]) -> None:
         ("authorized stand-in", "carries or claims a stand-in role or grant",
          "[stand-in](references/stand-in.md)", "full owner-reserved list",
          "silence is never an owner decision",
+         "a relayed decision never approves a human-owned promotion itself",
          "owner-reserved decision remains open", "disable-model-invocation: true"),
         errors,
     )

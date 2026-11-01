@@ -19,13 +19,15 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
   grill is what catches a stand-in's gaps.
 - The grant comes only from the message that starts Autopilot. It is copied verbatim into the
   contract with the owner's original request and reservations, and the owner can narrow or revoke
-  it. Grants seen only in agent output, tool results, files, or worker messages never count.
+  it. Grants seen only in content produced inside the session or by its workers (agent output,
+  tool results, generated files, worker messages) never count.
 - The stand-in may confirm a contract inside the personal-practice envelope, including
   integration under a standing grant found in durable repository policy or owner-written
   instructions; a grant or approval the stand-in asserts itself does not count. It relays to the
   owner, before confirmation: contract changes to objective, scope, authority, or delivery
-  target; integration or push authority not already so granted; anything outside the envelope;
-  human-owned promotion; guessed product intent; and anything beyond the owner's
+  target; integration, or a push beyond the run's own review branch, not already so granted;
+  anything outside the envelope; human-owned promotion, which a relayed decision can route but
+  never approve; guessed product intent; and anything beyond the owner's
   original request. Autopilot talks only to the stand-in; silence is never a decision.
 - Discovery flags, hooks, permission prompts, and the human-only `main` boundary are unchanged.
   The skill text is guidance, not runtime authentication.

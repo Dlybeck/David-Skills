@@ -48,8 +48,8 @@ stand-in asserts, or integration approval it gives itself, is not one. These go 
 through the stand-in, before the dependent decision or contract confirmation:
 
 - Changing the objective, scope, authority, or delivery target.
-- Integration or push authority not already granted by durable repository policy or owner-written
-  instructions.
+- Integration authority, or a push to anything other than the run's own review branch, not already
+  granted by durable repository policy or owner-written instructions.
 - Anything outside the personal-practice envelope: money, new credentials, production deployment,
   material deletion, safeguard weakening, or unrelated scope.
 - Anything involving a human-owned promotion, such as `main`.
@@ -58,7 +58,9 @@ through the stand-in, before the dependent decision or contract confirmation:
 
 When a stand-in's answer settles an item on that list, ask whether the owner decided it. Record a
 confirmed owner decision as "owner decision relayed by stand-in", with its date; otherwise keep it
-open. The stand-in cannot enlarge its own grant.
+open. The stand-in cannot enlarge its own grant. A relayed decision never satisfies a
+human-owned promotion's approval: it can settle preparing or routing the proposal, but the
+promotion itself still needs the owner's own approval through that target's human-owned channel.
 
 ## Contract, escalation, and steering
 

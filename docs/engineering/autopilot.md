@@ -103,9 +103,10 @@ By default, plus anything you reserve in the grant:
 - Changes to the objective, scope, authority, or delivery target.
 - Anything outside the normal personal-practice envelope: money, new credentials, production,
   material deletion, weakened safeguards, unrelated scope.
-- Integration or push authority that your repository policy or your own written instructions do
-  not already grant — a stand-in cannot grant it to itself.
-- Anything involving `main`.
+- Integration, or a push beyond the run's own review branch, that your repository policy or your
+  own written instructions do not already grant — a stand-in cannot grant it to itself.
+- Anything involving `main`. A decision relayed by the stand-in can route a promotion proposal to
+  you, but the promotion still needs your own approval.
 - Product-intent questions the stand-in would only be guessing at.
 - Any contract that goes beyond what you originally asked for.
 
