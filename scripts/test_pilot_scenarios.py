@@ -35,6 +35,65 @@ def require_text(path: str, fragments: tuple[str, ...], errors: list[str]) -> No
             errors.append(f"{path}: missing pilot contract fragment {fragment!r}")
 
 
+STAND_IN_SKILLS = {
+    "skills/engineering/autopilot/SKILL.md",
+    "skills/engineering/pursue-goal/SKILL.md",
+    "skills/productivity/grilling/SKILL.md",
+    "skills/engineering/advise/SKILL.md",
+}
+
+
+def check_stand_in(errors: list[str]) -> None:
+    """Autopilot alone accepts an authorized stand-in (ADR 0012)."""
+    require_text(
+        "skills/engineering/autopilot/references/stand-in.md",
+        (
+            "only from the message that starts Autopilot",
+            "word for word",
+            "never counts",
+            "Stand-in grant:",
+            "Owner's original request (verbatim):",
+            "Reserved for <owner>:",
+            "does not replace the grill",
+            "Changing the objective, scope, authority, or delivery target.",
+            "money, new credentials, production deployment",
+            "human-owned promotion, such as `main`",
+            "guessing the owner's preference",
+            "beyond the owner's original request",
+            "owner decision relayed by stand-in",
+            "never contacts the owner directly",
+            "Silence, elapsed time, or a",
+        ),
+        errors,
+    )
+    require_text(
+        "skills/engineering/autopilot/SKILL.md",
+        ("authorized stand-in", "[stand-in](references/stand-in.md)",
+         "owner-reserved decision remains open", "disable-model-invocation: true"),
+        errors,
+    )
+    require_text("skills/productivity/grilling/SKILL.md", ("Autopilot stand-in",), errors)
+    require_text("skills/engineering/pursue-goal/SKILL.md", ("authorized stand-in",), errors)
+    for wrapper in ("autopilot", "yolopilot"):
+        require_text(
+            f"skills/engineering/{wrapper}/agents/openai.yaml",
+            ("allow_implicit_invocation: false",),
+            errors,
+        )
+    # Yolopilot stays owner-only and its wording unchanged.
+    require_text(
+        "skills/engineering/yolopilot/SKILL.md",
+        ("Enter only through an explicit last-second human handoff.",
+         "disable-model-invocation: true"),
+        errors,
+    )
+    for skill_file in sorted((ROOT / "skills").glob("*/*/SKILL.md")):
+        relative = skill_file.relative_to(ROOT).as_posix()
+        text = skill_file.read_text(encoding="utf-8").lower()
+        if "stand-in" in text and relative not in STAND_IN_SKILLS:
+            errors.append(f"{relative}: only Autopilot and its direct path may accept a stand-in")
+
+
 def main() -> int:
     errors: list[str] = []
     data = json.loads(SCENARIOS.read_text(encoding="utf-8"))
@@ -146,6 +205,8 @@ def main() -> int:
         ("native goal", "linked worktree", "not status polling"),
         errors,
     )
+
+    check_stand_in(errors)
 
     if errors:
         print(f"Pilot scenario validation failed with {len(errors)} error(s):", file=sys.stderr)

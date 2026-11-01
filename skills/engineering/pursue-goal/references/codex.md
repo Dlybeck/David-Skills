@@ -12,7 +12,7 @@ Goal continuation does not create Git isolation. Establish or reuse the linked w
 by `/pursue-goal` before the first mutation, and include its absolute path in the goal objective so
 every continuation operates in the same checkout.
 
-Treat incoming human messages as steering of the current run, not implicit requests to replace
+Treat incoming human messages, or a contract-recorded stand-in's, as steering of the current run, not implicit requests to replace
 the goal. Use only goal controls actually exposed by this host. When a correction cannot be
 written into native goal metadata, keep the updated contract in the existing checkpoint, identify
 the stale metadata, and reconcile both at each continuation.

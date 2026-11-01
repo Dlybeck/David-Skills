@@ -1,14 +1,15 @@
 ---
 name: autopilot
-description: Establish a verified goal and authority contract with the user, then pursue it autonomously for as long as useful evidence supports progress.
+description: Establish a verified goal and authority contract with the user or an authorized stand-in, then pursue it autonomously for as long as useful evidence supports progress.
 disable-model-invocation: true
 ---
 
 # Autopilot
 
-Enter only through an explicit human handoff. Autopilot earns long-horizon authority through an
-understanding session before work continues without the user. It is a trust level, not a fixed
-software pipeline.
+Enter only through an explicit handoff from the human owner or an authorized stand-in. When the
+starting message carries a stand-in grant, read [stand-in](references/stand-in.md) first and
+apply it throughout. Autopilot earns long-horizon authority through an understanding session
+before work continues without the user. It is a trust level, not a fixed software pipeline.
 
 ## Establish the contract
 
@@ -21,7 +22,7 @@ warrants it, not a checklist to repeat for a small or already-understood task.
 `/grilling` uses `/attention-modes`: an On the side opening asks for the most consequential missing
 intent or boundary first. A short handoff still needs a complete, confirmed contract before this
 wrapper starts a durable goal; keep useful independent work within existing authority moving
-while any human-only contract question is open.
+while any human-only or owner-reserved contract question is open.
 
 Lock one self-contained **goal contract**:
 
@@ -30,7 +31,8 @@ Lock one self-contained **goal contract**:
 - Allowed file changes, research, local compute, tests, evaluations, commits, and external
   actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
-- Actions that require the human to return.
+- Actions that require the human to return. With a stand-in: its grant verbatim, the owner's
+  original request, owner-reserved decisions, relayed owner decisions, and the escalation route.
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 
@@ -48,15 +50,17 @@ of that work unless the user excludes it. Reuse an applicable standing grant alr
 the conversation or durable instructions instead of asking for the same permission again.
 
 Present the objective and endpoint compactly, with supporting scope and authority available in
-the working context, and obtain confirmation. An explicit approval of the same complete contract
+the working context, and obtain confirmation from the owner, or from a stand-in once no
+owner-reserved decision remains open. An explicit approval of the same complete contract
 already in the conversation counts. Do not start a durable goal while a material contract
 question remains open.
 
 ## Hand off to the engine
 
 Invoke `/pursue-goal` with the confirmed contract. This is delegated continuation of the
-human-triggered Autopilot process: the wrapper supplies trust and authority; the model-invoked
-engine supplies adaptive execution without re-invoking the human-only wrapper.
+explicitly triggered Autopilot process, whether the owner or an authorized stand-in started it:
+the wrapper supplies trust and authority; the model-invoked engine supplies adaptive execution
+without re-invoking the user-invoked wrapper. Carry any stand-in boundary in the contract itself.
 
 Let `/pursue-goal` choose among research, discovery, delivery, and optimization loops. A spec or
 issues are optional coordination artifacts, not admission tickets. Keep the contract stable while

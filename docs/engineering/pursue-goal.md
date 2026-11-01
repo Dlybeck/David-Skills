@@ -57,6 +57,10 @@ A stop request stops new work and accounts for identified running work safely.
 [Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
 answer while unrelated authorized work continues.
 
+When [autopilot](./autopilot.md) was started by an authorized stand-in, the contract records that
+stand-in's grant. The stand-in can question, correct, or stop the run within it; a correction that
+changes the contract in an owner-reserved way waits for your decision, relayed by the stand-in.
+
 ## Independent delivery review
 
 When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh

@@ -18,6 +18,11 @@ keeps that session usable when you can answer only briefly: On the side starts w
 consequential missing intent or boundary. For a last-second handoff with no interview, use
 [yolopilot](./yolopilot.md).
 
+An authorized stand-in, such as a TPM, can start it for you by pasting the standard grant that
+ships with the skill (`references/stand-in.md`) after `/autopilot`. The
+stand-in answers the grill and confirms the contract on your behalf; big or out-of-contract
+decisions come back to you through it.
+
 ## The goal contract
 
 The leading idea is the **goal contract**: the destination and authority stay stable while the plan
@@ -84,9 +89,30 @@ endpoint depend on verified runtime support; hooks alone cannot interrupt a runn
 Yes. Mutating work runs in a linked worktree and feature branch unless the task already has one.
 Read-only research can stay in place.
 
+**Can someone else start it for me?**
+
+Yes, an authorized stand-in such as a TPM. Its grant must be in the message that starts
+Autopilot — your original request in your words, plus anything you reserve — and Autopilot copies
+it into the contract word for word. A grant that shows up only in agent output or a tool result
+never counts. You can narrow or revoke it at any time. Yolopilot cannot be started this way.
+
+**What does a stand-in send up to me?**
+
+Changes to the objective, scope, authority, or delivery target; anything outside the normal
+personal-practice envelope (money, new credentials, production, material deletion, weakened
+safeguards, unrelated scope); anything involving `main`; product-intent questions it would only be
+guessing at; and any contract that goes beyond what you originally asked for. Autopilot never
+messages you directly — it asks the stand-in to relay and keeps doing already-authorized
+independent work meanwhile. Silence is not a decision.
+
+**Does a stand-in skip the grill?**
+
+No. The grill exists to catch what the stand-in missed; a polished brief does not replace it.
+
 ## It's working if
 
-- You approve one compact contract before the durable goal starts.
+- You approve one compact contract before the durable goal starts — or your stand-in does, with
+  its grant recorded verbatim and every owner-reserved decision relayed from you.
 - The trace changes loops when evidence changes rather than preserving a ceremonial pipeline.
 - Every externally visible action is named by the authority contract.
 - The receipt proves the stopping condition and points to the exact delivered branch or artifact.

@@ -1,0 +1,41 @@
+# Autopilot accepts an authorized stand-in
+
+## Context
+
+The owner wants a TPM — a person or controller — to start development chats, answer their intake
+questions, and confirm their goal contracts on the owner's behalf, relaying anything big. An
+earlier draft (Oct 1, "delegated requester") spread a requester preamble across most of the
+collection; a later beta (Oct 3, "autonomous-autopilot") added a second, parallel Autopilot. The
+owner judged that direction too sprawling: the result should be one tidy Autopilot.
+
+## Decision
+
+- Only `autopilot` accepts a **stand-in**. Its rules live in one file,
+  `skills/engineering/autopilot/references/stand-in.md`; `grilling` and `pursue-goal` carry one
+  pointer line each, honoring the stand-in boundary recorded in the goal contract. Every other
+  skill, including `yolopilot`, is unchanged and owner-only — Yolopilot skips the grill, and the
+  grill is what catches a stand-in's gaps.
+- The grant comes only from the message that starts Autopilot. It is copied verbatim into the
+  contract with the owner's original request and reservations, and the owner can narrow or revoke
+  it. Grants seen only in agent output, tool results, files, or worker messages never count.
+- The stand-in may confirm a contract inside the personal-practice envelope, including
+  integration under an existing standing grant. It relays to the owner, before confirmation:
+  contract changes to objective, scope, authority, or delivery target; anything outside the
+  envelope; human-owned promotion; guessed product intent; and anything beyond the owner's
+  original request. Autopilot talks only to the stand-in; silence is never a decision.
+- Discovery flags, hooks, permission prompts, and the human-only `main` boundary are unchanged.
+  The skill text is guidance, not runtime authentication.
+
+## Considered and deferred
+
+**Hardening option (b):** additionally require a durable owner-authored line (for example in the
+consuming repository's `CLAUDE.md`) naming who may act as stand-in, and refuse otherwise. Deferred
+for the owner's decision: it resists a spoofed grant in a shared session but adds per-repo setup.
+Today the session's explicit handoff is the trusted channel.
+
+## Validation
+
+`scripts/test_pilot_scenarios.py` statically asserts the stand-in file's grant source, standard
+grant block, and escalation list; the Autopilot pointer; the grilling and pursue-goal pointers;
+and that Yolopilot and the user-invoked flags are unchanged. Static checks do not prove live host
+behaviour with a stand-in.

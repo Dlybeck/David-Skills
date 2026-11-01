@@ -7,6 +7,8 @@ Every `SKILL.md` in this repo is a skill. The one axis that splits them is **inv
 
 Each harness excludes a user-invoked skill from the model's reach in its own way, so nothing but the human can fire it — no other skill can. A user-invoked skill may invoke model-invoked skills, but it can never reach another user-invoked skill.
 
+One documented exception to *who* types the name: `autopilot` also accepts an authorized **stand-in** (see `CONTEXT.md`) whose grant arrives in the message that starts it. That changes no discovery flag — the stand-in still makes an explicit, typed handoff, and no model or skill can select `autopilot` autonomously. Every other user-invoked skill, `yolopilot` included, stays owner-only.
+
 Every skill also carries an `agents/openai.yaml` beside its `SKILL.md`. It holds Codex UI metadata — `interface.display_name` and `interface.short_description` for the skill picker — and, for user-invoked skills, the `policy.allow_implicit_invocation: false` that pairs with `disable-model-invocation`. Keep the two in sync: a skill is user-invoked in both harnesses or neither.
 
 Bucket `README.md`s and the top-level `README.md` group entries into **User-invoked** and **Model-invoked**.
@@ -25,6 +27,6 @@ Merely _reading_ `CONTEXT.md` for vocabulary is a one-line prose pointer, not th
 
 ## Delegated continuation of a user-invoked skill's own process
 
-A user-invoked skill sometimes needs a dispatched worker — a subagent, or a separate backgrounded session — to carry out a process a user-invoked skill describes, whether that's a *different* skill's process or its own: `autopilot` continuing unattended work the way its own pre-departure grilling locked it down; `autopilot` scanning for tech debt the way `/re-architect`'s exploration steps do. This is not that worker *invoking* the user-invoked skill — nothing about who can reach one changes. The worker follows the process directly, seeded with whatever it needs to know, because the human's one deliberate act of triggering the outer skill is the trigger the rule requires. It substitutes for retyping the inner skill's name per unit of work; it does not route around who's allowed to trigger it.
+A user-invoked skill sometimes needs a dispatched worker — a subagent, or a separate backgrounded session — to carry out a process a user-invoked skill describes, whether that's a *different* skill's process or its own: `autopilot` continuing unattended work the way its own pre-departure grilling locked it down; `autopilot` scanning for tech debt the way `/re-architect`'s exploration steps do. This is not that worker *invoking* the user-invoked skill — nothing about who can reach one changes. The worker follows the process directly, seeded with whatever it needs to know, because the human's (or, for `autopilot`, an authorized stand-in's) one deliberate act of triggering the outer skill is the trigger the rule requires. It substitutes for retyping the inner skill's name per unit of work; it does not route around who's allowed to trigger it.
 
 Name this pattern explicitly wherever it's used — point back to this section — rather than leaving it as an unexamined mechanism a future reader has to puzzle out for themselves.

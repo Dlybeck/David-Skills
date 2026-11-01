@@ -72,6 +72,13 @@ Yes: state your question budget or ask for only the highest-impact unresolved de
 **`grill-with-docs` ran, but it never loaded `grilling`.**
 A real and unfixed rough edge, reported across [harnesses](https://www.aihero.dev/ai-coding-dictionary/harness) and models: a skill that names another skill does not reliably cause that skill to load, and `grill-with-docs` names two. The tell is a session that asks everything at once with no recommendations attached — that is the model improvising an interview rather than running this one. Asking the agent directly whether it loaded `grilling` and `domain-modeling` usually recovers it.
 
+**Someone else is answering for me. Does it still grill?**
+
+Yes. When [autopilot](../engineering/autopilot.md) is started by an authorized stand-in, the stand-in
+answers the grill within its recorded grant. Questions reserved for you — scope or authority
+changes, guessed product intent, going beyond your original request — go through the stand-in to
+you, and the grill waits for your answer before dependent questions.
+
 ## It's working if
 
 - Specific choices carry a recommendation you can accept or correct in a few words; open questions about your priorities do not invent one.

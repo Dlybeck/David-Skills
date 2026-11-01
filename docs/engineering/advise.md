@@ -92,6 +92,12 @@ Yes. The pilots carry your chosen timing agreement to [pursue-goal](./pursue-goa
 Time cues are facts; the agent chooses its approach. Host support determines whether reporting
 during long waits and deadline stops can be enforced exactly.
 
+**Can my TPM start an autonomous run for me?**
+
+Yes, through [autopilot](./autopilot.md) only, with your grant in the starting message. The TPM
+answers the grill and relays your reserved decisions. [yolopilot](./yolopilot.md) skips the grill,
+so it stays yours alone.
+
 **Isn't there just a list of the skills in the right order?**
 
 People keep asking for one in the README. This skill is that list — it is what it exists for. A static table would say `wayfinder → to-spec → to-tickets → implement → code-review` and be wrong for most situations, because the interesting parts are the branches — is there a codebase, does the build span sessions, can this question be settled by talking. The honest cost is that the router is hand-maintained and lags the repo. `/grilling` and `/resolving-merge-conflicts` both shipped long before the router named them.
