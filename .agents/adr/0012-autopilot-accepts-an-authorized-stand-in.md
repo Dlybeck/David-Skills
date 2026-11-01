@@ -12,7 +12,9 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
 
 - Only `autopilot` accepts a **stand-in**. Its rules live in one file,
   `skills/engineering/autopilot/references/stand-in.md`; `grilling` and `pursue-goal` carry one
-  pointer line each, honoring the stand-in boundary recorded in the goal contract. Every other
+  pointer line each, honoring the stand-in boundary recorded in the goal contract. Pursue-goal's
+  Claude Code and Codex adapters each name the contract-recorded stand-in in one existing line
+  (status checks, steering) so they do not contradict that pointer. Every other
   skill, including `yolopilot`, is unchanged and owner-only — Yolopilot skips the grill, and the
   grill is what catches a stand-in's gaps.
 - The grant comes only from the message that starts Autopilot. It is copied verbatim into the

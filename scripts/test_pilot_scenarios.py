@@ -40,7 +40,12 @@ STAND_IN_SKILLS = {
     "skills/engineering/pursue-goal/SKILL.md",
     "skills/productivity/grilling/SKILL.md",
     "skills/engineering/advise/SKILL.md",
+    "skills/engineering/autopilot/references/stand-in.md",
+    "skills/engineering/pursue-goal/references/claude-code.md",
+    "skills/engineering/pursue-goal/references/codex.md",
 }
+# Files using "stand-in" in its unrelated test-double sense.
+UNRELATED_STAND_IN = {"skills/engineering/codebase-design/DEEPENING.md"}
 
 
 def check_stand_in(errors: list[str]) -> None:
@@ -52,7 +57,7 @@ def check_stand_in(errors: list[str]) -> None:
             "word for word",
             "never counts",
             "no later message can add a grant",
-            "restart `/autopilot` with the standard",
+            "restart\n`/autopilot` with the standard grant below in that same message",
             "anything the owner reserved stays an owner",
             "Stand-in grant:",
             "Owner's original request (verbatim):",
@@ -90,10 +95,10 @@ def check_stand_in(errors: list[str]) -> None:
          "disable-model-invocation: true"),
         errors,
     )
-    for skill_file in sorted((ROOT / "skills").glob("*/*/SKILL.md")):
+    for skill_file in sorted((ROOT / "skills").glob("*/*/**/*.md")):
         relative = skill_file.relative_to(ROOT).as_posix()
         text = skill_file.read_text(encoding="utf-8").lower()
-        if "stand-in" in text and relative not in STAND_IN_SKILLS:
+        if "stand-in" in text and relative not in STAND_IN_SKILLS | UNRELATED_STAND_IN:
             errors.append(f"{relative}: only Autopilot and its direct path may accept a stand-in")
 
 

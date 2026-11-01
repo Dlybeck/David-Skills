@@ -1,7 +1,8 @@
 ## What it does
 
 `autopilot` turns a jointly understood outcome into a durable autonomous run. It first grills the
-goal, proof, authority, and delivery boundary while you are present; only then does it hand the
+goal, proof, authority, and delivery boundary while you, or your authorized stand-in, are present;
+only then does it hand the
 contract to [pursue-goal](./pursue-goal.md).
 
 It is a trust level rather than a software pipeline. Research-heavy AI work, an optimization

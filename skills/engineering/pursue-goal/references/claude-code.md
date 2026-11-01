@@ -12,8 +12,9 @@ Claude's background mechanism supplies its own worktree. Confirm the background 
 branch in its first update, then apply the same isolation, authority, checkpoint, and receipt rules
 as `/pursue-goal`. Do not create a second worktree around it.
 
-Use `claude agents` or `claude logs` only for a status check requested by the human or a contract-recorded stand-in. The background run
-records meaningful progress itself and does not require an AI polling loop.
+Use `claude agents` or `claude logs` only for a status check requested by the human or a
+contract-recorded stand-in. The background run records meaningful progress itself and does not
+require an AI polling loop.
 
 For an explicitly timed run, use [run timing](timing.md) inside the background session's actual
 workspace and session. Lifecycle hooks supply time facts at work boundaries; they are not timers

@@ -7,7 +7,7 @@ Every `SKILL.md` in this repo is a skill. The one axis that splits them is **inv
 
 Each harness excludes a user-invoked skill from the model's reach in its own way, so nothing but the human can fire it — no other skill can. A user-invoked skill may invoke model-invoked skills, but it can never reach another user-invoked skill.
 
-One documented exception to *who* types the name: `autopilot` also accepts an authorized **stand-in** (see `CONTEXT.md`) whose grant arrives in the message that starts it. That changes no discovery flag — the stand-in, whether a person or a controller session, still makes the explicit, typed opening handoff of the session, and no model or skill inside the session can select `autopilot` autonomously. Every other user-invoked skill, `yolopilot` included, stays owner-only.
+One documented exception to *who* types the name: `autopilot` also accepts an authorized **stand-in** (see `CONTEXT.md`) whose grant arrives in the message that starts it. That changes no discovery flag — the stand-in, whether a person or a controller session, still types the explicit `/autopilot` handoff as a user turn, and no model or skill inside the session can select `autopilot` autonomously. Every other user-invoked skill, `yolopilot` included, stays owner-only.
 
 Every skill also carries an `agents/openai.yaml` beside its `SKILL.md`. It holds Codex UI metadata — `interface.display_name` and `interface.short_description` for the skill picker — and, for user-invoked skills, the `policy.allow_implicit_invocation: false` that pairs with `disable-model-invocation`. Keep the two in sync: a skill is user-invoked in both harnesses or neither.
 
