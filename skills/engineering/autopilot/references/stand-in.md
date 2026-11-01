@@ -41,6 +41,16 @@ stand-in missed. Check cheap facts yourself rather than asking. Pace questions w
 `/attention-modes` by the stand-in's availability; the owner being away does not make the
 stand-in unavailable.
 
+Ask every grill and contract question as plain chat text, then end the turn and wait for the
+stand-in's reply. Never use an interactive question dialog or picker: a stand-in driving a
+background session cannot answer one, and resuming the session cancels it.
+
+The order is fixed, however detailed the brief: grill, then show the complete goal contract in
+chat, then obtain the stand-in's explicit confirmation of that contract. Until then, do only
+read-only inspection and research — no file edits, builds, commits, branches, or worktree
+changes for the goal. A brief that already describes the implementation is not a confirmed
+contract.
+
 The stand-in may answer routine and delegated questions and confirm a contract within the
 personal-practice envelope, including integration into an agent-owned target under a standing
 grant found in durable repository policy or owner-written instructions: durable files outside

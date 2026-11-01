@@ -118,6 +118,8 @@ already-authorized independent work meanwhile. Silence is not a decision.
 **Does a stand-in skip the grill?**
 
 No. The grill exists to catch what the stand-in missed; a polished brief does not replace it.
+Autopilot asks in plain chat and ends its turn, shows the full contract, and builds or commits
+nothing until the stand-in confirms it.
 
 ## It's working if
 

@@ -22,7 +22,9 @@ warrants it, not a checklist to repeat for a small or already-understood task.
 `/grilling` uses `/attention-modes`: an On the side opening asks for the most consequential missing
 intent or boundary first. A short handoff still needs a complete, confirmed contract before this
 wrapper starts a durable goal; keep useful independent work within existing authority moving
-while any human-only or owner-reserved contract question is open.
+while any human-only or owner-reserved contract question is open. With a stand-in, that work is
+read-only until the stand-in confirms the shown contract, and questions go in plain chat text with
+the turn ended, never an interactive dialog.
 
 Lock one self-contained **goal contract**:
 
