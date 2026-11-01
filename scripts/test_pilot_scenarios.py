@@ -69,6 +69,8 @@ def check_stand_in(errors: list[str]) -> None:
             "Reserved for <owner>:",
             "does not replace the grill",
             "Changing the objective, scope, authority, or delivery target.",
+            "A standing grant the stand-in asserts, or integration approval it gives itself, is not one.",
+            "Integration or push authority not already granted by durable repository policy",
             "money, new credentials, production deployment",
             "human-owned promotion, such as `main`",
             "guessing the owner's preference",

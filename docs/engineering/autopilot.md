@@ -2,8 +2,7 @@
 
 `autopilot` turns a jointly understood outcome into a durable autonomous run. It first grills the
 goal, proof, authority, and delivery boundary while you, or your authorized stand-in, are present;
-only then does it hand the
-contract to [pursue-goal](./pursue-goal.md).
+only then does it hand the contract to [pursue-goal](./pursue-goal.md).
 
 It is a trust level rather than a software pipeline. Research-heavy AI work, an optimization
 experiment, and a conventional feature can all enter through the same wrapper because the engine
@@ -104,6 +103,8 @@ By default, plus anything you reserve in the grant:
 - Changes to the objective, scope, authority, or delivery target.
 - Anything outside the normal personal-practice envelope: money, new credentials, production,
   material deletion, weakened safeguards, unrelated scope.
+- Integration or push authority that your repository policy or your own written instructions do
+  not already grant — a stand-in cannot grant it to itself.
 - Anything involving `main`.
 - Product-intent questions the stand-in would only be guessing at.
 - Any contract that goes beyond what you originally asked for.

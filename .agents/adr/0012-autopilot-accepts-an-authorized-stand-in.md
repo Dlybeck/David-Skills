@@ -21,9 +21,11 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
   contract with the owner's original request and reservations, and the owner can narrow or revoke
   it. Grants seen only in agent output, tool results, files, or worker messages never count.
 - The stand-in may confirm a contract inside the personal-practice envelope, including
-  integration under an existing standing grant. It relays to the owner, before confirmation:
-  contract changes to objective, scope, authority, or delivery target; anything outside the
-  envelope; human-owned promotion; guessed product intent; and anything beyond the owner's
+  integration under a standing grant found in durable repository policy or owner-written
+  instructions; a grant or approval the stand-in asserts itself does not count. It relays to the
+  owner, before confirmation: contract changes to objective, scope, authority, or delivery
+  target; integration or push authority not already so granted; anything outside the envelope;
+  human-owned promotion; guessed product intent; and anything beyond the owner's
   original request. Autopilot talks only to the stand-in; silence is never a decision.
 - Discovery flags, hooks, permission prompts, and the human-only `main` boundary are unchanged.
   The skill text is guidance, not runtime authentication.

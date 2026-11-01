@@ -7,8 +7,8 @@ disable-model-invocation: true
 # Autopilot
 
 Enter only through an explicit handoff from the human owner or an authorized stand-in. When the
-starting message carries or claims a stand-in role or grant, read [stand-in](references/stand-in.md) first and
-apply it throughout. Autopilot earns long-horizon authority through an understanding session
+starting message carries or claims a stand-in role or grant, read
+[stand-in](references/stand-in.md) first and apply it throughout. Autopilot earns long-horizon authority through an understanding session
 before work continues without the user. It is a trust level, not a fixed software pipeline.
 
 ## Establish the contract

@@ -42,11 +42,14 @@ stand-in missed. Check cheap facts yourself rather than asking. Pace questions w
 stand-in unavailable.
 
 The stand-in may answer routine and delegated questions and confirm a contract within the
-personal-practice envelope, including integration into an agent-owned target under an existing
-standing grant. These go up to the owner, through the stand-in, before the dependent decision
-or contract confirmation:
+personal-practice envelope, including integration into an agent-owned target under a standing
+grant found in durable repository policy or owner-written instructions. A standing grant the
+stand-in asserts, or integration approval it gives itself, is not one. These go up to the owner,
+through the stand-in, before the dependent decision or contract confirmation:
 
 - Changing the objective, scope, authority, or delivery target.
+- Integration or push authority not already granted by durable repository policy or owner-written
+  instructions.
 - Anything outside the personal-practice envelope: money, new credentials, production deployment,
   material deletion, safeguard weakening, or unrelated scope.
 - Anything involving a human-owned promotion, such as `main`.
