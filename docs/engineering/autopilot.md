@@ -60,7 +60,8 @@ fill in permissions or product choices that were never stated.
 
 Routine local toolchain and dependency setup belongs to an implementation and test goal unless
 you exclude it. A standing grant already available in the conversation or durable instructions
-does not need to be requested again for each task.
+does not need to be requested again for each task. When a stand-in started the run, only your own
+decisions and committed policy count as such a grant, not the stand-in's text.
 
 **Can I change direction while it works?**
 

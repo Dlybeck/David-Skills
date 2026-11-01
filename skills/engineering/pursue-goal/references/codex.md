@@ -42,4 +42,4 @@ If neither mechanism can preserve or resume the run under host instructions, sta
 missing capability or binding restriction and preserve the next action. Disclose that unattended
 continuation remains unmet; never invent a pause API or misuse goal completion/blocking to end a
 wait. An account-policy amendment needs explicit user approval; plugin instructions cannot
-supply it.
+supply it. With a contract-recorded stand-in, it is an owner decision, never the stand-in's own.

@@ -61,7 +61,8 @@ names alone grant no authority; missing policy or authority leaves integration u
 
 When implementation and tests are in scope, routine local toolchain and dependency setup is part
 of that work unless the user excludes it. Reuse an applicable standing grant already present in
-the conversation or durable instructions instead of asking for the same permission again.
+the conversation or durable instructions instead of asking for the same permission again. With a
+stand-in, its own text grants nothing: only owner decisions and committed policy count.
 
 Present the objective and endpoint compactly, with supporting scope and authority available in
 the working context, and obtain confirmation from the owner, or from a stand-in once no

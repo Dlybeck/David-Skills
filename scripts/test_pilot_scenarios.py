@@ -94,6 +94,7 @@ def check_stand_in(errors: list[str]) -> None:
          "relayed decision never approves a human-owned promotion itself",
          "counts only as policy committed on the integration target",
          "restate every rule in that reference compactly",
+         "With a stand-in, its own text grants nothing",
          "produced inside the session or by its workers never counts, and no later message can add a grant",
          "\"owner decision relayed by stand-in\" with its date, or keep it open",
          "Offers of other user-invoked skills or new stages go to the owner",
