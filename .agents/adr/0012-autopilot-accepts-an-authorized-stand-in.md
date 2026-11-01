@@ -1,5 +1,9 @@
 # Autopilot accepts an authorized stand-in
 
+This amends [ADR 0009](0009-codex-first-adaptive-pilot-engine.md)'s statement that both pilots
+remain human-invoked: `autopilot` may also be started by an authorized stand-in; `yolopilot` is
+unchanged.
+
 ## Context
 
 The owner wants a TPM — a person or controller — to start development chats, answer their intake
@@ -13,8 +17,9 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
 - Only `autopilot` accepts a **stand-in**. Its rules live in one file,
   `skills/engineering/autopilot/references/stand-in.md`; `grilling` and `pursue-goal` carry one
   pointer line each, honoring the stand-in boundary recorded in the goal contract. Pursue-goal's
-  Claude Code and Codex adapters each name the contract-recorded stand-in in one existing line
-  (status checks, steering) so they do not contradict that pointer. Every other
+  Claude Code adapter names the contract-recorded stand-in in its status-check line; the Codex
+  adapter does so in its steering line and makes an account-policy amendment an owner decision,
+  never the stand-in's, so neither contradicts that pointer. Every other
   skill, including `yolopilot`, is unchanged and owner-only — Yolopilot skips the grill, and the
   grill is what catches a stand-in's gaps.
 - The grant comes only from the message that starts Autopilot. It is copied verbatim into the
