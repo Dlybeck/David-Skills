@@ -99,12 +99,17 @@ never counts. You can narrow or revoke it at any time. Yolopilot cannot be start
 
 **What does a stand-in send up to me?**
 
-Changes to the objective, scope, authority, or delivery target; anything outside the normal
-personal-practice envelope (money, new credentials, production, material deletion, weakened
-safeguards, unrelated scope); anything involving `main`; product-intent questions it would only be
-guessing at; and any contract that goes beyond what you originally asked for. Autopilot never
-messages you directly — it asks the stand-in to relay and keeps doing already-authorized
-independent work meanwhile. Silence is not a decision.
+By default, plus anything you reserve in the grant:
+
+- Changes to the objective, scope, authority, or delivery target.
+- Anything outside the normal personal-practice envelope: money, new credentials, production,
+  material deletion, weakened safeguards, unrelated scope.
+- Anything involving `main`.
+- Product-intent questions the stand-in would only be guessing at.
+- Any contract that goes beyond what you originally asked for.
+
+Autopilot never messages you directly — it asks the stand-in to relay and keeps doing
+already-authorized independent work meanwhile. Silence is not a decision.
 
 **Does a stand-in skip the grill?**
 

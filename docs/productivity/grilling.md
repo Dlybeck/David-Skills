@@ -75,9 +75,10 @@ A real and unfixed rough edge, reported across [harnesses](https://www.aihero.de
 **Someone else is answering for me. Does it still grill?**
 
 Yes. When [autopilot](../engineering/autopilot.md) is started by an authorized stand-in, the stand-in
-answers the grill within its recorded grant. Questions reserved for you — scope or authority
-changes, guessed product intent, going beyond your original request — go through the stand-in to
-you, and the grill waits for your answer before dependent questions.
+answers the grill within its recorded grant. Questions reserved for you — for example scope or
+authority changes, guessed product intent, or going beyond your original request; the full list is
+on the autopilot page — go through the stand-in to you, and the grill waits for your answer before
+dependent questions.
 
 ## It's working if
 

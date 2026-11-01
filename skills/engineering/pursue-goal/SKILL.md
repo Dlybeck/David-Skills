@@ -38,7 +38,8 @@ The contract may be clarified by new evidence, but changing the objective, autho
 boundary, or delivery target requires the human. A clear mid-run instruction from that human
 can supply the change; the contract is not frozen against its owner. Replanning inside that
 envelope does not require renewed approval. When the contract records an authorized stand-in,
-it steers within that recorded grant; owner-reserved changes need an owner decision it relays.
+it steers within that grant; anything on the contract's owner-reserved list needs an owner
+decision relayed through it, and silence is never one.
 
 ## Select the next loop
 

@@ -7,7 +7,7 @@ disable-model-invocation: true
 # Autopilot
 
 Enter only through an explicit handoff from the human owner or an authorized stand-in. When the
-starting message carries a stand-in grant, read [stand-in](references/stand-in.md) first and
+starting message carries or claims a stand-in role or grant, read [stand-in](references/stand-in.md) first and
 apply it throughout. Autopilot earns long-horizon authority through an understanding session
 before work continues without the user. It is a trust level, not a fixed software pipeline.
 
@@ -31,8 +31,11 @@ Lock one self-contained **goal contract**:
 - Allowed file changes, research, local compute, tests, evaluations, commits, and external
   actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
-- Actions that require the human to return. With a stand-in: its grant verbatim, the owner's
-  original request, owner-reserved decisions, relayed owner decisions, and the escalation route.
+- Actions that require the human to return. With a stand-in, make the contract self-contained for
+  an engine that never reads the stand-in reference: its grant verbatim, the owner's original
+  request, relayed owner decisions, and the full owner-reserved list (the reference's default
+  escalation categories plus the owner's own reservations), with the rule that escalations go
+  only through the stand-in and silence is never an owner decision.
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 

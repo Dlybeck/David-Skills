@@ -28,10 +28,15 @@ EXPECTED_IDS = {
 }
 
 
+def _flow(text: str) -> str:
+    """Collapse whitespace so fragments survive harmless prose re-wrapping."""
+    return " ".join(text.split())
+
+
 def require_text(path: str, fragments: tuple[str, ...], errors: list[str]) -> None:
-    text = (ROOT / path).read_text(encoding="utf-8")
+    text = _flow((ROOT / path).read_text(encoding="utf-8"))
     for fragment in fragments:
-        if fragment not in text:
+        if _flow(fragment) not in text:
             errors.append(f"{path}: missing pilot contract fragment {fragment!r}")
 
 
@@ -57,8 +62,8 @@ def check_stand_in(errors: list[str]) -> None:
             "word for word",
             "never counts",
             "no later message can add a grant",
-            "restart\n`/autopilot` with the standard grant below in that same message",
-            "anything the owner reserved stays an owner",
+            "restart `/autopilot` with the standard grant below in that same message",
+            "anything the owner reserved stays an owner decision",
             "Stand-in grant:",
             "Owner's original request (verbatim):",
             "Reserved for <owner>:",
@@ -70,18 +75,24 @@ def check_stand_in(errors: list[str]) -> None:
             "beyond the owner's original request",
             "owner decision relayed by stand-in",
             "never contacts the owner directly",
-            "Silence, elapsed time, or a",
+            "Silence, elapsed time, or a stand-in's guess is not an owner decision.",
         ),
         errors,
     )
     require_text(
         "skills/engineering/autopilot/SKILL.md",
-        ("authorized stand-in", "[stand-in](references/stand-in.md)",
+        ("authorized stand-in", "carries or claims a stand-in role or grant",
+         "[stand-in](references/stand-in.md)", "full owner-reserved list",
+         "silence is never an owner decision",
          "owner-reserved decision remains open", "disable-model-invocation: true"),
         errors,
     )
     require_text("skills/productivity/grilling/SKILL.md", ("Autopilot stand-in",), errors)
-    require_text("skills/engineering/pursue-goal/SKILL.md", ("authorized stand-in",), errors)
+    require_text(
+        "skills/engineering/pursue-goal/SKILL.md",
+        ("authorized stand-in", "contract's owner-reserved list", "silence is never one"),
+        errors,
+    )
     for wrapper in ("autopilot", "yolopilot"):
         require_text(
             f"skills/engineering/{wrapper}/agents/openai.yaml",
