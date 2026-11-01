@@ -31,7 +31,9 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
 **Hardening option (b):** additionally require a durable owner-authored line (for example in the
 consuming repository's `CLAUDE.md`) naming who may act as stand-in, and refuse otherwise. Deferred
 for the owner's decision: it resists a spoofed grant in a shared session but adds per-repo setup.
-Today the session's explicit handoff is the trusted channel.
+Today the session's explicit handoff is the trusted channel. The same option would also enforce
+Yolopilot's owner-only status, which today rests on documentation outside Yolopilot's unchanged
+text: its "explicit last-second human handoff" wording cannot tell an owner from a stand-in.
 
 ## Validation
 
