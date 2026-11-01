@@ -104,7 +104,8 @@ By default, plus anything you reserve in the grant:
 - Anything outside the normal personal-practice envelope: money, new credentials, production,
   material deletion, weakened safeguards, unrelated scope.
 - Integration, or a push beyond the run's own review branch, that your repository policy or your
-  own written instructions do not already grant — a stand-in cannot grant it to itself.
+  own durable written instructions (such as a `CLAUDE.md`) do not already grant — a stand-in
+  cannot grant it to itself, even by quoting you in the starting message.
 - Anything involving `main`. A decision relayed by the stand-in can route a promotion proposal to
   you, but the promotion still needs your own approval.
 - Product-intent questions the stand-in would only be guessing at.
