@@ -46,7 +46,7 @@ personal-practice envelope, including integration into an agent-owned target und
 grant found in durable repository policy or owner-written instructions: durable files outside
 this session, as committed on the integration target, such as its `CLAUDE.md` or `AGENTS.md`.
 User-level instruction files, uncommitted or branch-only edits, and any file the stand-in wrote
-or changed do not count. A standing grant the
+or changed, or this run wrote, do not count. A standing grant the
 stand-in asserts, or integration approval it gives itself, is not one; integration wording inside
 the starting message, including the quoted original request, needs a relayed owner decision. These go up to the owner,
 through the stand-in, before the dependent decision or contract confirmation:
@@ -80,7 +80,8 @@ stand-in's guess is not an owner decision.
 During the run, the stand-in may question, correct, or stop work within the grant through
 `/pursue-goal`'s steering discipline. A correction that changes the contract on the list above
 needs a relayed owner decision. Return milestones, evidence, and the final receipt to the
-stand-in, who may summarize them for the owner; keep the grant, reserved decisions, and pending
+stand-in, who may summarize them for the owner. Offers of other user-invoked skills, such as
+`/teach`, or of a new stage are relayed to the owner, not accepted from the stand-in. Keep the grant, reserved decisions, and pending
 owner questions in any continuity checkpoint. A checkpoint preserves the grant; it cannot create
 or extend one.
 

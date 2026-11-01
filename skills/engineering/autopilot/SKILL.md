@@ -32,11 +32,16 @@ Lock one self-contained **goal contract**:
   actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
 - Actions that require the human to return. With a stand-in, make the contract self-contained for
-  an engine that never reads the stand-in reference: its grant verbatim, the owner's original
-  request, relayed owner decisions, and the full owner-reserved list (the reference's default
-  escalation categories plus the owner's own reservations), with the rule that escalations go
-  only through the stand-in, silence is never an owner decision, and a relayed decision never
-  approves a human-owned promotion itself.
+  an engine that never reads the stand-in reference:
+  - Its grant verbatim, the owner's original request, and relayed owner decisions.
+  - The full owner-reserved list: the reference's default escalation categories plus the owner's
+    own reservations.
+  - Escalations go only through the stand-in; silence is never an owner decision; a relayed
+    decision never approves a human-owned promotion itself.
+  - A standing integration grant counts only as policy committed on the integration target — never
+    a stand-in claim, starting-message text, user-level or uncommitted file, or a file the stand-in
+    or this run wrote.
+  - Offers of other user-invoked skills or new stages go to the owner, not the stand-in.
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 
