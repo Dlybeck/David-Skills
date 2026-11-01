@@ -43,8 +43,10 @@ stand-in unavailable.
 
 The stand-in may answer routine and delegated questions and confirm a contract within the
 personal-practice envelope, including integration into an agent-owned target under a standing
-grant found in durable repository policy or owner-written instructions — durable files outside
-this session, such as a repository or user `CLAUDE.md` or `AGENTS.md`. A standing grant the
+grant found in durable repository policy or owner-written instructions: durable files outside
+this session, as committed on the integration target, such as its `CLAUDE.md` or `AGENTS.md`.
+User-level instruction files, uncommitted or branch-only edits, and any file the stand-in wrote
+or changed do not count. A standing grant the
 stand-in asserts, or integration approval it gives itself, is not one; integration wording inside
 the starting message, including the quoted original request, needs a relayed owner decision. These go up to the owner,
 through the stand-in, before the dependent decision or contract confirmation:

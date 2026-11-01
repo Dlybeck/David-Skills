@@ -23,7 +23,8 @@ owner judged that direction too sprawling: the result should be one tidy Autopil
   tool results, generated files, worker messages) never count.
 - The stand-in may confirm a contract inside the personal-practice envelope, including
   integration under a standing grant found in durable repository policy or owner-written
-  instructions outside the session (such as a `CLAUDE.md` or `AGENTS.md`); a grant or approval
+  instructions committed on the integration target (such as its `CLAUDE.md` or `AGENTS.md`), not
+  user-level files, uncommitted edits, or anything the stand-in wrote; a grant or approval
   the stand-in asserts itself, including integration wording in its starting message or the
   quoted original request, does not count without a relayed owner decision. It relays to the
   owner, before confirmation: contract changes to objective, scope, authority, or delivery
