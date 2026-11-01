@@ -30,6 +30,8 @@ Each round the user answers reshapes the tree — settled decisions push the fro
 Finding _facts_ is your job: inspect the environment directly for cheap lookups. Delegate only
 substantial independent investigation within the user's budget; ask other settled-frontier
 questions while it runs. Material choices not already delegated are the user's — ask and wait.
+When an Autopilot stand-in answers, its recorded grant sets which choices it may settle; route
+owner-reserved ones through it to the owner and wait.
 Use `/tool-fit` when an available source or visual would make a question easier to answer.
 
 The session is done when no material decision in the agreed scope remains unresolved. State any
