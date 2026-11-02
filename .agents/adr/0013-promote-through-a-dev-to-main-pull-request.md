@@ -45,6 +45,9 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
 - `main` is one merge commit ahead of `dev` after a promotion with no Changeset. The next
   promotion's merge still has `dev` as its second parent and `dev`'s tree, so it releases normally.
 - The hook's `gh pr merge` check makes one network call, and any failure blocks.
-- Text inspection cannot see commands built at runtime, scripts, or other interpreters.
+- The hook is a guardrail against mistakes, not deliberate evasion; any analysis error blocks.
+  Text inspection cannot see commands built at runtime, scripts, or other interpreters. Known
+  gaps left open: a branch switch inside a `bash -c` script, `$((1<<n))` read as a heredoc, and
+  a heredoc piped to a shell on a later line.
   Branch protection that allows only merge commits on `main` is a GitHub setting, which David
   configures himself.

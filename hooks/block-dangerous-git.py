@@ -122,14 +122,82 @@ SHELLS = {"bash", "sh", "zsh", "dash"}
 SHELL_READER = re.compile(r"(?:^|[\s;&|(/])(?:bash|sh|zsh|dash)(?=\s|$)")
 
 
+def skip_heredoc_bodies(command, index, pending, keep=None):
+    """Consume the bodies of `pending` heredocs starting at `index` (the line
+    after their operators). Appends kept lines to `keep` when given. Returns
+    the index after the last delimiter line."""
+    length = len(command)
+    for strip_tabs, delimiter in pending:
+        while index < length:
+            end = command.find("\n", index)
+            end = length if end < 0 else end
+            body_line = command[index:end]
+            index = end + 1
+            if (body_line.lstrip("\t") if strip_tabs else body_line) == delimiter:
+                break
+            if keep is not None:
+                keep.append(body_line + "\n")
+    return index
+
+
+def substitution_end(command, start, closer):
+    """Index of the `)` or backtick closing a command substitution whose text
+    starts at `start`, or -1 when it is not closed. Quotes, nested parentheses
+    and heredoc bodies inside it are skipped."""
+    depth, quote, pending = 1, None, []
+    index, length = start, len(command)
+    while index < length:
+        char = command[index]
+        if quote:
+            if char == quote:
+                quote = None
+            elif char == "\\" and quote == '"':
+                index += 1
+            index += 1
+            continue
+        if char == "\\":
+            index += 2
+            continue
+        if closer == "`":
+            if char == "`":
+                return index
+        elif char in "'\"":
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return index
+        elif command.startswith("<<", index) and not command.startswith("<<<", index):
+            match = HEREDOC_AT.match(command, index)
+            if match:
+                pending.append((match.group(1) == "-", match.group(3)))
+                index = match.end()
+                continue
+        elif char == "\n" and pending:
+            index = skip_heredoc_bodies(command, index + 1, pending)
+            pending = []
+            continue
+        index += 1
+    return -1
+
+
 def without_heredoc_bodies_and_comments(command):
-    """Drop what the shell treats as data or nothing: heredoc bodies (report
-    text often holds an unbalanced apostrophe) and comments. A heredoc body
-    fed to a shell is kept, since the shell runs it. One quote-aware scan
-    finds both, so `<<EOF` or `#` inside a quoted string counts for neither,
-    and a mid-word `#` (fixes#3) is not a comment. Command substitution
-    inside double quotes opens a new quoting context this scan does not
-    track; that text is returned unchanged rather than guessed at."""
+    """Rewrite shell text into what its commands are, for tokenizing:
+
+    - heredoc bodies are dropped as data (report text often holds an
+      unbalanced apostrophe), unless a shell reads them;
+    - comments are dropped; a mid-word `#` (fixes#3) is not one;
+    - backslash-newline is joined where the shell joins it, outside single
+      quotes, comments and quoted heredoc bodies;
+    - a command substitution inside double quotes ("$(...)" or "`...`") is
+      lifted out as its own lines, rewritten the same way, so the commands
+      it runs are seen.
+
+    One quote-aware scan does all of it, so `<<EOF` or `#` inside a quoted
+    string counts for nothing. Text it cannot follow (an unclosed
+    substitution) is returned unchanged rather than guessed at."""
     out, line = [], []
     pending = []
     quote = None
@@ -141,20 +209,33 @@ def without_heredoc_bodies_and_comments(command):
 
     while index < length:
         char = command[index]
-        if quote:
-            if quote == '"' and (char == "`" or command.startswith("$(", index)):
-                return command
+        if quote == "'":
             emit(char)
-            if char == quote:
+            if char == "'":
                 quote = None
-            elif char == "\\" and quote == '"' and index + 1 < length:
-                index += 1
-                emit(command[index])
             index += 1
             continue
         if char == "\\" and index + 1 < length:
-            emit(command[index:index + 2])
-            index += 2
+            if command[index + 1] == "\n":
+                index += 2
+            else:
+                emit(command[index:index + 2])
+                index += 2
+            continue
+        if quote == '"':
+            if char == "`" or command.startswith("$(", index):
+                opener, closer = (1, "`") if char == "`" else (2, ")")
+                end = substitution_end(command, index + opener, closer)
+                if end < 0:
+                    return command
+                inner = without_heredoc_bodies_and_comments(command[index + opener:end])
+                emit('"\n' + inner + '\n"')
+                index = end + 1
+                continue
+            emit(char)
+            if char == '"':
+                quote = None
+            index += 1
             continue
         if char in "'\"":
             quote = char
@@ -175,19 +256,10 @@ def without_heredoc_bodies_and_comments(command):
                 continue
         if char == "\n":
             emit(char)
-            index += 1
-            keep = SHELL_READER.search("".join(line))
+            keep = [] if SHELL_READER.search("".join(line)) else None
             line = []
-            for strip_tabs, delimiter in pending:
-                while index < length:
-                    end = command.find("\n", index)
-                    end = length if end < 0 else end
-                    body_line = command[index:end]
-                    index = end + 1
-                    if (body_line.lstrip("\t") if strip_tabs else body_line) == delimiter:
-                        break
-                    if keep:
-                        out.append(body_line + "\n")
+            index = skip_heredoc_bodies(command, index + 1, pending, keep)
+            out.extend(keep or [])
             pending = []
             continue
         emit(char)
@@ -248,22 +320,64 @@ def switch_target(arguments):
     return names[0] if known else None
 
 
+NOT_A_SWITCH = object()
+
+
+def uses_current_branch(tokens):
+    """Whether a simple command acts on the current branch: a push, or a gh
+    PR create/merge that may default to it."""
+    for index, token in enumerate(tokens[:-1]):
+        name = os.path.basename(token)
+        if name == "git" and tokens[index + 1] == "push":
+            return True
+        if name == "gh" and tokens[index + 1:index + 3] in (["pr", "create"], ["pr", "merge"]):
+            return True
+    return False
+
+
 def possible_branches(command, switched):
-    """Every branch some part of the command may run on: the hook's current
-    branch and each branch-switch target, with None for a switch that cannot
-    be read (gh pr checkout, git worktree, a path). Order within the command
-    is not modeled, so a push is checked against all of them."""
-    branches = {current_branch()}
+    """Every branch some part of the command may run on: each branch-switch
+    target, with None for a switch that cannot be read (gh pr checkout, git
+    worktree, a path), plus the hook's current branch. The starting branch is
+    left out only when a switch is joined by `&&` to everything after it, up
+    to the first command that acts on the current branch: a failed switch
+    then stops the chain. A push is checked against all of these."""
+    start = current_branch()
     if not switched:
-        return branches
-    for tokens in simple_commands(command) or []:
+        return {start}
+    segments, current = [], []
+    for token in shell_tokens(command) or []:
+        if token and set(token) <= SHELL_OPERATORS:
+            segments.append((current, token))
+            current = []
+        else:
+            current.append(token)
+    segments.append((current, ""))
+
+    branches = set()
+    first_switch = first_user = None
+    for position, (tokens, _) in enumerate(segments):
         for index, token in enumerate(tokens[:-1]):
+            target = NOT_A_SWITCH
             if os.path.basename(token) == "gh" and tokens[index + 1:index + 3] == ["pr", "checkout"]:
-                branches.add(None)
+                target = None
             elif os.path.basename(token) == "git" and tokens[index + 1] == "worktree":
-                branches.add(None)
+                target = None
             elif os.path.basename(token) == "git" and tokens[index + 1] in {"checkout", "switch"}:
-                branches.add(switch_target(tokens[index + 2:]))
+                target = switch_target(tokens[index + 2:])
+            if target is not NOT_A_SWITCH:
+                branches.add(target)
+                if first_switch is None:
+                    first_switch = position
+        if first_user is None and uses_current_branch(tokens):
+            first_user = position
+    chained = (
+        first_switch is not None
+        and (first_user is None or first_switch < first_user)
+        and all(operator == "&&" for _, operator in segments[first_switch:first_user])
+    )
+    if not chained:
+        branches.add(start)
     return branches
 
 
@@ -586,7 +700,10 @@ def push_flags_and_refspecs(arguments):
         elif argument.startswith("-"):
             flags.append(argument)
         else:
-            found.append(argument)
+            # A redirection glued to the word (`dev>/tmp/log`) is not part of it.
+            word = re.split(r"[0-9]*[<>]", argument, maxsplit=1)[0]
+            if word:
+                found.append(word)
         index += 1
     return flags, (found if repository_from_option else found[1:])
 
@@ -635,7 +752,9 @@ def normalize_git_options(command):
     """
     tokens = shell_tokens(command)
     if tokens is None:
-        return command, True
+        # Untokenizable: still join every backslash-newline, so the raw-text
+        # checks see a continued `git push` as one line.
+        return re.sub(r"\\\r?\n", "", command), True
     output = []
     context_changed = any(token in DIRECTORY_CHANGERS for token in tokens)
     index = 0
@@ -865,22 +984,27 @@ def main():
         return 0
 
     command = (data.get("tool_input") or {}).get("command") or ""
-    # The shell deletes a backslash-newline before it splits words.
-    command = re.sub(r"\\\r?\n", "", command)
+    try:
+        reason = command_problem(command)
+    except Exception as error:  # A crash must block, never fall through to allow.
+        reason = f"could not be checked ({type(error).__name__}); run it in simpler steps."
+    if reason:
+        sys.stderr.write(f"DANGEROUS GIT COMMAND blocked: this command {reason}\n")
+        return 2
+    return 0
+
+
+def command_problem(command):
     command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
     switched = branch_switched(command)
     branches = possible_branches(command, switched)
 
-    reason = (
+    return (
         push_problem(command, normalized, context_changed, branches)
         or gh_problem(command, context_changed, switched, branches)
         or destructive_problem(normalized)
     )
-    if reason:
-        sys.stderr.write(f"DANGEROUS GIT COMMAND blocked: this command {reason}\n")
-        return 2
-    return 0
 
 
 if __name__ == "__main__":

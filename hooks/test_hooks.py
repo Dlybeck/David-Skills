@@ -112,6 +112,8 @@ BLOCK_PUSH_TO_MAIN = [
     "/bin/bash <<'EOF'\ngit push origin HEAD:main\nEOF",
     'git commit -m "$(printf "Fix #3")" && git push origin HEAD:main',
     'git push origin main>/dev/null',
+    "git commit -F - <<'EOF'\nfix path C:\\\nEOF\ngit push origin HEAD:main",
+    '# see C:\\\ngit push origin main',
     'git push \\\n  origin \\\n  main',
     'git push origin :main',
     'git -C /tmp/repo push',
@@ -267,6 +269,7 @@ BLOCK_DEV_REWRITE = [
     'git push --dele origin dev',
     # Git resolves a heads/<branch> destination to refs/heads/<branch>.
     'git push -f origin HEAD:heads/dev',
+    'git push -f origin dev>/tmp/log',
     'git push origin :heads/dev',
 ]
 
@@ -493,6 +496,29 @@ with tempfile.TemporaryDirectory() as temp_dir:
         check(f"block-dangerous-git reads commands run by a shell: {command!r}",
               code == 2, f"(code={code}, err={err!r})")
 
+    # Command substitutions inside double quotes are read as commands.
+    for command in (
+        'PR_URL="$(gh pr create --fill)"',
+        'out="$(gh pr merge 12 --merge 2>&1)"',
+        'echo "`gh pr merge 12`"',
+        "r=\"$(gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }')\"",
+        # A backslash-newline inside a quoted heredoc body or a comment does
+        # not continue the line, so it hides nothing after it.
+        "cat > r.md <<'EOF'\nnpm run x \\\nEOF\ngh pr merge 12 --merge",
+        "# see C:\\\ngh pr merge 12 --merge",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git reads quoted substitutions and stray backslashes: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    for command in (
+        'PR_URL="$(gh pr create --base main --head dev --title x --body-file r.md)"',
+        "gh pr edit 7 --body \"$(cat <<'EOF'\nA 27\\\" monitor (big)\nEOF\n)\"",
+        "gh pr edit 7 --body \"$(cat <<'EOF'\nA 27\" monitor\nEOF\n)\"",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git allows quoted substitution bodies: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")
     check("block-dangerous-git blocks when any merge in the command targets main",
           code == 2 and "into main" in err, f"(code={code}, err={err!r})")
@@ -592,6 +618,23 @@ with tempfile.TemporaryDirectory() as temp_dir:
     check("block-dangerous-git blocks PR into main from a main checkout",
           code == 2, f"(code={code}, err={err!r})")
 
+    # From a main checkout: a switch chained by && to the push leaves main
+    # behind; a `;` does not, since a failed switch would push main.
+    git(repo, "branch", "dev")
+    git(repo, "branch", "feature/x")
+    code, err = run_hook_bash(
+        "block-dangerous-git.py",
+        "git checkout dev && git merge --no-ff feature/x && git push", cwd=repo)
+    check("block-dangerous-git allows a chained switch to dev then push from main",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+    for cmd in ("git checkout dev; git push", "git checkout dev\ngit push",
+                "git checkout dev || git push"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git keeps main when the switch may fail: {cmd!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    git(repo, "branch", "-q", "--delete", "dev")
+    git(repo, "branch", "-q", "--delete", "feature/x")
+
     git(repo, "switch", "-qc", "dev")
     code, err = run_hook_bash("block-dangerous-git.py", "git push", cwd=repo)
     check("block-dangerous-git allows implicit push from dev",
@@ -619,7 +662,8 @@ with tempfile.TemporaryDirectory() as temp_dir:
     for cmd in ("git checkout dev && git merge --ff-only feature/x && git push",
                 "git switch dev && git push",
                 "git checkout -b feature/y && git push -u origin HEAD",
-                "git switch dev && gh pr create --base main --head dev --title x"):
+                "git switch dev && gh pr create --base main --head dev --title x",
+                "git switch dev && gh pr create --base main --title x"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git follows a literal branch switch: {cmd!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
@@ -629,7 +673,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
                 "git checkout notes.txt && git push",
                 "gh pr checkout 5 && git push",
                 "git switch feature/x && gh pr create --base main",
-                "git switch dev && gh pr create --base main --title x",
+                "git switch dev; gh pr create --base main --title x",
                 # Every branch the command passes through counts, not just the last.
                 "git checkout main && git merge dev && git push && git checkout dev",
                 "git switch main\ngit merge --ff-only dev\ngit push origin\ngit switch dev",
@@ -706,6 +750,12 @@ MALFORMED_STDIN += [
     for value in ([], {}, 7)
 ]
 MALFORMED_STDIN += [json.dumps({"model": ["invalid"]})]
+
+# Input deep enough to exhaust the scanner's recursion blocks rather than
+# crashing (a crash exits 1, which the host treats as allow).
+code, err = run_hook_bash("block-dangerous-git.py", 'echo "$(' * 2000 + "true" + ')"' * 2000)
+check("block-dangerous-git blocks when analysis fails", code == 2 and "could not be checked" in err,
+      f"(code={code}, err={err!r})")
 
 for raw in MALFORMED_STDIN:
     code, err = run_hook("block-dangerous-git.py", raw)
