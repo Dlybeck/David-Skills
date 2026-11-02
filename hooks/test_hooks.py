@@ -543,7 +543,21 @@ with tempfile.TemporaryDirectory() as temp_dir:
         code, err, calls = run_merge(command, "main")
         check(f"block-dangerous-git allows text about pushes and any heredoc word: {command!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
-    for command in ("bash -c 'git push origin main'", 'out="$(git push origin main 2>&1)"'):
+    for command in ("bash -c 'git push origin main'", 'out="$(git push origin main 2>&1)"',
+                    # Targeted re-review: scripts run by shells, eval and script(1).
+                    "bash -euo pipefail -c 'git push origin main'",
+                    "bash -O extglob -c 'git push origin main'",
+                    "bash --norc -c 'git push origin main'",
+                    "bash -euo pipefail -c 'git push -f origin dev'",
+                    'eval "git push origin main"',
+                    "eval 'git push --all origin'",
+                    "ksh -c 'git push origin main'",
+                    "script -qc 'git push origin main' /dev/null",
+                    "bash -c $'git push origin main'",
+                    "x=`git push origin main 2>&1`",
+                    # A bit shift is not a heredoc, so later lines stay visible.
+                    "x=$((y<<1))\ngit push origin main",
+                    "(( mask = 1 << 2 ))\ngit push origin main"):
         code, err, calls = run_merge(command, "dev")
         check(f"block-dangerous-git still blocks a push run by a shell: {command!r}",
               code == 2 and "main" in err, f"(code={code}, err={err!r})")
@@ -715,7 +729,12 @@ with tempfile.TemporaryDirectory() as temp_dir:
                 # Every branch the command passes through counts, not just the last.
                 "git checkout main && git merge dev && git push && git checkout dev",
                 "git switch main\ngit merge --ff-only dev\ngit push origin\ngit switch dev",
-                "git checkout dev && git push -f && git switch -c feature/next"):
+                "git checkout dev && git push -f && git switch -c feature/next",
+                # A push run by a shell mid-chain still counts its branch.
+                "git checkout main && git merge feature/x && sh -c 'git push' && "
+                "git checkout feature/x && git push",
+                "git checkout dev && git rebase main && bash -c 'git push --force' && "
+                "git checkout feature/x && git push"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git blocks after a switch it cannot clear: {cmd!r}",
               code == 2, f"(code={code}, err={err!r})")

@@ -112,14 +112,18 @@ def is_option_prefix(flag, *options, minimum=3):
 
 # A heredoc operator and its delimiter word: quoted ('END', "END"),
 # backslash-escaped (\END) or bare, including hyphens (END-OF-BODY).
-HEREDOC_AT = re.compile(r"""<<(-?)[ \t]*(?:'([^'\n]+)'|"([^"\n]+)"|\\?([^\s;&|()<>'"]+))""")
+HEREDOC_AT = re.compile(
+    r"""<<(-?)[ \t]*(?:'([^'\n]+)'|"([^"\n]+)"|\\?([A-Za-z_][^\s;&|()<>'"]*))"""
+)
 
 
 def heredoc_delimiter(match):
     return next(group for group in match.groups()[1:] if group is not None)
-SHELLS = {"bash", "sh", "zsh", "dash"}
+SHELLS = {"bash", "sh", "zsh", "dash", "ksh", "mksh", "ash", "fish"}
+# Words that run a `-c` script argument: the shells, and script(1).
+SCRIPT_RUNNERS = SHELLS | {"script"}
 # A shell reading stdin, by bare name or path (/bin/bash, /usr/bin/env bash).
-SHELL_READER = re.compile(r"(?:^|[\s;&|(/])(?:bash|sh|zsh|dash)(?=\s|$)")
+SHELL_READER = re.compile(r"(?:^|[\s;&|(/])(?:" + "|".join(sorted(SHELLS)) + r")(?=\s|$)")
 
 
 def skip_heredoc_bodies(command, index, pending, keep=None):
@@ -237,6 +241,15 @@ def without_heredoc_bodies_and_comments(command):
                 quote = None
             index += 1
             continue
+        if char == "`":
+            # An unquoted backtick substitution sticks to its neighbours as
+            # one word; lift it out as its own lines, like a quoted one.
+            end = substitution_end(command, index + 1, "`")
+            if end < 0:
+                return command
+            emit("\n" + without_heredoc_bodies_and_comments(command[index + 1:end]) + "\n")
+            index = end + 1
+            continue
         if char in "'\"":
             quote = char
             emit(char)
@@ -325,8 +338,15 @@ NOT_A_SWITCH = object()
 
 def uses_current_branch(tokens):
     """Whether a simple command acts on the current branch: a push, or a gh
-    PR create/merge that may default to it."""
-    for index, token in enumerate(tokens[:-1]):
+    PR create/merge that may default to it, including inside a script it
+    runs (`sh -c`, `eval`)."""
+    for index, token in enumerate(tokens):
+        for script in embedded_scripts(tokens, index):
+            inner = simple_commands(script)
+            if inner is None or any(uses_current_branch(part) for part in inner):
+                return True
+        if index == len(tokens) - 1:
+            break
         name = os.path.basename(token)
         if name == "git" and tokens[index + 1] == "push":
             return True
@@ -415,9 +435,10 @@ def gh_calls(command):
         return
     for tokens in commands:
         for index, token in enumerate(tokens):
-            script = shell_script_argument(tokens, index)
-            if script is not None:
+            scripts = embedded_scripts(tokens, index)
+            for script in scripts:
                 yield from gh_calls(script)
+            if scripts:
                 continue
             if os.path.basename(token) != "gh":
                 continue
@@ -614,7 +635,7 @@ def pr_merge_problem(arguments, context_changed, command, switched):
             fix = "name the PR explicitly"
         return ("merges a PR (or enables auto-merge) whose base branch could not be "
                 "determined with gh pr view. Merges into main/master are the owner's; "
-                f"{fix} so its base can be checked.")
+                f"{fix}, so its base can be checked.")
     if base in PROTECTED_BRANCHES:
         return (f"merges a PR (or enables auto-merge) into {base}. Only the repository "
                 f"owner merges into {base}.")
@@ -663,8 +684,9 @@ def api_problem(arguments):
     if endpoint == "graphql" or endpoint.endswith("/graphql"):
         text = graphql_text(arguments)
         if text is None:
-            return ("sends a GraphQL document from a file or stdin this hook cannot read. "
-                    "Inline the query so it can be checked for merge and ref mutations.")
+            return ("sends a GraphQL document this hook cannot read (a missing query, stdin, an "
+                    "unreadable file, or a command substitution). Pass the query inline or with "
+                    "-F query=@file so it can be checked for merge and ref mutations.")
         match = GRAPHQL_WRITE_MUTATIONS.search(text)
         if match:
             return (f"runs the GraphQL mutation {match.group(1)}, which can merge a PR or "
@@ -722,17 +744,34 @@ def push_flags_and_refspecs(arguments):
     return flags, (found if repository_from_option else found[1:])
 
 
-def shell_script_argument(tokens, index):
-    """The script of `bash [-o opt ...] -c '<script>'` when tokens[index] is
-    a shell, else None."""
-    if os.path.basename(tokens[index]) not in SHELLS:
-        return None
+def embedded_scripts(tokens, index):
+    """The shell text that the command word tokens[index] runs, as a list:
+    `eval <words>`, and `<shell> [options] -c '<script>'` (also `script -c`).
+    Option clusters may carry the value-taking -o/-O (`-euo pipefail`). A
+    `$'...'` script reaches here as `$...`, so it is also read without the
+    `$`. Empty for any other word."""
+    name = os.path.basename(tokens[index])
+    if name == "eval":
+        return [" ".join(tokens[index + 1:])] if index + 1 < len(tokens) else []
+    if name not in SCRIPT_RUNNERS:
+        return []
     position = index + 1
-    while position < len(tokens) and tokens[position][:1] in {"-", "+"}:
-        if re.fullmatch(r"-[a-z]*c[a-z]*", tokens[position]):
-            return tokens[position + 1] if position + 1 < len(tokens) else None
-        position += 2 if tokens[position] in {"-o", "+o"} else 1
-    return None
+    while position < len(tokens) and tokens[position][:1] in {"-", "+"} and len(tokens[position]) > 1:
+        cluster = tokens[position]
+        if cluster == "--":
+            return []
+        if cluster.startswith("--"):  # --login, --norc: no -c inside a long option
+            position += 1
+            continue
+        values = sum(cluster[1:].count(option) for option in "oO")
+        if "c" in cluster[1:]:
+            script_at = position + 1 + values
+            if script_at >= len(tokens):
+                return []
+            script = tokens[script_at]
+            return [script, script[1:]] if script.startswith("$") else [script]
+        position += 1 + values
+    return []
 
 
 def push_invocations(command):
@@ -751,10 +790,10 @@ def push_invocations(command):
         return
     for tokens in commands:
         for index, token in enumerate(tokens):
-            script = shell_script_argument(tokens, index)
-            if script is not None:
+            scripts = embedded_scripts(tokens, index)
+            for script in scripts:
                 yield from push_invocations(script)
-            elif os.path.basename(token) == "git" and tokens[index + 1:index + 2] == ["push"]:
+            if not scripts and os.path.basename(token) == "git" and tokens[index + 1:index + 2] == ["push"]:
                 yield tokens[index + 2:]
 
 
