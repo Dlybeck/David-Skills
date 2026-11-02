@@ -519,6 +519,54 @@ with tempfile.TemporaryDirectory() as temp_dir:
         check(f"block-dangerous-git allows quoted substitution bodies: {command!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
 
+    # Pre-review: a GraphQL query built by a command substitution is unreadable.
+    for command in (
+        "gh api graphql -f query=\"$(cat <<'EOF'\nmutation { mergePullRequest(input: "
+        "{pullRequestId: \\\"x\\\"}) { clientMutationId } }\nEOF\n)\"",
+        'gh api graphql -f query="$(cat q.graphql)"',
+        "gh api graphql -F owner=o",
+    ):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git blocks GraphQL it cannot read: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # Pre-review: text that only mentions a push to main is not a push.
+    for command in (
+        'gh pr create --base main --head dev --title "Promote dev to main" '
+        '--body "Agents never git push to main; David merges."',
+        'gh pr comment 12 --body "🤖 Agent: the hook blocks git push origin main as before"',
+        'git commit -m "docs: agents never git push to main"',
+        'grep -rn "git push origin main" hooks/',
+        "gh pr comment 12 --body-file - <<'END-OF-BODY'\nit's done\nEND-OF-BODY",
+        "cat <<\\EOF\nit's here\nEOF",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git allows text about pushes and any heredoc word: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+    for command in ("bash -c 'git push origin main'", 'out="$(git push origin main 2>&1)"',
+                    # Targeted re-review: scripts run by shells, eval and script(1).
+                    "bash -euo pipefail -c 'git push origin main'",
+                    "bash -O extglob -c 'git push origin main'",
+                    "bash --norc -c 'git push origin main'",
+                    "bash -euo pipefail -c 'git push -f origin dev'",
+                    'eval "git push origin main"',
+                    "eval 'git push --all origin'",
+                    "ksh -c 'git push origin main'",
+                    "script -qc 'git push origin main' /dev/null",
+                    "bash -c $'git push origin main'",
+                    "x=`git push origin main 2>&1`",
+                    # A bit shift is not a heredoc, so later lines stay visible.
+                    "x=$((y<<1))\ngit push origin main",
+                    "(( mask = 1 << 2 ))\ngit push origin main"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git still blocks a push run by a shell: {command!r}",
+              code == 2 and "main" in err, f"(code={code}, err={err!r})")
+
+    # Pre-review: a blocked merge after cd says what fixes it.
+    code, err, calls = run_merge("cd /tmp && gh pr merge 12 --merge", "dev")
+    check("block-dangerous-git tells a merge after cd to pass --repo",
+          code == 2 and "--repo owner/name" in err, f"(code={code}, err={err!r})")
+
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")
     check("block-dangerous-git blocks when any merge in the command targets main",
           code == 2 and "into main" in err, f"(code={code}, err={err!r})")
@@ -663,7 +711,11 @@ with tempfile.TemporaryDirectory() as temp_dir:
                 "git switch dev && git push",
                 "git checkout -b feature/y && git push -u origin HEAD",
                 "git switch dev && gh pr create --base main --head dev --title x",
-                "git switch dev && gh pr create --base main --title x"):
+                "git switch dev && gh pr create --base main --title x",
+                # Pre-review: each push counts the last switch before it.
+                "git checkout main && git pull && git checkout dev && git merge main && git push",
+                "git checkout main && git pull --ff-only && git checkout feature/x && "
+                "git rebase main && git push --force-with-lease"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git follows a literal branch switch: {cmd!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
@@ -677,7 +729,12 @@ with tempfile.TemporaryDirectory() as temp_dir:
                 # Every branch the command passes through counts, not just the last.
                 "git checkout main && git merge dev && git push && git checkout dev",
                 "git switch main\ngit merge --ff-only dev\ngit push origin\ngit switch dev",
-                "git checkout dev && git push -f && git switch -c feature/next"):
+                "git checkout dev && git push -f && git switch -c feature/next",
+                # A push run by a shell mid-chain still counts its branch.
+                "git checkout main && git merge feature/x && sh -c 'git push' && "
+                "git checkout feature/x && git push",
+                "git checkout dev && git rebase main && bash -c 'git push --force' && "
+                "git checkout feature/x && git push"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git blocks after a switch it cannot clear: {cmd!r}",
               code == 2, f"(code={code}, err={err!r})")
