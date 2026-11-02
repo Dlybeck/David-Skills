@@ -108,6 +108,10 @@ BLOCK_PUSH_TO_MAIN = [
     'git push origin HEAD:heads/master',
     'git push origin HEAD:heads/main',
     'git commit -m wip#3 && git push origin main',
+    'git commit -m "docs: explain <<EOF handling"\ngit push origin HEAD:main',
+    "/bin/bash <<'EOF'\ngit push origin HEAD:main\nEOF",
+    'git commit -m "$(printf "Fix #3")" && git push origin HEAD:main',
+    'git push origin main>/dev/null',
     'git push \\\n  origin \\\n  main',
     'git push origin :main',
     'git -C /tmp/repo push',
@@ -465,6 +469,8 @@ with tempfile.TemporaryDirectory() as temp_dir:
         "cat > /tmp/report.md <<'EOF'\nDavid's call\nEOF\ngh pr edit 12 --body-file /tmp/report.md",
         "git commit -F - <<'EOF'\nfix(hooks): don't block\nEOF",
         "gh pr list # David's open PRs",
+        "git commit -m \"$(cat <<'EOF'\nfix: David's change\nEOF\n)\"",
+        "gh pr comment 12 --body \"$(cat <<'EOF'\n🤖 Agent: it's fixed in abc123\nEOF\n)\"",
         "git push origin feature/x # not main",
     ):
         code, err, calls = run_merge(command, "main")
@@ -472,6 +478,13 @@ with tempfile.TemporaryDirectory() as temp_dir:
               code == 0 and err == "", f"(code={code}, err={err!r})")
     for command in (
         "bash <<'EOF'\ngh pr merge 12 --merge\nEOF",
+        "/bin/bash <<'EOF'\ngh pr merge 12 --merge\nEOF",
+        "bash -o pipefail -c 'gh pr merge 12 --merge'",
+        # `<<EOF` inside quotes or a comment is not a heredoc.
+        'echo "use <<EOF"\ngh pr merge 12 --merge',
+        "# write it with cat <<EOF\ngh pr merge 12 --merge",
+        # Command substitution inside double quotes is left unstripped.
+        'gh pr comment 12 --body "$(printf "Fixed #3")" && gh pr merge 12 --merge',
         "bash -c 'gh pr merge 12 --merge'",
         "sh -c \"gh api -X PUT repos/o/r/pulls/12/merge\"",
         "bash -lc 'gh pr -R o/r merge 12'",
@@ -606,7 +619,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
     for cmd in ("git checkout dev && git merge --ff-only feature/x && git push",
                 "git switch dev && git push",
                 "git checkout -b feature/y && git push -u origin HEAD",
-                "git switch dev && gh pr create --base main --title x"):
+                "git switch dev && gh pr create --base main --head dev --title x"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git follows a literal branch switch: {cmd!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
@@ -615,7 +628,12 @@ with tempfile.TemporaryDirectory() as temp_dir:
                 "git checkout dev && git push --force origin HEAD",
                 "git checkout notes.txt && git push",
                 "gh pr checkout 5 && git push",
-                "git switch feature/x && gh pr create --base main"):
+                "git switch feature/x && gh pr create --base main",
+                "git switch dev && gh pr create --base main --title x",
+                # Every branch the command passes through counts, not just the last.
+                "git checkout main && git merge dev && git push && git checkout dev",
+                "git switch main\ngit merge --ff-only dev\ngit push origin\ngit switch dev",
+                "git checkout dev && git push -f && git switch -c feature/next"):
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
         check(f"block-dangerous-git blocks after a switch it cannot clear: {cmd!r}",
               code == 2, f"(code={code}, err={err!r})")
