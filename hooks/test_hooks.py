@@ -107,6 +107,8 @@ BLOCK_PUSH_TO_MAIN = [
     'git push origin HEAD:refs/heads/master',
     'git push origin HEAD:heads/master',
     'git push origin HEAD:heads/main',
+    'git commit -m wip#3 && git push origin main',
+    'git push \\\n  origin \\\n  main',
     'git push origin :main',
     'git -C /tmp/repo push',
     'git -c push.default=matching push origin',
@@ -422,6 +424,36 @@ with tempfile.TemporaryDirectory() as temp_dir:
     for command in ("gh dash", "gh alias list", "gh pr checkout 12"):
         code, err, calls = run_merge(command, "dev", "co: pr checkout")
         check(f"block-dangerous-git allows non-alias gh command: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    # Backslash-newline continuations (the layout GitHub's docs use for gh api)
+    # and mid-word `#` (which is not a shell comment) hide nothing.
+    for command, base in (
+        ("gh api \\\n  --method PUT \\\n  -H \"Accept: application/vnd.github+json\" \\\n"
+         "  /repos/o/r/pulls/5/merge \\\n  -f merge_method=merge", "dev"),
+        ("gh api \\\n  --method PATCH \\\n  /repos/o/r/git/refs/heads/main \\\n  -f sha=abc", "dev"),
+        ("gh api \\\n  --method DELETE \\\n  /repos/o/r/git/refs/heads/dev", "dev"),
+        ("gh \\\n  pr merge 12 --merge", "main"),
+        ("echo a#b; gh pr merge 12 --squash", "main"),
+        ("gh pr comment 12 --body fixes#3 && gh pr merge 12", "main"),
+    ):
+        code, err, calls = run_merge(command, base)
+        check(f"block-dangerous-git sees through continuation/mid-word #: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # A branch switch earlier in the command makes the hook's current branch
+    # (and its current-branch PR) the wrong thing to check.
+    for command in ("git checkout dev && gh pr merge --merge",
+                    "git switch dev && gh pr merge --squash",
+                    "gh pr checkout 5 && gh pr merge --merge",
+                    "git checkout feature/x && gh pr create --base main --title x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git blocks bare PR command after a branch switch: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    for command in ("git checkout feature/x && gh pr merge 12 --merge",
+                    "git switch dev && gh pr create --base main --head dev --title x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git allows explicit PR command after a branch switch: {command!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
 
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")

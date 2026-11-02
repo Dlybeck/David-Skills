@@ -93,7 +93,7 @@ PR_MERGE_OPTIONS_WITH_VALUE = {
     "-A", "--author-email", "-b", "--body", "-F", "--body-file",
     "--match-head-commit", "-R", "--repo", "-t", "--subject",
 }
-SHELL_OPERATORS = set(";&|()")
+SHELL_OPERATORS = set(";&|()\n")
 DIRECTORY_CHANGERS = {"cd", "pushd", "popd"}
 GH_FLAGS_WITH_VALUE = {"-R", "--repo"}
 GH_SINGLE_WORD_COMMANDS = {"api", "browse", "status", "completion", "help"}
@@ -116,19 +116,42 @@ def is_option_prefix(flag, *options, minimum=3):
     return len(flag) >= minimum and any(option.startswith(flag) for option in options)
 
 
-def simple_commands(command):
-    """Split shell text into token lists, one per simple command, at shell
-    operators and unquoted newlines. Comments are kept as words so a `#`
-    never hides the newline that ends a command. Returns None when the text
-    cannot be tokenized (unbalanced quotes and the like); callers treat that
-    as unknown, never as safe."""
+def shell_tokens(command):
+    """Tokenize shell text, keeping unquoted newlines as operator tokens.
+    Comments stay as words: shlex would start one at a mid-word `#` (which
+    the shell does not) and swallow the rest of the line. Returns None when
+    the text cannot be tokenized (unbalanced quotes and the like); callers
+    treat that as unknown, never as safe."""
     try:
         lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()\n")
         lexer.whitespace = " \t\r"
         lexer.whitespace_split = True
         lexer.commenters = ""
-        tokens = list(lexer)
+        return list(lexer)
     except ValueError:
+        return None
+
+
+def branch_switched(command):
+    """Whether the command changes the checked-out branch before a later part
+    of it runs, so the hook's own current branch and current-branch PR no
+    longer describe what that later part acts on."""
+    for tokens in simple_commands(command) or []:
+        for index, token in enumerate(tokens[:-1]):
+            following = tokens[index + 1]
+            if os.path.basename(token) == "git" and following in {"checkout", "switch", "worktree"}:
+                return True
+            if os.path.basename(token) == "gh" and tokens[index + 1:index + 3] == ["pr", "checkout"]:
+                return True
+    return False
+
+
+def simple_commands(command):
+    """Split shell text into token lists, one per simple command, at shell
+    operators and unquoted newlines. Returns None when the text cannot be
+    tokenized."""
+    tokens = shell_tokens(command)
+    if tokens is None:
         return None
     commands, current = [], []
     for token in tokens:
@@ -305,7 +328,7 @@ def pr_edit_problem(arguments):
     return None
 
 
-def pr_merge_base(arguments, context_changed, command):
+def pr_merge_base(arguments, context_changed, command, switched):
     """Look up the base branch of the PR `gh pr merge` would merge. Returns
     the branch name, or None when it cannot be determined."""
     selector = positionals(arguments, PR_MERGE_OPTIONS_WITH_VALUE)[:1]
@@ -316,6 +339,10 @@ def pr_merge_base(arguments, context_changed, command):
     if (context_changed or GH_TARGET_VARIABLES.search(command)) and not explicit:
         return None
     if GH_HOST_VARIABLE.search(command):
+        return None
+    # Without a selector gh merges the current branch's PR, and the command
+    # may have switched branch before it runs.
+    if switched and not selector:
         return None
     view = ["gh", "pr", "view", *selector, "--json", "baseRefName", "--jq", ".baseRefName"]
     if repo:
@@ -328,10 +355,10 @@ def pr_merge_base(arguments, context_changed, command):
     return base if out.returncode == 0 and base else None
 
 
-def pr_merge_problem(arguments, context_changed, command):
+def pr_merge_problem(arguments, context_changed, command, switched):
     if arguments is None:
         return "merges a PR in a way that cannot be read from the command text."
-    base = pr_merge_base(arguments, context_changed, command)
+    base = pr_merge_base(arguments, context_changed, command, switched)
     if base is None:
         return ("merges a PR (or enables auto-merge) whose base branch could not be "
                 "determined with gh pr view. Merges into main/master are the owner's; "
@@ -470,11 +497,8 @@ def normalize_git_options(command):
     options or a shell cd can change ref resolution, require explicit push
     destinations rather than trusting the hook process's current branch.
     """
-    try:
-        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()")
-        lexer.whitespace_split = True
-        tokens = list(lexer)
-    except ValueError:
+    tokens = shell_tokens(command)
+    if tokens is None:
         return command, True
     output = []
     context_changed = any(token in DIRECTORY_CHANGERS for token in tokens)
@@ -498,7 +522,7 @@ def normalize_git_options(command):
                 if option not in {"--no-pager", "--paginate", "--no-optional-locks"}:
                     context_changed = True
                 index += 1
-    return " ".join(token if set(token) <= set(";&|()") else shlex.quote(token)
+    return " ".join(token if set(token) <= SHELL_OPERATORS else shlex.quote(token)
                     for token in output), context_changed
 
 
@@ -642,7 +666,7 @@ def push_problem(command, normalized, context_changed):
     return None
 
 
-def gh_problem(command, context_changed):
+def gh_problem(command, context_changed, switched):
     """The first blocked `gh` call in the command. The merge check runs last
     because it is the only one that makes a network call."""
     calls = list(gh_calls(command))
@@ -654,11 +678,11 @@ def gh_problem(command, context_changed):
     if problem:
         return problem
     checks = (
-        (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed)),
+        (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed or switched)),
         (("pr", "edit"), pr_edit_problem),
         (("api",), api_problem),
         (("repo", "sync"), repo_sync_problem),
-        (("pr", "merge"), lambda arguments: pr_merge_problem(arguments, context_changed, command)),
+        (("pr", "merge"), lambda arguments: pr_merge_problem(arguments, context_changed, command, switched)),
     )
     for subcommand, check in checks:
         for arguments in gh_invocations(command, *subcommand):
@@ -702,12 +726,15 @@ def main():
         return 0
 
     command = (data.get("tool_input") or {}).get("command") or ""
+    # The shell deletes a backslash-newline before it splits words.
+    command = re.sub(r"\\\r?\n", "", command)
     command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
+    switched = branch_switched(command)
 
     reason = (
-        push_problem(command, normalized, context_changed)
-        or gh_problem(command, context_changed)
+        push_problem(command, normalized, context_changed or switched)
+        or gh_problem(command, context_changed, switched)
         or destructive_problem(normalized)
     )
     if reason:
