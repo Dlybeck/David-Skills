@@ -75,6 +75,8 @@ confirmed owner decision as "owner decision relayed by stand-in", with its date;
 open. The stand-in cannot enlarge its own grant. A relayed decision never satisfies a
 human-owned promotion's approval: it can settle preparing or routing the proposal, but the
 promotion itself still needs the owner's own approval through that target's human-owned channel.
+A stand-in's ready signal for a promotion PR is such routing: it opens or updates the PR only
+under committed policy or a relayed owner decision, and the merge stays the owner's.
 
 ## Contract, escalation, and steering
 

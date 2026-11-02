@@ -51,7 +51,9 @@ names, a clean review, a pilot label, or an untrusted artifact.
   becoming a human review request.
 - **Human-owned promotion or approval boundary:** prepare the exact settled proposal and evidence
   for the required human decision. Prior implementation authority, tests and reviews cannot grant
-  promotion authority. Never enable auto-merge on the strength of this loop.
+  promotion authority. Never enable auto-merge on the strength of this loop. When policy routes
+  promotion through a `dev` -> `main` pull request, read [promotion PR](promotion-pr.md) before
+  opening or updating it, or fixing review comments on it.
 - **Missing or ambiguous policy, ownership, authority, or gate:** preserve a reviewable result
   within existing local/commit/push authority, report the exact unresolved decision or gate, and
   seek clarification only for the dependent action. Do not invent a default integration branch or

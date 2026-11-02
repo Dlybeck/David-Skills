@@ -56,6 +56,9 @@ implementation, research, review, or any standalone skill.
    Committed proposals also use **`/independent-pr-review`**: a fresh full-base actionable defect
    review and authorized developer repair/re-review loop before policy-driven settled delivery. It keeps
    ordinary findings separate from Standards/Spec and does not grant comment or merge authority.
+   Where policy promotes `dev` to a human-owned `main` through a pull request, the
+   `/independent-pr-review` developer loop opens or updates that promotion PR on a pasted ready
+   signal and fixes the owner's review comments on it; the owner merges.
    **`/tdd`**, **`/code-review`**, and **`/independent-pr-review`** also work standalone. A conversation or current goal contract,
    including user corrections, can supply the requirements without a formal spec.
 

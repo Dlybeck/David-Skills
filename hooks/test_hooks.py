@@ -18,6 +18,7 @@ Future hooks land with their own table of cases added to this file, not a
 new test file.
 """
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -102,6 +103,19 @@ def dispatch_payload(tool_name, command=None):
 # ---------------------------------------------------------------------------
 
 BLOCK_PUSH_TO_MAIN = [
+    'git push origin master',
+    'git push origin HEAD:refs/heads/master',
+    'git push origin HEAD:heads/master',
+    'git push origin HEAD:heads/main',
+    'git commit -m wip#3 && git push origin main',
+    'git commit -m "docs: explain <<EOF handling"\ngit push origin HEAD:main',
+    "/bin/bash <<'EOF'\ngit push origin HEAD:main\nEOF",
+    'git commit -m "$(printf "Fix #3")" && git push origin HEAD:main',
+    'git push origin main>/dev/null',
+    "git commit -F - <<'EOF'\nfix path C:\\\nEOF\ngit push origin HEAD:main",
+    '# see C:\\\ngit push origin main',
+    'git push \\\n  origin \\\n  main',
+    'git push origin :main',
     'git -C /tmp/repo push',
     'git -c push.default=matching push origin',
     'cd /tmp/repo && git push',
@@ -126,11 +140,18 @@ for cmd in BLOCK_PUSH_TO_MAIN:
           code == 2 and "main" in err, f"(code={code}, err={err!r})")
 
 BLOCK_PR_TO_MAIN = [
-    'gh pr create --base main --title "x"',
-    'gh pr create --base "main" --title "x"',
-    "gh pr create --base 'main' --title x",
+    'gh pr create --base main --head feature/x --title "x"',
+    'gh pr create --base "main" --head feature/x --title "x"',
+    "gh pr create --base 'main' --head feature/x --title x",
+    'gh pr create -B main -H feature/x --title x',
+    'gh pr create --base=master --head=feature/x',
+    'gh pr create --base main --head Dlybeck:dev',
+    'gh pr create --title x --head feature/x',
+    'cd /tmp/repo && gh pr create --base main --title x',
     'gh pr edit 5 --base=main',
     'gh pr edit 5 --base="main"',
+    'gh pr edit 5 -B master',
+    'gh pr edit 5 --base refs/heads/main',
 ]
 
 for cmd in BLOCK_PR_TO_MAIN:
@@ -152,12 +173,355 @@ PASS_LOOKALIKES = [
     'git push origin "maintenance"',
     'gh pr create --base dev --title "x"',
     'gh pr create --base develop --title "x"',
+    'gh pr create --base feature/main-page --title "x"',
+    'git push origin feature/master-plan',
+    'git push origin mastery',
 ]
 
 for cmd in PASS_LOOKALIKES:
     code, err = run_hook_bash("block-dangerous-git.py", cmd)
     check(f"block-dangerous-git allows lookalike: {cmd!r}",
           code == 0, f"(code={code}, err={err!r})")
+
+# The dev -> main promotion PR: opening it from head dev, editing its body,
+# commenting, and replying on review threads are all allowed.
+PASS_PROMOTION_PR = [
+    'gh pr create --base main --head dev --title "Promote dev" --body-file report.md',
+    'gh pr create -B main -H dev --title x',
+    'gh pr create --base=master --head=dev',
+    'gh pr edit 12 --body-file report.md',
+    'gh pr edit 12 --title "Promote dev to main"',
+    'gh pr edit 12 --base dev',
+    'gh pr comment 12 --body "🤖 Agent: updated the report"',
+    'gh pr view 12 --comments',
+    'gh pr list --base main --head dev --state open --json number',
+    'gh api repos/o/r/pulls/12/comments',
+    'gh api repos/o/r/pulls/12/comments/345/replies -f body="🤖 Agent: fixed in abc123"',
+    'gh api repos/o/r/issues/12/comments -f body=x',
+    'gh api repos/o/r/contents/README.md',
+    'gh api -X GET repos/o/r/git/refs/heads/main',
+    "gh api graphql -f query='query { viewer { login } }'",
+    'gh repo sync',
+    'gh repo sync owner/fork --branch dev',
+]
+
+for cmd in PASS_PROMOTION_PR:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git allows promotion-PR work: {cmd!r}",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+# gh api writes that merge a PR, move a ref, or commit content, and GraphQL
+# mutations that do the same, are blocked whatever branch they name.
+BLOCK_GH_WRITES = [
+    'gh api -X PUT repos/o/r/pulls/12/merge',
+    'gh api --method=PUT /repos/o/r/pulls/12/merge -f merge_method=merge',
+    'gh api repos/o/r/merges -f base=main -f head=dev',
+    'gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/x -f sha=abc',
+    'gh api -XDELETE repos/o/r/git/refs/heads/dev',
+    'gh api -X PUT repos/o/r/contents/README.md -f message=x -f content=eA==',
+    'gh api repos/o/r/merge-upstream -f branch=main',
+    "gh api graphql -f query='mutation { mergePullRequest(input: {pullRequestId: \"x\"}) { clientMutationId } }'",
+    "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input: {}) { clientMutationId } }'",
+    "gh api graphql -F query='mutation { updateRef(input: {}) { clientMutationId } }'",
+    "gh api graphql -f query='mutation { createCommitOnBranch(input: {}) { clientMutationId } }'",
+    'gh api graphql -F query=@/nonexistent/query.graphql',
+    "gh api https://api.github.com/graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'",
+    "gh api https://ghe.example.com/api/graphql -f query='mutation { updateRef(input: {}) { clientMutationId } }'",
+    'gh api -X PUT https://api.github.com/repos/o/r/pulls/12/merge',
+    'gh api graphql --input -',
+    'gh repo sync owner/fork',
+    'gh repo sync owner/fork --branch main',
+]
+
+for cmd in BLOCK_GH_WRITES:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git blocks gh write: {cmd!r}",
+          code == 2 and err.startswith("DANGEROUS GIT COMMAND blocked"),
+          f"(code={code}, err={err!r})")
+
+with tempfile.TemporaryDirectory() as temp_dir:
+    for name, text, blocked in (
+        ("merge.graphql", "mutation { mergePullRequest(input: {}) { clientMutationId } }", True),
+        ("query.graphql", "query { repository(owner: \"o\", name: \"r\") { id } }", False),
+    ):
+        path = Path(temp_dir) / name
+        path.write_text(text, encoding="utf-8")
+        code, err = run_hook_bash("block-dangerous-git.py", f"gh api graphql -F query=@{path}")
+        check(f"block-dangerous-git reads GraphQL file {name}",
+              code == (2 if blocked else 0), f"(code={code}, err={err!r})")
+
+# Force-pushing or deleting dev rewrites the promotion PR's head.
+BLOCK_DEV_REWRITE = [
+    'git push --force origin dev',
+    'git push -f origin dev',
+    'git push -uf origin dev',
+    'git push origin +dev',
+    'git push --force-with-lease origin HEAD:dev',
+    'git push origin +HEAD:refs/heads/dev',
+    'git push origin --delete dev',
+    'git push origin :dev',
+    # Git accepts any unambiguous prefix of a long option.
+    'git push --force-w origin dev',
+    'git push --force-with origin dev',
+    'git push --force-with-lease=dev:abc123 origin dev',
+    'git push --del origin dev',
+    'git push --dele origin dev',
+    # Git resolves a heads/<branch> destination to refs/heads/<branch>.
+    'git push -f origin HEAD:heads/dev',
+    'git push -f origin dev>/tmp/log',
+    'git push origin :heads/dev',
+]
+
+for cmd in BLOCK_DEV_REWRITE:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git blocks dev rewrite: {cmd!r}",
+          code == 2 and "dev" in err, f"(code={code}, err={err!r})")
+
+PASS_DEV_PUSHES = [
+    'git push origin dev',
+    'git push -u origin dev',
+    'git push origin HEAD:dev',
+    'git push --force origin feature/x',
+    'git push origin +feature/x',
+    'git push -f origin develop',
+    'git push origin --delete feature/x',
+    'git push --dry-run origin dev',
+    'git push --follow-tags origin dev',
+]
+
+for cmd in PASS_DEV_PUSHES:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git allows dev push: {cmd!r}",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+# `gh pr merge` looks up the PR's base with `gh pr view`. A fake gh on PATH
+# answers with FAKE_GH_BASE (or fails) and logs what it was asked.
+FAKE_GH = """#!/usr/bin/env python3
+import json, os, sys
+with open(os.environ["FAKE_GH_LOG"], "a", encoding="utf-8") as log:
+    log.write(json.dumps(sys.argv[1:]) + "\\n")
+if sys.argv[1:3] == ["alias", "list"]:
+    aliases = os.environ.get("FAKE_GH_ALIASES", "")
+    if aliases == "FAIL":
+        sys.exit(1)
+    print(aliases)
+    sys.exit(0)
+base = os.environ.get("FAKE_GH_BASE", "")
+if sys.argv[1:3] != ["pr", "view"] or base == "FAIL":
+    sys.exit(1)
+print(base)
+"""
+
+with tempfile.TemporaryDirectory() as temp_dir:
+    bin_dir = Path(temp_dir) / "bin"
+    bin_dir.mkdir()
+    fake_gh = bin_dir / "gh"
+    fake_gh.write_text(FAKE_GH, encoding="utf-8")
+    fake_gh.chmod(0o755)
+    gh_log = Path(temp_dir) / "gh.jsonl"
+
+    def run_merge(command, base, aliases="co: pr checkout"):
+        gh_log.write_text("", encoding="utf-8")
+        environment = {
+            **os.environ,
+            "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
+            "FAKE_GH_LOG": str(gh_log),
+            "FAKE_GH_BASE": base,
+            "FAKE_GH_ALIASES": aliases,
+        }
+        proc = subprocess.run(
+            [sys.executable, str(HOOKS_DIR / "block-dangerous-git.py")],
+            input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}),
+            capture_output=True, text=True, cwd=REPO_ROOT, timeout=30, env=environment,
+        )
+        calls = [json.loads(line) for line in gh_log.read_text().splitlines() if line]
+        return proc.returncode, proc.stderr, calls
+
+    for command, base, blocked in (
+        ("gh pr merge 12 --merge", "main", True),
+        ("gh pr merge 12 --auto --squash", "main", True),
+        ("gh pr merge 12 --merge", "master", True),
+        ("gh pr merge 12 --merge", "FAIL", True),
+        ("gh pr merge 12 --merge", "", True),
+        ("gh pr merge --merge", "main", True),
+        ("gh pr merge 12 --squash --delete-branch", "dev", False),
+        ("gh pr merge 12 --auto --merge", "feature/x", False),
+        ('gh pr merge 12 --merge --subject "Merge feature/x"', "dev", False),
+        ("gh pr merge 12 --merge && gh pr merge 13 --merge", "dev", False),
+    ):
+        code, err, calls = run_merge(command, base)
+        check(f"block-dangerous-git gh pr merge base={base or 'empty'!s}: {command!r}",
+              code == (2 if blocked else 0) and (blocked or err == ""),
+              f"(code={code}, err={err!r})")
+
+    code, err, calls = run_merge("gh pr merge 12 --merge -R owner/repo", "dev")
+    check("block-dangerous-git looks up the merge base for the named PR and repo",
+          code == 0 and calls == [["pr", "view", "12", "--json", "baseRefName", "--jq",
+                                   ".baseRefName", "--repo", "owner/repo"]],
+          f"(code={code}, calls={calls!r})")
+
+    code, err, calls = run_merge("cd /tmp && gh pr merge 12 --merge", "dev")
+    check("block-dangerous-git blocks merge after cd without --repo, no lookup",
+          code == 2 and calls == [], f"(code={code}, calls={calls!r})")
+
+    code, err, calls = run_merge("cd /tmp && gh pr merge 12 --merge --repo owner/repo", "dev")
+    check("block-dangerous-git allows merge after cd with explicit --repo",
+          code == 0 and len(calls) == 1, f"(code={code}, calls={calls!r})")
+
+    # The lookup runs in the hook's own directory and environment: a command
+    # that points gh elsewhere without --repo must block, not check the wrong PR.
+    for command in (
+        "GH_REPO=owner/other gh pr merge 12 --merge",
+        "export GH_REPO=owner/other; gh pr merge 12 --merge",
+        "pushd /tmp/other && gh pr merge 12 --merge",
+        "GH_HOST=ghe.example.com gh pr merge 12 --merge --repo owner/repo",
+    ):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git blocks merge with redirected gh target: {command!r}",
+              code == 2 and calls == [], f"(code={code}, calls={calls!r})")
+
+    code, err, calls = run_merge("GH_REPO=owner/other gh pr merge 12 --merge -R owner/other", "dev")
+    check("block-dangerous-git allows GH_REPO merge with matching explicit --repo",
+          code == 0 and len(calls) == 1, f"(code={code}, calls={calls!r})")
+
+    # gh accepts -R/--repo between `pr` and the subcommand.
+    for command in ("gh pr -R owner/repo merge 12 --merge", "gh pr --repo=owner/repo merge 12"):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git sees merge after a leading repo flag: {command!r}",
+              code == 2 and "into main" in err and calls and "owner/repo" in calls[0][-1],
+              f"(code={code}, err={err!r}, calls={calls!r})")
+    for command in ("gh pr -R owner/repo edit 5 --base main",
+                    "gh pr -R owner/repo create --base main --head feature/x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git sees PR command after a leading repo flag: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # An option value spelled gh or git is a value, not a new command.
+    code, err, calls = run_merge("gh pr merge --subject gh 12 --merge", "main")
+    check("block-dangerous-git keeps the PR selector after a value spelled gh",
+          code == 2 and any(call[:3] == ["pr", "view", "12"] for call in calls),
+          f"(code={code}, calls={calls!r})")
+    for command in (
+        "gh api -t gh -X PUT repos/o/r/pulls/5/merge",
+        "gh api --template git graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'",
+    ):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git reads gh api past a value spelled gh/git: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # Newlines end a command even after a comment.
+    for command in ("echo ready\ngh pr merge 12 --merge",
+                    "gh pr list # open PRs\ngh pr merge 12 --merge"):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git splits commands at newlines: {command!r}",
+              code == 2 and "into main" in err, f"(code={code}, err={err!r})")
+
+    # Aliases can hide a merge: defining one is blocked, and so is running one.
+    for command, aliases in (
+        ("gh alias set pm 'pr merge'", "co: pr checkout"),
+        ("gh alias import aliases.yml", "co: pr checkout"),
+        ("gh pm 12", "pm: pr merge"),
+        ("gh co 12", "co: pr checkout"),
+        ("gh dash", "FAIL"),
+    ):
+        code, err, calls = run_merge(command, "dev", aliases)
+        check(f"block-dangerous-git blocks gh alias use: {command!r} ({aliases})",
+              code == 2 and "alias" in err, f"(code={code}, err={err!r})")
+    for command in ("gh dash", "gh alias list", "gh pr checkout 12"):
+        code, err, calls = run_merge(command, "dev", "co: pr checkout")
+        check(f"block-dangerous-git allows non-alias gh command: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    # Backslash-newline continuations (the layout GitHub's docs use for gh api)
+    # and mid-word `#` (which is not a shell comment) hide nothing.
+    for command, base in (
+        ("gh api \\\n  --method PUT \\\n  -H \"Accept: application/vnd.github+json\" \\\n"
+         "  /repos/o/r/pulls/5/merge \\\n  -f merge_method=merge", "dev"),
+        ("gh api \\\n  --method PATCH \\\n  /repos/o/r/git/refs/heads/main \\\n  -f sha=abc", "dev"),
+        ("gh api \\\n  --method DELETE \\\n  /repos/o/r/git/refs/heads/dev", "dev"),
+        ("gh \\\n  pr merge 12 --merge", "main"),
+        ("echo a#b; gh pr merge 12 --squash", "main"),
+        ("gh pr comment 12 --body fixes#3 && gh pr merge 12", "main"),
+    ):
+        code, err, calls = run_merge(command, base)
+        check(f"block-dangerous-git sees through continuation/mid-word #: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # A branch switch earlier in the command makes the hook's current branch
+    # (and its current-branch PR) the wrong thing to check.
+    for command in ("git checkout dev && gh pr merge --merge",
+                    "git switch dev && gh pr merge --squash",
+                    "gh pr checkout 5 && gh pr merge --merge",
+                    "git checkout feature/x && gh pr create --base main --title x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git blocks bare PR command after a branch switch: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    for command in ("git checkout feature/x && gh pr merge 12 --merge",
+                    "git switch dev && gh pr create --base main --head dev --title x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git allows explicit PR command after a branch switch: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    # Heredoc bodies are data (report text often holds an apostrophe), unless
+    # a shell reads them. Real comments are dropped; `bash -c` scripts are read.
+    for command in (
+        "gh pr comment 12 --body-file - <<'EOF'\n🤖 Agent: David's comment is fixed in abc123.\nEOF",
+        "gh pr edit 12 --body-file - <<'EOF'\n## Task\nit's done\nEOF",
+        "gh pr create --base main --head dev --title x --body-file - <<'EOF'\nIt's ready\nEOF",
+        "cat > /tmp/report.md <<'EOF'\nDavid's call\nEOF\ngh pr edit 12 --body-file /tmp/report.md",
+        "git commit -F - <<'EOF'\nfix(hooks): don't block\nEOF",
+        "gh pr list # David's open PRs",
+        "git commit -m \"$(cat <<'EOF'\nfix: David's change\nEOF\n)\"",
+        "gh pr comment 12 --body \"$(cat <<'EOF'\n🤖 Agent: it's fixed in abc123\nEOF\n)\"",
+        "git push origin feature/x # not main",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git allows heredoc/comment text: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+    for command in (
+        "bash <<'EOF'\ngh pr merge 12 --merge\nEOF",
+        "/bin/bash <<'EOF'\ngh pr merge 12 --merge\nEOF",
+        "bash -o pipefail -c 'gh pr merge 12 --merge'",
+        # `<<EOF` inside quotes or a comment is not a heredoc.
+        'echo "use <<EOF"\ngh pr merge 12 --merge',
+        "# write it with cat <<EOF\ngh pr merge 12 --merge",
+        # Command substitution inside double quotes is left unstripped.
+        'gh pr comment 12 --body "$(printf "Fixed #3")" && gh pr merge 12 --merge',
+        "bash -c 'gh pr merge 12 --merge'",
+        "sh -c \"gh api -X PUT repos/o/r/pulls/12/merge\"",
+        "bash -lc 'gh pr -R o/r merge 12'",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git reads commands run by a shell: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # Command substitutions inside double quotes are read as commands.
+    for command in (
+        'PR_URL="$(gh pr create --fill)"',
+        'out="$(gh pr merge 12 --merge 2>&1)"',
+        'echo "`gh pr merge 12`"',
+        "r=\"$(gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }')\"",
+        # A backslash-newline inside a quoted heredoc body or a comment does
+        # not continue the line, so it hides nothing after it.
+        "cat > r.md <<'EOF'\nnpm run x \\\nEOF\ngh pr merge 12 --merge",
+        "# see C:\\\ngh pr merge 12 --merge",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git reads quoted substitutions and stray backslashes: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    for command in (
+        'PR_URL="$(gh pr create --base main --head dev --title x --body-file r.md)"',
+        "gh pr edit 7 --body \"$(cat <<'EOF'\nA 27\\\" monitor (big)\nEOF\n)\"",
+        "gh pr edit 7 --body \"$(cat <<'EOF'\nA 27\" monitor\nEOF\n)\"",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git allows quoted substitution bodies: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")
+    check("block-dangerous-git blocks when any merge in the command targets main",
+          code == 2 and "into main" in err, f"(code={code}, err={err!r})")
 
 # Generated reports live outside the commit-gated tracker. Check the real
 # status command without weakening protection for any .scratch directory.
@@ -250,10 +614,79 @@ with tempfile.TemporaryDirectory() as temp_dir:
               code == 2 and "can update main" in err,
               f"(code={code}, err={err!r})")
 
+    code, err = run_hook_bash("block-dangerous-git.py", "gh pr create --base main", cwd=repo)
+    check("block-dangerous-git blocks PR into main from a main checkout",
+          code == 2, f"(code={code}, err={err!r})")
+
+    # From a main checkout: a switch chained by && to the push leaves main
+    # behind; a `;` does not, since a failed switch would push main.
+    git(repo, "branch", "dev")
+    git(repo, "branch", "feature/x")
+    code, err = run_hook_bash(
+        "block-dangerous-git.py",
+        "git checkout dev && git merge --no-ff feature/x && git push", cwd=repo)
+    check("block-dangerous-git allows a chained switch to dev then push from main",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+    for cmd in ("git checkout dev; git push", "git checkout dev\ngit push",
+                "git checkout dev || git push"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git keeps main when the switch may fail: {cmd!r}",
+              code == 2, f"(code={code}, err={err!r})")
+    git(repo, "branch", "-q", "--delete", "dev")
+    git(repo, "branch", "-q", "--delete", "feature/x")
+
     git(repo, "switch", "-qc", "dev")
     code, err = run_hook_bash("block-dangerous-git.py", "git push", cwd=repo)
     check("block-dangerous-git allows implicit push from dev",
           code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    for cmd in ("gh pr create --base main --title x", "gh pr create --fill"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git allows promotion PR from a dev checkout: {cmd!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    for cmd in ("git push --force", "git push -f origin HEAD", "git push origin +@"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks force push from a dev checkout: {cmd!r}",
+              code == 2 and "dev" in err, f"(code={code}, err={err!r})")
+
+    git(repo, "switch", "-qc", "feature/x")
+    code, err = run_hook_bash("block-dangerous-git.py", "gh pr create --base main", cwd=repo)
+    check("block-dangerous-git blocks PR into main from a feature checkout",
+          code == 2 and "feature/x" in err, f"(code={code}, err={err!r})")
+    code, err = run_hook_bash("block-dangerous-git.py", "git push --force", cwd=repo)
+    check("block-dangerous-git allows force push of a feature checkout",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    # A literal switch to a readable branch moves the effective current branch.
+    for cmd in ("git checkout dev && git merge --ff-only feature/x && git push",
+                "git switch dev && git push",
+                "git checkout -b feature/y && git push -u origin HEAD",
+                "git switch dev && gh pr create --base main --head dev --title x",
+                "git switch dev && gh pr create --base main --title x"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git follows a literal branch switch: {cmd!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+    for cmd in ("git checkout main && git push",
+                "git checkout dev && git push -f",
+                "git checkout dev && git push --force origin HEAD",
+                "git checkout notes.txt && git push",
+                "gh pr checkout 5 && git push",
+                "git switch feature/x && gh pr create --base main",
+                "git switch dev; gh pr create --base main --title x",
+                # Every branch the command passes through counts, not just the last.
+                "git checkout main && git merge dev && git push && git checkout dev",
+                "git switch main\ngit merge --ff-only dev\ngit push origin\ngit switch dev",
+                "git checkout dev && git push -f && git switch -c feature/next"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks after a switch it cannot clear: {cmd!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    git(repo, "switch", "-qc", "master")
+    code, err = run_hook_bash("block-dangerous-git.py", "git push", cwd=repo)
+    check("block-dangerous-git blocks implicit push from master",
+          code == 2 and "current branch (master)" in err, f"(code={code}, err={err!r})")
+    git(repo, "switch", "-q", "dev")
 
     for cmd in unbounded_pushes:
         code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
@@ -317,6 +750,12 @@ MALFORMED_STDIN += [
     for value in ([], {}, 7)
 ]
 MALFORMED_STDIN += [json.dumps({"model": ["invalid"]})]
+
+# Input deep enough to exhaust the scanner's recursion blocks rather than
+# crashing (a crash exits 1, which the host treats as allow).
+code, err = run_hook_bash("block-dangerous-git.py", 'echo "$(' * 2000 + "true" + ')"' * 2000)
+check("block-dangerous-git blocks when analysis fails", code == 2 and "could not be checked" in err,
+      f"(code={code}, err={err!r})")
 
 for raw in MALFORMED_STDIN:
     code, err = run_hook("block-dangerous-git.py", raw)

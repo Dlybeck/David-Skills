@@ -62,6 +62,13 @@ going beyond the owner's original request — to the owner. Only Autopilot accep
 and every other user-invoked skill stay owner-only.
 _Avoid_: requester, proxy, delegate (a **Delegate** is a dispatch run)
 
+**Promotion PR**:
+The one open pull request from the agent-owned `dev` into the human-owned `main`. Agents open or
+update it only on a pasted **ready signal** (the dev chat, the TPM, and the chief of staff agree
+and the readiness checks pass on one `dev` SHA). They fix the owner's review comments on it
+through `dev`, replying with a `🤖 Agent:` prefix. Only the owner merges it, with a merge commit.
+_Avoid_: release PR, version PR (the repository has neither)
+
 ## Relationships
 
 - An **Issue tracker** holds many **Issues**

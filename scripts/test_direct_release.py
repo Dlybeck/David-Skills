@@ -339,6 +339,58 @@ class ReleaseFixture:
         self.git("push", "origin", f"{moved_sha}:refs/heads/fixture-moved")
         return moved_sha
 
+    def commit_tree(self, tree: str, *parents: str, message: str) -> str:
+        arguments = ["commit-tree", tree]
+        for parent in parents:
+            arguments += ["-p", parent]
+        return self.git(*arguments, input_text=f"{message}\n").stdout.strip()
+
+    def add_dev_commit(self, parent: str, name: str) -> str:
+        """Commit a new file on top of `parent` without touching the checkout."""
+        blob = self.git(
+            "hash-object", "-w", "--stdin", input_text=f"{name}\n"
+        ).stdout.strip()
+        index = self.root / f"index-{name}"
+        environment = self.git_environment | {"GIT_INDEX_FILE": str(index)}
+        self.run(["git", "read-tree", parent], environment=environment)
+        self.run(
+            ["git", "update-index", "--add", "--cacheinfo", f"100644,{blob},{name}"],
+            environment=environment,
+        )
+        tree = self.run(["git", "write-tree"], environment=environment).stdout.strip()
+        return self.commit_tree(tree, parent, message=f"feat: {name}")
+
+    def promote(self, kind: str) -> dict[str, str]:
+        """Advance dev by one commit, then promote it to main the way `kind` says.
+
+        Returns the SHAs involved and checks out the new main, as the Release
+        workflow would after a push to main.
+        """
+        dev_sha = self.add_dev_commit(self.base_sha, "feature.txt")
+        dev_tree = self.git("rev-parse", f"{dev_sha}^{{tree}}").stdout.strip()
+        if kind == "merge":
+            main_sha = self.commit_tree(
+                dev_tree, self.base_sha, dev_sha, message="Merge pull request #1 from dev"
+            )
+        elif kind == "squash":
+            main_sha = self.commit_tree(dev_tree, self.base_sha, message="feat: squashed (#1)")
+        elif kind == "merge-with-extra-change":
+            extra = self.add_dev_commit(dev_sha, "extra.txt")
+            extra_tree = self.git("rev-parse", f"{extra}^{{tree}}").stdout.strip()
+            main_sha = self.commit_tree(
+                extra_tree, self.base_sha, dev_sha, message="Merge pull request #1 from dev"
+            )
+        else:
+            raise ValueError(kind)
+        self.git(
+            "push",
+            "origin",
+            f"{dev_sha}:refs/heads/dev",
+            f"{main_sha}:refs/heads/main",
+        )
+        self.git("switch", "--detach", main_sha)
+        return {"dev": dev_sha, "main": main_sha}
+
     def move_remote_ref(self, branch: str, moved_sha: str) -> None:
         self.bare_git(
             "update-ref",
@@ -444,6 +496,90 @@ class DirectReleaseTests(unittest.TestCase):
         self.assertIsNone(fixture.remote_ref("refs/tags/v1.5.1"))
         self.assertEqual(fixture.npm_calls, [["test"]])
         self.assertEqual(fixture.gh_calls, [])
+
+    def test_releases_a_github_merge_commit_of_dev_and_advances_both(self) -> None:
+        fixture = self.fixture(pending_changeset=True)
+        promoted = fixture.promote("merge")
+
+        result = fixture.run_release(RELEASE_EVENT_SHA=promoted["main"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        release_sha = fixture.remote_ref("refs/heads/main")
+        self.assertNotEqual(release_sha, promoted["main"])
+        self.assertEqual(fixture.remote_ref("refs/heads/dev"), release_sha)
+        self.assertEqual(fixture.remote_ref("refs/tags/v1.5.1^{}"), release_sha)
+        self.assertEqual(
+            fixture.bare_git("rev-parse", f"{release_sha}^").stdout.strip(),
+            promoted["main"],
+        )
+        self.assertEqual(
+            fixture.bare_git(
+                "merge-base", "--is-ancestor", promoted["dev"], release_sha, check=False
+            ).returncode,
+            0,
+        )
+
+    def test_refuses_a_squash_or_rebase_promotion_with_a_clear_message(self) -> None:
+        fixture = self.fixture(pending_changeset=True)
+        promoted = fixture.promote("squash")
+
+        result = fixture.run_release(RELEASE_EVENT_SHA=promoted["main"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("A squash or rebase merge rewrites dev's commits", result.stderr)
+        self.assertIn('"Create a merge commit"', result.stderr)
+        self.assertEqual(fixture.remote_ref("refs/heads/main"), promoted["main"])
+        self.assertEqual(fixture.remote_ref("refs/heads/dev"), promoted["dev"])
+        self.assertIsNone(fixture.remote_ref("refs/tags/v1.5.1"))
+        self.assertEqual(fixture.gh_calls, [])
+
+    def test_refuses_a_merge_commit_whose_tree_differs_from_dev(self) -> None:
+        fixture = self.fixture(pending_changeset=True)
+        promoted = fixture.promote("merge-with-extra-change")
+
+        result = fixture.run_release(RELEASE_EVENT_SHA=promoted["main"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("changes files that are not on origin/dev", result.stderr)
+        self.assertEqual(fixture.remote_ref("refs/heads/main"), promoted["main"])
+        self.assertIsNone(fixture.remote_ref("refs/tags/v1.5.1"))
+
+    def test_refuses_a_merge_commit_when_dev_moved_after_the_merge(self) -> None:
+        fixture = self.fixture(pending_changeset=True)
+        promoted = fixture.promote("merge")
+        later = fixture.add_dev_commit(promoted["dev"], "later.txt")
+        fixture.git("push", "origin", f"{later}:refs/heads/dev")
+
+        result = fixture.run_release(RELEASE_EVENT_SHA=promoted["main"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("origin/main and origin/dev must be aligned", result.stderr)
+        self.assertIn("has since moved", result.stderr)
+        self.assertEqual(fixture.remote_ref("refs/heads/main"), promoted["main"])
+        self.assertEqual(fixture.remote_ref("refs/heads/dev"), later)
+        self.assertIsNone(fixture.remote_ref("refs/tags/v1.5.1"))
+
+    def test_merge_promotion_lease_refuses_a_dev_race(self) -> None:
+        fixture = self.fixture(pending_changeset=True)
+        promoted = fixture.promote("merge")
+        later = fixture.add_dev_commit(promoted["dev"], "race.txt")
+        fixture.git("push", "origin", f"{later}:refs/heads/fixture-moved")
+        hook = fixture.checkout / ".git" / "hooks" / "pre-push"
+        hook.write_text(
+            "#!/usr/bin/env bash\nset -eu\n"
+            f"git --git-dir={shlex.quote(str(fixture.remote))} update-ref "
+            f"refs/heads/dev {later} {promoted['dev']}\n",
+            encoding="utf-8",
+        )
+        hook.chmod(0o755)
+
+        result = fixture.run_release(RELEASE_EVENT_SHA=promoted["main"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("atomic transaction failed", result.stderr)
+        self.assertEqual(fixture.remote_ref("refs/heads/main"), promoted["main"])
+        self.assertEqual(fixture.remote_ref("refs/heads/dev"), later)
+        self.assertIsNone(fixture.remote_ref("refs/tags/v1.5.1"))
 
     def test_exact_lease_refuses_a_race_after_the_final_fetch(self) -> None:
         fixture = self.fixture(pending_changeset=True)

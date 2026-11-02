@@ -133,6 +133,46 @@ def check_stand_in(errors: list[str]) -> None:
             errors.append(f"{relative}: only Autopilot and its direct path may accept a stand-in")
 
 
+def check_promotion_pr(errors: list[str]) -> None:
+    """The dev -> main promotion PR opens on a ready signal and is merged by the owner (ADR 0013)."""
+    require_text(
+        "skills/engineering/independent-pr-review/references/promotion-pr.md",
+        (
+            "Act on the PR only from one of them; finishing a task is not a ready signal.",
+            "Ready for <owner>: <task>",
+            "Agreed: dev chat, TPM, chief of staff (<date>)",
+            "Owner decision for this PR:",
+            "report the failing check with its evidence and open nothing",
+            "local `dev` equals `origin/dev`",
+            "None found is a failure.",
+            "gh pr list --base main --head dev --state open",
+            "**One open:** update it.",
+            "**More than one open:** report them and change neither.",
+            "- **Asked for:**", "- **Changed:**", "- **Tested:**", "- **Left open:**",
+            "## Also on dev",
+            "Merge with **Create a merge commit**.",
+            "Report only; do not push, merge, approve, or change code.",
+            "Review fix: PR #<n>",
+            "Read each listed comment, and only those.",
+            "a body starting `🤖 Agent:` is an agent's own reply: skip it.",
+            "pulls/<n>/comments/<id>/replies",
+            "goes back to the TPM",
+            "Merging, approving, enabling auto-merge, and closing the promotion PR belong to the owner.",
+        ),
+        errors,
+    )
+    require_text(
+        "skills/engineering/independent-pr-review/references/developer-loop.md",
+        ("read [promotion PR](promotion-pr.md) before",),
+        errors,
+    )
+    require_text(
+        "skills/engineering/autopilot/SKILL.md",
+        ("A promotion PR opens only on a later ready signal",),
+        errors,
+    )
+
+
 def main() -> int:
     errors: list[str] = []
     data = json.loads(SCENARIOS.read_text(encoding="utf-8"))
@@ -246,6 +286,7 @@ def main() -> int:
     )
 
     check_stand_in(errors)
+    check_promotion_pr(errors)
 
     if errors:
         print(f"Pilot scenario validation failed with {len(errors)} error(s):", file=sys.stderr)
