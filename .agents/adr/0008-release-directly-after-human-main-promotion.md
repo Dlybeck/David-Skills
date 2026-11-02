@@ -1,5 +1,8 @@
 # Release directly after the human main promotion
 
+[ADR 0013](./0013-promote-through-a-dev-to-main-pull-request.md) amends the alignment rule below: David
+promotes by merging the `dev` -> `main` PR with a merge commit, which the release also accepts.
+
 ## Context
 
 This is a private personal repository with a human-gated `main` branch. A generated version pull

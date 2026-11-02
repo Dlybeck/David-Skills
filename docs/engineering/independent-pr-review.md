@@ -28,6 +28,18 @@ full-change review. Authorized intermediate findings go into one consolidated PR
 reviewed head. A clean review produces no PR comment. The settled result reaches you with exact-head
 evidence, while scope or approval blockers surface earlier.
 
+## The promotion PR
+
+Where `main` is human-owned and `dev` is agent-owned, finished work reaches you as one open PR
+from `dev` into `main`. The agent opens or updates it only when you or the TPM paste a ready
+signal, after it checks one pinned `dev` SHA: pushed, tests passing, CI green, the task merged in,
+no open findings. The report gives each task what you asked for, what changed, how it was tested,
+and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
+a fresh cloud review session. Your comments come back as a pasted review fix. The agent fixes
+them through `dev`, which updates the same PR, and replies on each thread with `🤖 Agent:`. You
+merge with **Create a merge commit**. The steps live in
+[promotion PR](../../skills/engineering/independent-pr-review/references/promotion-pr.md).
+
 ## Common questions
 
 **Does this replace Standards and Spec review?**
@@ -48,6 +60,13 @@ ownership and applicable standing grants after all gates pass; explicit task res
 Tests and clean review cannot supply authority. Installation remains separate: updated source
 does not prove an active installed skill changed.
 
+**Can an agent merge the promotion PR, even by accident?**
+
+No. The plugin hook lets agents open it only from head `dev`. It blocks `gh pr merge` and
+auto-merge into `main` (and blocks them too when the base can't be checked), along with `gh api`
+merges and ref writes, and force-pushes of `dev`. Squash or rebase merges make the release refuse,
+so use **Create a merge commit**.
+
 **What if reviewer and developer keep disagreeing?**
 
 The loop preserves the finding and response and brings a genuine deadlock to you. Repeating
@@ -59,6 +78,8 @@ unchanged unsupported advice is not progress. You can interrupt the work at any 
 - Actionable comments state a precise trigger, impact, location, and evidence.
 - Repairs receive a new reviewer; clean passes add no noise to the PR.
 - Final delivery states tests, review, and CI separately without claiming universal correctness.
+- There is never more than one open promotion PR, its head matches `dev`, and every review comment
+  you sent back has a `🤖 Agent:` reply naming its commit.
 
 ## Where it fits
 

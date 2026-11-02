@@ -39,7 +39,7 @@ Autopilot records repository policy and applicable standing grants in the confir
 | Boundary | Delivery |
 | --- | --- |
 | Agent-owned target with an applicable grant and all gates passing | Integrate after validation, independent review and CI without asking again for the same permission |
-| Human-owned promotion | Prepare the proposal for its required human approval |
+| Human-owned promotion | Prepare the proposal for its required human approval; a `dev` -> `main` [promotion PR](./independent-pr-review.md#the-promotion-pr) opens only on a later ready signal |
 | Missing integration policy, authority or gate | Preserve a review branch within existing push authority, or a local result when push is unauthorized |
 
 ## Independent delivery review

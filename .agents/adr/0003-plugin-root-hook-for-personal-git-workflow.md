@@ -1,5 +1,8 @@
 # Plugin-root hooks enforce David's personal Git workflow
 
+[ADR 0013](./0013-promote-through-a-dev-to-main-pull-request.md) amends the `main` rule below: agents may
+open the `dev` -> `main` promotion PR, and every agent merge into `main` is blocked.
+
 ## Context
 
 Prose rules were not enough to prevent two recurring mistakes: agents attempting destructive Git

@@ -94,6 +94,8 @@ proposal, then use the repository's required merge strategy and verify remote re
 If policy, integration permission or a required gate is absent, retain the review branch within
 existing commit/push authority and report the unmet condition. Human-owned promotion remains
 subject to its explicit approval boundary; the confirmed goal does not override task restrictions.
+A promotion PR opens only on a later ready signal, never as part of the run's own delivery; that
+signal and any review fixes follow the developer loop's promotion-PR route.
 
 ## Return
 
