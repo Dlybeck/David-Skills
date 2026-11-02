@@ -30,7 +30,8 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
   when `gh pr view` reports a `main`/`master` base or cannot determine one. It also blocks
   `gh api` writes to PR merge, merges, merge-upstream, git refs, and contents endpoints; GraphQL
   merge and ref mutations; `gh repo sync` of a remote's `main`; pushes to `master`; and
-  force-pushes or deletions of `dev`. Merges into `dev` and feature branches stay allowed: dev
+  force-pushes or deletions of `dev`. Defining or running a gh alias is blocked too, since an
+  alias can hide any of these. Merges into `dev` and feature branches stay allowed: dev
   chats in David's other repositories merge their PRs with `gh pr merge`.
 - The release accepts a merge commit on `main` whose second parent is exactly the `dev` tip with
   an unchanged tree. The release commit then fast-forwards both branches, and the lease on `dev`

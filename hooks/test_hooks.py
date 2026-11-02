@@ -105,6 +105,8 @@ def dispatch_payload(tool_name, command=None):
 BLOCK_PUSH_TO_MAIN = [
     'git push origin master',
     'git push origin HEAD:refs/heads/master',
+    'git push origin HEAD:heads/master',
+    'git push origin HEAD:heads/main',
     'git push origin :main',
     'git -C /tmp/repo push',
     'git -c push.default=matching push origin',
@@ -257,6 +259,9 @@ BLOCK_DEV_REWRITE = [
     'git push --force-with-lease=dev:abc123 origin dev',
     'git push --del origin dev',
     'git push --dele origin dev',
+    # Git resolves a heads/<branch> destination to refs/heads/<branch>.
+    'git push -f origin HEAD:heads/dev',
+    'git push origin :heads/dev',
 ]
 
 for cmd in BLOCK_DEV_REWRITE:
@@ -287,6 +292,12 @@ FAKE_GH = """#!/usr/bin/env python3
 import json, os, sys
 with open(os.environ["FAKE_GH_LOG"], "a", encoding="utf-8") as log:
     log.write(json.dumps(sys.argv[1:]) + "\\n")
+if sys.argv[1:3] == ["alias", "list"]:
+    aliases = os.environ.get("FAKE_GH_ALIASES", "")
+    if aliases == "FAIL":
+        sys.exit(1)
+    print(aliases)
+    sys.exit(0)
 base = os.environ.get("FAKE_GH_BASE", "")
 if sys.argv[1:3] != ["pr", "view"] or base == "FAIL":
     sys.exit(1)
@@ -301,13 +312,14 @@ with tempfile.TemporaryDirectory() as temp_dir:
     fake_gh.chmod(0o755)
     gh_log = Path(temp_dir) / "gh.jsonl"
 
-    def run_merge(command, base):
+    def run_merge(command, base, aliases="co: pr checkout"):
         gh_log.write_text("", encoding="utf-8")
         environment = {
             **os.environ,
             "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
             "FAKE_GH_LOG": str(gh_log),
             "FAKE_GH_BASE": base,
+            "FAKE_GH_ALIASES": aliases,
         }
         proc = subprocess.run(
             [sys.executable, str(HOOKS_DIR / "block-dangerous-git.py")],
@@ -363,6 +375,54 @@ with tempfile.TemporaryDirectory() as temp_dir:
     code, err, calls = run_merge("GH_REPO=owner/other gh pr merge 12 --merge -R owner/other", "dev")
     check("block-dangerous-git allows GH_REPO merge with matching explicit --repo",
           code == 0 and len(calls) == 1, f"(code={code}, calls={calls!r})")
+
+    # gh accepts -R/--repo between `pr` and the subcommand.
+    for command in ("gh pr -R owner/repo merge 12 --merge", "gh pr --repo=owner/repo merge 12"):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git sees merge after a leading repo flag: {command!r}",
+              code == 2 and "into main" in err and calls and "owner/repo" in calls[0][-1],
+              f"(code={code}, err={err!r}, calls={calls!r})")
+    for command in ("gh pr -R owner/repo edit 5 --base main",
+                    "gh pr -R owner/repo create --base main --head feature/x"):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git sees PR command after a leading repo flag: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # An option value spelled gh or git is a value, not a new command.
+    code, err, calls = run_merge("gh pr merge --subject gh 12 --merge", "main")
+    check("block-dangerous-git keeps the PR selector after a value spelled gh",
+          code == 2 and any(call[:3] == ["pr", "view", "12"] for call in calls),
+          f"(code={code}, calls={calls!r})")
+    for command in (
+        "gh api -t gh -X PUT repos/o/r/pulls/5/merge",
+        "gh api --template git graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'",
+    ):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git reads gh api past a value spelled gh/git: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
+    # Newlines end a command even after a comment.
+    for command in ("echo ready\ngh pr merge 12 --merge",
+                    "gh pr list # open PRs\ngh pr merge 12 --merge"):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git splits commands at newlines: {command!r}",
+              code == 2 and "into main" in err, f"(code={code}, err={err!r})")
+
+    # Aliases can hide a merge: defining one is blocked, and so is running one.
+    for command, aliases in (
+        ("gh alias set pm 'pr merge'", "co: pr checkout"),
+        ("gh alias import aliases.yml", "co: pr checkout"),
+        ("gh pm 12", "pm: pr merge"),
+        ("gh co 12", "co: pr checkout"),
+        ("gh dash", "FAIL"),
+    ):
+        code, err, calls = run_merge(command, "dev", aliases)
+        check(f"block-dangerous-git blocks gh alias use: {command!r} ({aliases})",
+              code == 2 and "alias" in err, f"(code={code}, err={err!r})")
+    for command in ("gh dash", "gh alias list", "gh pr checkout 12"):
+        code, err, calls = run_merge(command, "dev", "co: pr checkout")
+        check(f"block-dangerous-git allows non-alias gh command: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
 
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")
     check("block-dangerous-git blocks when any merge in the command targets main",

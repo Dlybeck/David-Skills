@@ -7,8 +7,8 @@ remember correctly every time:
 1. Anything that writes `main` (or `master`) without a human directly at the
    keyboard: `git push` targeting it (any form), `gh pr merge` and
    `--auto` for a PR based on it (or whose base cannot be determined),
-   `gh api` writes that merge PRs or move refs or contents, and
-   `gh repo sync` of its remote. Also force-pushes and deletions of the
+   `gh api` writes that merge PRs or move refs or contents,
+   `gh repo sync` of its remote, and gh aliases, which could hide any of these. Also force-pushes and deletions of the
    shared `dev` integration branch, which is the head of the dev -> main
    promotion PR. Opening that PR is allowed: `gh pr create` into a
    protected branch only from head `dev`; retargeting a PR there with
@@ -47,7 +47,7 @@ from _shared import read_hook_input
 # doesn't false-positive on a branch like "feature/main-page"), followed by
 # whitespace/quote/shell-separator/end (so "main-ish" doesn't match either).
 PUSH_TO_MAIN = re.compile(
-    r'git\s+push\b[^|&;\n]*?(?:^|[\s:+])((?:refs/heads/)?(?:main|master))(?=[\s"\'&|;]|$)'
+    r'git\s+push\b[^|&;\n]*?(?:^|[\s:+])((?:refs/)?(?:heads/)?(?:main|master))(?=[\s"\'&|;]|$)'
 )
 PROTECTED_BRANCHES = {"main", "master"}
 # The agent-owned integration branch: the only head a PR into a protected
@@ -95,6 +95,16 @@ PR_MERGE_OPTIONS_WITH_VALUE = {
 }
 SHELL_OPERATORS = set(";&|()")
 DIRECTORY_CHANGERS = {"cd", "pushd", "popd"}
+GH_FLAGS_WITH_VALUE = {"-R", "--repo"}
+GH_SINGLE_WORD_COMMANDS = {"api", "browse", "status", "completion", "help"}
+# gh's own top-level commands. Any other first word is an alias or an
+# extension; aliases can hide `pr merge` or `api`, so they are looked up.
+GH_COMMANDS = {
+    "agent-task", "alias", "api", "attestation", "auth", "browse", "cache", "codespace",
+    "completion", "config", "copilot", "extension", "gist", "gpg-key", "help", "issue",
+    "label", "org", "pr", "preview", "project", "release", "repo", "ruleset", "run",
+    "search", "secret", "ssh-key", "status", "variable", "workflow",
+}
 # Variables that point gh at another repository or host than the hook's own.
 GH_TARGET_VARIABLES = re.compile(r'\bGH_REPO\b')
 GH_HOST_VARIABLE = re.compile(r'\bGH_HOST\b')
@@ -107,12 +117,16 @@ def is_option_prefix(flag, *options, minimum=3):
 
 
 def simple_commands(command):
-    """Split shell text into token lists, one per simple command. Returns
-    None when the text cannot be tokenized (unbalanced quotes and the like);
-    callers treat that as unknown, never as safe."""
+    """Split shell text into token lists, one per simple command, at shell
+    operators and unquoted newlines. Comments are kept as words so a `#`
+    never hides the newline that ends a command. Returns None when the text
+    cannot be tokenized (unbalanced quotes and the like); callers treat that
+    as unknown, never as safe."""
     try:
-        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()")
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()\n")
+        lexer.whitespace = " \t\r"
         lexer.whitespace_split = True
+        lexer.commenters = ""
         tokens = list(lexer)
     except ValueError:
         return None
@@ -129,29 +143,50 @@ def simple_commands(command):
     return commands
 
 
-def gh_invocations(command, *subcommand):
-    """Yield the argument list after each `gh <subcommand...>` in the command.
-    Arguments stop at the next `gh`/`git` word, since a newline does not
-    survive tokenizing. Yields None once if the command is not tokenizable
-    but textually mentions the subcommand."""
+def gh_calls(command):
+    """Yield (words, flags) for each `gh` call: its subcommand words in order,
+    and the flags given between them (gh accepts `gh pr -R x merge`). Flags
+    that take a value carry it. Yields None once if the command cannot be
+    tokenized but mentions gh."""
     commands = simple_commands(command)
     if commands is None:
-        if re.search(r'\bgh\s+' + r'\s+'.join(subcommand) + r'\b', command):
+        if re.search(r'\bgh\b', command):
             yield None
         return
-    width = len(subcommand)
     for tokens in commands:
         for index, token in enumerate(tokens):
             if os.path.basename(token) != "gh":
                 continue
-            if tuple(tokens[index + 1:index + 1 + width]) != subcommand:
-                continue
-            arguments = []
-            for argument in tokens[index + 1 + width:]:
-                if os.path.basename(argument) in {"gh", "git"}:
-                    break
-                arguments.append(argument)
-            yield arguments
+            words, flags = [], []
+            rest = tokens[index + 1:]
+            position = 0
+            while position < len(rest):
+                argument = rest[position]
+                if argument in GH_FLAGS_WITH_VALUE:
+                    flags.extend(rest[position:position + 2])
+                    position += 2
+                elif argument.startswith("-"):
+                    flags.append(argument)
+                    position += 1
+                else:
+                    words.append(argument)
+                    position += 1
+                    if len(words) == 2 or words[0] in GH_SINGLE_WORD_COMMANDS:
+                        break
+            yield words, flags, rest[position:]
+
+
+def gh_invocations(command, *subcommand):
+    """Yield the argument list of each `gh <subcommand...>` call, with any
+    flags given before the subcommand included. Yields None once if the
+    command is not tokenizable but mentions gh."""
+    for call in gh_calls(command):
+        if call is None:
+            yield None
+            return
+        words, flags, arguments = call
+        if tuple(words[:len(subcommand)]) == subcommand:
+            yield flags + list(words[len(subcommand):]) + arguments
 
 
 def option_values(arguments, long_name, short_name=None):
@@ -193,8 +228,47 @@ def positionals(arguments, options_with_value):
 
 
 def short_branch(ref):
+    """The branch a ref names; Git resolves both `refs/heads/x` and `heads/x`."""
     ref = ref.lstrip("+")
-    return ref[len("refs/heads/"):] if ref.startswith("refs/heads/") else ref
+    for prefix in ("refs/heads/", "heads/"):
+        if ref.startswith(prefix):
+            return ref[len(prefix):]
+    return ref
+
+
+def gh_aliases():
+    """Names of the user's gh aliases, or None when they cannot be listed."""
+    try:
+        out = subprocess.run(["gh", "alias", "list"], capture_output=True, text=True, timeout=10)
+    except Exception:
+        return None
+    if out.returncode != 0:
+        # gh exits non-zero with "no aliases configured" on an empty list.
+        return set() if "no aliases" in (out.stdout + out.stderr).lower() else None
+    return {line.split(":", 1)[0].strip() for line in out.stdout.splitlines() if ":" in line}
+
+
+def gh_alias_problem(calls):
+    """gh aliases can expand to any command, so defining one is blocked and
+    using one is blocked; the full command is always available instead."""
+    unknown = set()
+    for words, _, _ in calls:
+        if words[:1] == ["alias"] and words[1:2] and words[1] in {"set", "import"}:
+            return ("defines a gh alias. An alias can hide a merge into main from this "
+                    "check; run the full gh command instead.")
+        if words and words[0] not in GH_COMMANDS:
+            unknown.add(words[0])
+    if not unknown:
+        return None
+    aliases = gh_aliases()
+    if aliases is None:
+        return (f"runs gh {sorted(unknown)[0]}, which is not a gh command, and gh aliases "
+                f"could not be listed to rule out an alias. Run the full gh command instead.")
+    hidden = sorted(unknown & aliases)
+    if hidden:
+        return (f"runs the gh alias {hidden[0]}, which this check cannot see through. Run "
+                f"the full gh command instead.")
+    return None
 
 
 def pr_create_problem(arguments, context_changed):
@@ -571,6 +645,14 @@ def push_problem(command, normalized, context_changed):
 def gh_problem(command, context_changed):
     """The first blocked `gh` call in the command. The merge check runs last
     because it is the only one that makes a network call."""
+    calls = list(gh_calls(command))
+    if not calls:
+        return None
+    if None in calls:
+        return "runs gh in a way that cannot be read from the command text (unbalanced quoting)."
+    problem = gh_alias_problem(calls)
+    if problem:
+        return problem
     checks = (
         (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed)),
         (("pr", "edit"), pr_edit_problem),
