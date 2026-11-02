@@ -456,6 +456,30 @@ with tempfile.TemporaryDirectory() as temp_dir:
         check(f"block-dangerous-git allows explicit PR command after a branch switch: {command!r}",
               code == 0 and err == "", f"(code={code}, err={err!r})")
 
+    # Heredoc bodies are data (report text often holds an apostrophe), unless
+    # a shell reads them. Real comments are dropped; `bash -c` scripts are read.
+    for command in (
+        "gh pr comment 12 --body-file - <<'EOF'\n🤖 Agent: David's comment is fixed in abc123.\nEOF",
+        "gh pr edit 12 --body-file - <<'EOF'\n## Task\nit's done\nEOF",
+        "gh pr create --base main --head dev --title x --body-file - <<'EOF'\nIt's ready\nEOF",
+        "cat > /tmp/report.md <<'EOF'\nDavid's call\nEOF\ngh pr edit 12 --body-file /tmp/report.md",
+        "git commit -F - <<'EOF'\nfix(hooks): don't block\nEOF",
+        "gh pr list # David's open PRs",
+        "git push origin feature/x # not main",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git allows heredoc/comment text: {command!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+    for command in (
+        "bash <<'EOF'\ngh pr merge 12 --merge\nEOF",
+        "bash -c 'gh pr merge 12 --merge'",
+        "sh -c \"gh api -X PUT repos/o/r/pulls/12/merge\"",
+        "bash -lc 'gh pr -R o/r merge 12'",
+    ):
+        code, err, calls = run_merge(command, "main")
+        check(f"block-dangerous-git reads commands run by a shell: {command!r}",
+              code == 2, f"(code={code}, err={err!r})")
+
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")
     check("block-dangerous-git blocks when any merge in the command targets main",
           code == 2 and "into main" in err, f"(code={code}, err={err!r})")
@@ -577,6 +601,24 @@ with tempfile.TemporaryDirectory() as temp_dir:
     code, err = run_hook_bash("block-dangerous-git.py", "git push --force", cwd=repo)
     check("block-dangerous-git allows force push of a feature checkout",
           code == 0 and err == "", f"(code={code}, err={err!r})")
+
+    # A literal switch to a readable branch moves the effective current branch.
+    for cmd in ("git checkout dev && git merge --ff-only feature/x && git push",
+                "git switch dev && git push",
+                "git checkout -b feature/y && git push -u origin HEAD",
+                "git switch dev && gh pr create --base main --title x"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git follows a literal branch switch: {cmd!r}",
+              code == 0 and err == "", f"(code={code}, err={err!r})")
+    for cmd in ("git checkout main && git push",
+                "git checkout dev && git push -f",
+                "git checkout dev && git push --force origin HEAD",
+                "git checkout notes.txt && git push",
+                "gh pr checkout 5 && git push",
+                "git switch feature/x && gh pr create --base main"):
+        code, err = run_hook_bash("block-dangerous-git.py", cmd, cwd=repo)
+        check(f"block-dangerous-git blocks after a switch it cannot clear: {cmd!r}",
+              code == 2, f"(code={code}, err={err!r})")
 
     git(repo, "switch", "-qc", "master")
     code, err = run_hook_bash("block-dangerous-git.py", "git push", cwd=repo)

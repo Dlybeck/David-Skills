@@ -116,12 +116,74 @@ def is_option_prefix(flag, *options, minimum=3):
     return len(flag) >= minimum and any(option.startswith(flag) for option in options)
 
 
+HEREDOC = re.compile(r"(?<!<)<<(-?)\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+SHELLS = {"bash", "sh", "zsh", "dash"}
+SHELL_READER = re.compile(r"(?:^|[\s;&|(])(?:bash|sh|zsh|dash)(?=\s|$)")
+
+
+def without_heredoc_bodies(command):
+    """Drop heredoc bodies, which are data for the command, not commands, and
+    often hold report text with unbalanced apostrophes. A body fed to a
+    shell is kept, since the shell runs it."""
+    lines = command.split("\n")
+    kept = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        kept.append(line)
+        index += 1
+        for match in HEREDOC.finditer(line):
+            strip_tabs, delimiter = match.group(1) == "-", match.group(3)
+            body = []
+            while index < len(lines):
+                candidate = lines[index].lstrip("\t") if strip_tabs else lines[index]
+                index += 1
+                if candidate == delimiter:
+                    break
+                body.append(lines[index - 1])
+            if SHELL_READER.search(line):
+                kept.extend(body)
+    return "\n".join(kept)
+
+
+def without_comments(command):
+    """Drop shell comments: a `#` that starts a word, outside quotes, through
+    the end of its line. A mid-word `#` (fixes#3) is not a comment."""
+    out = []
+    quote = None
+    index = 0
+    while index < len(command):
+        char = command[index]
+        if quote:
+            out.append(char)
+            if char == quote:
+                quote = None
+            elif char == "\\" and quote == '"' and index + 1 < len(command):
+                index += 1
+                out.append(command[index])
+        elif char == "\\" and index + 1 < len(command):
+            out.append(char + command[index + 1])
+            index += 1
+        elif char in "'\"":
+            quote = char
+            out.append(char)
+        elif char == "#" and (not out or out[-1][-1:].isspace() or out[-1][-1:] in SHELL_OPERATORS):
+            while index < len(command) and command[index] != "\n":
+                index += 1
+            continue
+        else:
+            out.append(char)
+        index += 1
+    return "".join(out)
+
+
 def shell_tokens(command):
     """Tokenize shell text, keeping unquoted newlines as operator tokens.
-    Comments stay as words: shlex would start one at a mid-word `#` (which
-    the shell does not) and swallow the rest of the line. Returns None when
-    the text cannot be tokenized (unbalanced quotes and the like); callers
-    treat that as unknown, never as safe."""
+    Heredoc bodies and comments are removed first; shlex's own comment rule
+    would also start one at a mid-word `#`. Returns None when the text cannot
+    be tokenized (unbalanced quotes and the like); callers treat that as
+    unknown, never as safe."""
+    command = without_comments(without_heredoc_bodies(command))
     try:
         lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|()\n")
         lexer.whitespace = " \t\r"
@@ -144,6 +206,47 @@ def branch_switched(command):
             if os.path.basename(token) == "gh" and tokens[index + 1:index + 3] == ["pr", "checkout"]:
                 return True
     return False
+
+
+def switch_target(arguments):
+    """The branch a `git checkout`/`git switch` lands on, or None when it
+    cannot be read: a new branch from -b/-c, else an existing local branch.
+    A path checkout (`--`, or a name that is not a local branch) is unknown."""
+    for option in ("-b", "-B", "-c", "-C"):
+        values = option_values(arguments, option)
+        if values:
+            return values[-1]
+    if "--" in arguments:
+        return None
+    names = [argument for argument in arguments if not argument.startswith("-")]
+    if len(names) != 1:
+        return None
+    try:
+        known = subprocess.run(
+            ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{names[0]}"],
+            capture_output=True, timeout=5,
+        ).returncode == 0
+    except Exception:
+        return None
+    return names[0] if known else None
+
+
+def effective_branch(command, switched):
+    """The branch later parts of the command run on: the hook's current
+    branch, or the target of the last literal branch switch. None when a
+    switch target cannot be read (gh pr checkout, git worktree, a path)."""
+    if not switched:
+        return current_branch()
+    branch = None
+    for tokens in simple_commands(command) or []:
+        for index, token in enumerate(tokens[:-1]):
+            if os.path.basename(token) == "gh" and tokens[index + 1:index + 3] == ["pr", "checkout"]:
+                branch = None
+            elif os.path.basename(token) == "git" and tokens[index + 1] == "worktree":
+                branch = None
+            elif os.path.basename(token) == "git" and tokens[index + 1] in {"checkout", "switch"}:
+                branch = switch_target(tokens[index + 2:])
+    return branch
 
 
 def simple_commands(command):
@@ -178,6 +281,11 @@ def gh_calls(command):
         return
     for tokens in commands:
         for index, token in enumerate(tokens):
+            if (os.path.basename(token) in SHELLS and index + 2 < len(tokens)
+                    and re.fullmatch(r"-[a-z]*c", tokens[index + 1])):
+                # `bash -c '<script>'`: the script is commands too.
+                yield from gh_calls(tokens[index + 2])
+                continue
             if os.path.basename(token) != "gh":
                 continue
             words, flags = [], []
@@ -294,9 +402,10 @@ def gh_alias_problem(calls):
     return None
 
 
-def pr_create_problem(arguments, context_changed):
+def pr_create_problem(arguments, context_changed, branch):
     """A PR into a protected branch (or into the repo default, when no
-    --base is given) is allowed only from head `dev`."""
+    --base is given) is allowed only from head `dev`. `branch` is the
+    effective current branch, None when unknown."""
     if arguments is None:
         return "opens a PR whose base and head cannot be read from the command text."
     bases = option_values(arguments, "--base", "-B")
@@ -305,11 +414,11 @@ def pr_create_problem(arguments, context_changed):
     heads = option_values(arguments, "--head", "-H")
     if heads:
         head = heads[-1]
-    elif context_changed:
+    elif context_changed or branch is None:
         return ("opens a PR into main/master (or the default branch) after changing "
-                "directory, so its head is unknown. Pass --head dev explicitly.")
+                "directory or branch, so its head is unknown. Pass --head dev explicitly.")
     else:
-        head = current_branch()
+        head = branch
     if head == INTEGRATION_BRANCH:
         return None
     target = "main/master" if bases else "the default branch (no --base given)"
@@ -459,8 +568,10 @@ def push_flags_and_refspecs(arguments):
     return flags, (found if repository_from_option else found[1:])
 
 
-def push_rewrites_dev(command):
-    """Whether a push force-updates or deletes the shared `dev` branch."""
+def push_rewrites_dev(command, branch):
+    """Whether a push force-updates or deletes the shared `dev` branch.
+    `branch` is the effective current branch; None (unknown) may be dev."""
+    branch = INTEGRATION_BRANCH if branch is None else branch
     for match in PUSH_COMMAND.finditer(command):
         try:
             arguments = shlex.split(match.group("arguments"))
@@ -474,7 +585,7 @@ def push_rewrites_dev(command):
         delete = "d" in short_flags or any(
             is_option_prefix(f, "--delete", minimum=4) for f in long_flags)
         if not refspecs:
-            if force and current_branch() == INTEGRATION_BRANCH:
+            if force and branch == INTEGRATION_BRANCH:
                 return True
             continue
         for refspec in refspecs:
@@ -482,7 +593,7 @@ def push_rewrites_dev(command):
             if not colon:
                 destination = source
             if destination.lstrip("+") in {"HEAD", "@"}:
-                destination = current_branch()
+                destination = branch
             if short_branch(destination) != INTEGRATION_BRANCH:
                 continue
             if force or delete or refspec.startswith("+") or (colon and not source):
@@ -640,14 +751,16 @@ def push_can_update_main_broadly(command):
     return False
 
 
-def push_problem(command, normalized, context_changed):
+def push_problem(command, normalized, context_changed, branch):
+    """`branch` is the effective current branch, None when a branch switch
+    in the command cannot be read."""
     if PUSH_TO_MAIN.search(normalized):
         return (
             "pushes directly to main/master. It is human-gated, full stop -- an agent "
             "never pushes to it or merges into it. Work reaches main only through the "
             "dev -> main promotion PR, which the repository owner merges."
         )
-    if push_rewrites_dev(command):
+    if push_rewrites_dev(command, branch):
         return (
             "force-pushes or deletes dev. dev is the shared integration branch and the "
             "head of the dev -> main promotion PR; add new commits instead of rewriting it."
@@ -657,16 +770,15 @@ def push_problem(command, normalized, context_changed):
             "uses a bulk or matching refspec that can update main without naming it. "
             "Push explicit non-main branches instead."
         )
-    if context_changed and push_uses_implicit_ref(command):
+    if (context_changed or branch is None) and push_uses_implicit_ref(command):
         return ("leaves the push target implicit where it can resolve to main. Name an "
                 "explicit non-main destination.")
-    branch = current_branch()
     if branch in PROTECTED_BRANCHES and push_uses_implicit_ref(command):
         return f"pushes the current branch ({branch}) upstream. Same rule as a direct push to main."
     return None
 
 
-def gh_problem(command, context_changed, switched):
+def gh_problem(command, context_changed, switched, branch):
     """The first blocked `gh` call in the command. The merge check runs last
     because it is the only one that makes a network call."""
     calls = list(gh_calls(command))
@@ -678,7 +790,7 @@ def gh_problem(command, context_changed, switched):
     if problem:
         return problem
     checks = (
-        (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed or switched)),
+        (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed, branch)),
         (("pr", "edit"), pr_edit_problem),
         (("api",), api_problem),
         (("repo", "sync"), repo_sync_problem),
@@ -731,10 +843,11 @@ def main():
     command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
     switched = branch_switched(command)
+    branch = effective_branch(command, switched)
 
     reason = (
-        push_problem(command, normalized, context_changed or switched)
-        or gh_problem(command, context_changed, switched)
+        push_problem(command, normalized, context_changed, branch)
+        or gh_problem(command, context_changed, switched, branch)
         or destructive_problem(normalized)
     )
     if reason:

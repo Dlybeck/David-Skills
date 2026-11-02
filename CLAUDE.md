@@ -49,7 +49,8 @@ PR, and to fix David's review comments on it through `dev`, only on a pasted rea
 review fix from David or the TPM. The ready signal
 records that the dev chat, the TPM, and the chief of staff agree. The steps, checks, and report live in
 [promotion PR](./skills/engineering/independent-pr-review/references/promotion-pr.md). Agents
-never merge, approve, or push to `main`; the plugin hook enforces it. The repository has no
+never merge, approve, or push to `main`: the plugin hook blocks merges and pushes, and GitHub
+refuses approval of a PR by its own author's account. The repository has no
 version or release pull request.
 
 After a `main` promotion, the Release workflow consumes pending Changesets, synchronizes every
