@@ -94,6 +94,16 @@ PR_MERGE_OPTIONS_WITH_VALUE = {
     "--match-head-commit", "-R", "--repo", "-t", "--subject",
 }
 SHELL_OPERATORS = set(";&|()")
+DIRECTORY_CHANGERS = {"cd", "pushd", "popd"}
+# Variables that point gh at another repository or host than the hook's own.
+GH_TARGET_VARIABLES = re.compile(r'\bGH_REPO\b')
+GH_HOST_VARIABLE = re.compile(r'\bGH_HOST\b')
+
+
+def is_option_prefix(flag, *options, minimum=3):
+    """Whether a long flag is an abbreviation of one of `options`; Git
+    accepts any unambiguous prefix of a long option."""
+    return len(flag) >= minimum and any(option.startswith(flag) for option in options)
 
 
 def simple_commands(command):
@@ -221,12 +231,17 @@ def pr_edit_problem(arguments):
     return None
 
 
-def pr_merge_base(arguments, context_changed):
+def pr_merge_base(arguments, context_changed, command):
     """Look up the base branch of the PR `gh pr merge` would merge. Returns
     the branch name, or None when it cannot be determined."""
     selector = positionals(arguments, PR_MERGE_OPTIONS_WITH_VALUE)[:1]
     repo = option_values(arguments, "--repo", "-R")[-1:]
-    if context_changed and not repo and not (selector and "://" in selector[0]):
+    explicit = bool(repo) or bool(selector and "://" in selector[0])
+    # The lookup runs in this hook's own directory and environment, so a
+    # command that changes either can make it check a different PR.
+    if (context_changed or GH_TARGET_VARIABLES.search(command)) and not explicit:
+        return None
+    if GH_HOST_VARIABLE.search(command):
         return None
     view = ["gh", "pr", "view", *selector, "--json", "baseRefName", "--jq", ".baseRefName"]
     if repo:
@@ -239,10 +254,10 @@ def pr_merge_base(arguments, context_changed):
     return base if out.returncode == 0 and base else None
 
 
-def pr_merge_problem(arguments, context_changed):
+def pr_merge_problem(arguments, context_changed, command):
     if arguments is None:
         return "merges a PR in a way that cannot be read from the command text."
-    base = pr_merge_base(arguments, context_changed)
+    base = pr_merge_base(arguments, context_changed, command)
     if base is None:
         return ("merges a PR (or enables auto-merge) whose base branch could not be "
                 "determined with gh pr view. Merges into main/master are the owner's; "
@@ -281,8 +296,10 @@ def api_problem(arguments):
     if arguments is None:
         return "calls gh api in a way that cannot be read from the command text."
     endpoints = positionals(arguments, API_OPTIONS_WITH_VALUE)
-    endpoint = endpoints[0].split("?", 1)[0].strip("/") if endpoints else ""
-    if endpoint == "graphql":
+    endpoint = endpoints[0].split("?", 1)[0] if endpoints else ""
+    # gh accepts absolute URLs; check the path whatever host it names.
+    endpoint = re.sub(r"^[A-Za-z][A-Za-z0-9+.-]*://[^/]*", "", endpoint).strip("/")
+    if endpoint == "graphql" or endpoint.endswith("/graphql"):
         text = graphql_text(arguments)
         if text is None:
             return ("sends a GraphQL document from a file or stdin this hook cannot read. "
@@ -350,9 +367,11 @@ def push_rewrites_dev(command):
             return INTEGRATION_BRANCH in match.group("arguments")
         flags, refspecs = push_flags_and_refspecs(arguments)
         short_flags = "".join(f[1:] for f in flags if not f.startswith("--"))
+        long_flags = [f.split("=", 1)[0] for f in flags if f.startswith("--")]
         force = "f" in short_flags or any(
-            f == "--force" or f.startswith("--force-with-lease") for f in flags)
-        delete = "d" in short_flags or "--delete" in flags
+            is_option_prefix(f, "--force", "--force-with-lease") for f in long_flags)
+        delete = "d" in short_flags or any(
+            is_option_prefix(f, "--delete", minimum=4) for f in long_flags)
         if not refspecs:
             if force and current_branch() == INTEGRATION_BRANCH:
                 return True
@@ -384,7 +403,7 @@ def normalize_git_options(command):
     except ValueError:
         return command, True
     output = []
-    context_changed = "cd" in tokens
+    context_changed = any(token in DIRECTORY_CHANGERS for token in tokens)
     index = 0
     value_options = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--config-env"}
     while index < len(tokens):
@@ -557,7 +576,7 @@ def gh_problem(command, context_changed):
         (("pr", "edit"), pr_edit_problem),
         (("api",), api_problem),
         (("repo", "sync"), repo_sync_problem),
-        (("pr", "merge"), lambda arguments: pr_merge_problem(arguments, context_changed)),
+        (("pr", "merge"), lambda arguments: pr_merge_problem(arguments, context_changed, command)),
     )
     for subcommand, check in checks:
         for arguments in gh_invocations(command, *subcommand):

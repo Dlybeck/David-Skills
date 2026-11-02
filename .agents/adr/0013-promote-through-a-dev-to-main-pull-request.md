@@ -1,7 +1,7 @@
 # Promote through a dev-to-main pull request
 
-This amends [ADR 0003](0003-plugin-root-hook-for-personal-git-workflow.md), whose hook blocked
-every agent PR into `main`, and [ADR 0008](0008-release-directly-after-human-main-promotion.md),
+This amends [ADR 0003](./0003-plugin-root-hook-for-personal-git-workflow.md), whose hook blocked
+every agent PR into `main`, and [ADR 0008](./0008-release-directly-after-human-main-promotion.md),
 whose release required `main` and `dev` to be the same commit.
 
 ## Context
@@ -25,7 +25,8 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
   GitHub account, so that prefix is the only way to tell their comments from his, and agents
   skip comments that carry it.
 - The hook allows `gh pr create` into `main`/`master` only from head `dev`, plus body edits,
-  comments, and replies. It blocks `gh pr edit --base main`, and `gh pr merge` (including `--auto`)
+  comments, and replies. A `gh pr create` with no `--base` targets the default branch, usually
+  `main`, so it is held to the same head-`dev` rule; other PRs pass an explicit base. It blocks `gh pr edit --base main`, and `gh pr merge` (including `--auto`)
   when `gh pr view` reports a `main`/`master` base or cannot determine one. It also blocks
   `gh api` writes to PR merge, merges, merge-upstream, git refs, and contents endpoints; GraphQL
   merge and ref mutations; `gh repo sync` of a remote's `main`; pushes to `master`; and
@@ -36,7 +37,7 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
   is that tip. A squash or rebase promotion fails with a message naming "Create a merge commit".
 - The standing grant in `CLAUDE.md` takes effect when David merges the promotion PR that carries
   it. His merge counts as writing it. Until then, each promotion PR needs a relayed owner
-  decision.
+  decision; the promotion-PR reference counts only a grant already on `main` as committed policy.
 
 ## Consequences
 

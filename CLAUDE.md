@@ -44,17 +44,17 @@ review or approve it. Explicit task restrictions override this grant.
 
 David alone promotes the tested `dev` tip to `main`, by merging the one open **promotion PR**
 (head `dev`, base `main`) with **Create a merge commit**; that merge is the human release approval.
-Agents have a standing grant to open or update that PR, and to fix David's review comments on it
-through `dev`, only on a pasted ready signal or review fix from David or the TPM. The ready signal
+Agents have a standing grant, in force once this paragraph is on `main`, to open or update that
+PR, and to fix David's review comments on it through `dev`, only on a pasted ready signal or
+review fix from David or the TPM. The ready signal
 records that the dev chat, the TPM, and the chief of staff agree. The steps, checks, and report live in
 [promotion PR](./skills/engineering/independent-pr-review/references/promotion-pr.md). Agents
 never merge, approve, or push to `main`; the plugin hook enforces it. The repository has no
 version or release pull request.
 
 After a `main` promotion, the Release workflow consumes pending Changesets, synchronizes every
-version surface, and tests the versioned tree. It accepts `main` equal to `dev`, or a merge commit
-whose second parent is exactly the `dev` tip with an unchanged tree; a squash or rebase promotion is
-refused. Its only permitted branch write is the mechanical release commit: it atomically advances
+version surface, and tests the versioned tree. It accepts a fast-forward or merge-commit
+promotion and refuses squash or rebase (ADR 0013). Its only permitted branch write is the mechanical release commit: it atomically advances
 `main` and `dev` to that same commit while creating the version tag, then creates the GitHub
 Release. It refuses to write if either branch moved after the promotion. A manual workflow dispatch
 may only complete a missing GitHub Release for an existing tag reachable from current `main`; it

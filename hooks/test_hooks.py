@@ -216,6 +216,9 @@ BLOCK_GH_WRITES = [
     "gh api graphql -F query='mutation { updateRef(input: {}) { clientMutationId } }'",
     "gh api graphql -f query='mutation { createCommitOnBranch(input: {}) { clientMutationId } }'",
     'gh api graphql -F query=@/nonexistent/query.graphql',
+    "gh api https://api.github.com/graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'",
+    "gh api https://ghe.example.com/api/graphql -f query='mutation { updateRef(input: {}) { clientMutationId } }'",
+    'gh api -X PUT https://api.github.com/repos/o/r/pulls/12/merge',
     'gh api graphql --input -',
     'gh repo sync owner/fork',
     'gh repo sync owner/fork --branch main',
@@ -248,6 +251,12 @@ BLOCK_DEV_REWRITE = [
     'git push origin +HEAD:refs/heads/dev',
     'git push origin --delete dev',
     'git push origin :dev',
+    # Git accepts any unambiguous prefix of a long option.
+    'git push --force-w origin dev',
+    'git push --force-with origin dev',
+    'git push --force-with-lease=dev:abc123 origin dev',
+    'git push --del origin dev',
+    'git push --dele origin dev',
 ]
 
 for cmd in BLOCK_DEV_REWRITE:
@@ -263,6 +272,8 @@ PASS_DEV_PUSHES = [
     'git push origin +feature/x',
     'git push -f origin develop',
     'git push origin --delete feature/x',
+    'git push --dry-run origin dev',
+    'git push --follow-tags origin dev',
 ]
 
 for cmd in PASS_DEV_PUSHES:
@@ -335,6 +346,22 @@ with tempfile.TemporaryDirectory() as temp_dir:
 
     code, err, calls = run_merge("cd /tmp && gh pr merge 12 --merge --repo owner/repo", "dev")
     check("block-dangerous-git allows merge after cd with explicit --repo",
+          code == 0 and len(calls) == 1, f"(code={code}, calls={calls!r})")
+
+    # The lookup runs in the hook's own directory and environment: a command
+    # that points gh elsewhere without --repo must block, not check the wrong PR.
+    for command in (
+        "GH_REPO=owner/other gh pr merge 12 --merge",
+        "export GH_REPO=owner/other; gh pr merge 12 --merge",
+        "pushd /tmp/other && gh pr merge 12 --merge",
+        "GH_HOST=ghe.example.com gh pr merge 12 --merge --repo owner/repo",
+    ):
+        code, err, calls = run_merge(command, "dev")
+        check(f"block-dangerous-git blocks merge with redirected gh target: {command!r}",
+              code == 2 and calls == [], f"(code={code}, calls={calls!r})")
+
+    code, err, calls = run_merge("GH_REPO=owner/other gh pr merge 12 --merge -R owner/other", "dev")
+    check("block-dangerous-git allows GH_REPO merge with matching explicit --repo",
           code == 0 and len(calls) == 1, f"(code={code}, calls={calls!r})")
 
     code, err, calls = run_merge("gh pr merge 12 --merge; gh pr merge 13 --merge", "main")

@@ -2,10 +2,9 @@
 
 A **promotion PR** is the one open pull request from the agent-owned integration branch (`dev`)
 into the human-owned branch (`main` or `master`). Agents open it, keep its report current, and fix
-review comments on it; only the owner merges it. Use this reference when repository policy routes
-human-owned promotion through that PR. The plugin hook allows `gh pr create` into `main` only from
-head `dev` and blocks every agent merge into `main`, so the owner's merge stays the approval.
-Commands below say `main`; use `master` where that is the human-owned branch.
+review comments on it; only the owner merges it, and the plugin hook enforces that. Use this
+reference when repository policy routes human-owned promotion through that PR. Commands below say
+`main`; use `master` where that is the human-owned branch.
 
 Two pasted handoffs drive it: a **ready signal** opens or updates the PR, and a **review fix**
 returns the owner's comments. They come from the owner or from the TPM relaying for them. Act on the
@@ -19,6 +18,9 @@ Agreed: dev chat, TPM, chief of staff (<date>)
 Owner's original request (verbatim): <what the owner asked for>
 Owner decision for this PR: <committed repository policy | relayed by <who> on <date>>
 ```
+
+"Committed repository policy" means a grant already on `main`, where only the owner puts it. A
+grant that exists only on `dev` or a feature branch needs the relayed decision.
 
 Run every readiness check on one pinned `dev` SHA and record its result. Any failure ends the step:
 report the failing check with its evidence and open nothing.

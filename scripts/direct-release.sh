@@ -143,27 +143,23 @@ if (( ${#changesets[@]} == 0 )); then
   exit 0
 fi
 
-parent_count() {
-  local parents
-  read -r -a parents < <(git rev-list --parents -n 1 "$1")
-  echo $(( ${#parents[@]} - 1 ))
-}
-
 # Two promotions are accepted: a fast-forward of main to dev, or GitHub's
 # "Create a merge commit" on a dev -> main pull request. The merge must merge
 # exactly the current dev tip and leave its tree unchanged, so the release is
 # still a release of tested dev.
+read -r -a main_parents < <(git rev-list --parents -n 1 "$main_sha")
+merged_sha=""
+(( ${#main_parents[@]} == 3 )) && merged_sha="${main_parents[2]}"
+
 if [[ "$dev_sha" == "$main_sha" ]]; then
   :
-elif [[ "$(parent_count "$main_sha")" == 2 &&
-        "$(git rev-parse "$main_sha^2")" == "$dev_sha" ]]; then
+elif [[ "$merged_sha" == "$dev_sha" ]]; then
   [[ "$(git rev-parse "$main_sha^{tree}")" == "$(git rev-parse "$dev_sha^{tree}")" ]] ||
     fail "the merge commit on main ($main_sha) changes files that are not on origin/dev ($dev_sha). Main must contain exactly the tested dev tree; bring the extra change through dev and promote again."
 elif git merge-base --is-ancestor "$main_sha" "$dev_sha"; then
   fail "origin/main and origin/dev must be aligned before release: origin/dev ($dev_sha) has commits the promotion of $main_sha did not include. A newer promotion will release them."
-elif [[ "$(parent_count "$main_sha")" == 2 ]] &&
-     git merge-base --is-ancestor "$(git rev-parse "$main_sha^2")" "$dev_sha"; then
-  fail "origin/main and origin/dev must be aligned before release: main merged $(git rev-parse "$main_sha^2"), but origin/dev has since moved to $dev_sha. A newer promotion will release them."
+elif [[ -n "$merged_sha" ]] && git merge-base --is-ancestor "$merged_sha" "$dev_sha"; then
+  fail "origin/main and origin/dev must be aligned before release: main merged $merged_sha, but origin/dev has since moved to $dev_sha. A newer promotion will release them."
 elif ! git merge-base --is-ancestor "$dev_sha" "$main_sha"; then
   fail "origin/main ($main_sha) is not origin/dev ($dev_sha) or a merge commit of it. A squash or rebase merge rewrites dev's commits, so the release cannot advance dev. Promote dev -> main with GitHub's \"Create a merge commit\" (or a fast-forward push of dev)."
 else
