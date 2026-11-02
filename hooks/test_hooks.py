@@ -498,7 +498,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
 
     # Command substitutions inside double quotes are read as commands.
     for command in (
-        'PR_URL="$(gh pr create --fill)"',
+        'PR_URL="$(gh pr create --fill --head feature/x)"',
         'out="$(gh pr merge 12 --merge 2>&1)"',
         'echo "`gh pr merge 12`"',
         "r=\"$(gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }')\"",
