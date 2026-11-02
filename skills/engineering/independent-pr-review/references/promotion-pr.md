@@ -36,10 +36,10 @@ report the failing check with its evidence and open nothing.
 Then find the PR: `gh pr list --base main --head dev --state open --json number,url,body`.
 
 - **One open:** update it. Read its current body, keep every other task's section, add or refresh
-  this task's section, and apply with `gh pr edit <n> --body-file <report>`.
+  this task's section, and apply with `gh pr edit <n> --body-file <report>`, adding
+  `--title "Promote dev to main (<count> tasks)"` once the report holds more than one task.
 - **None open:** `gh pr create --base main --head dev --title "Promote dev to main: <task>"
-  --body-file <report>`. With more than one task in the report, title it
-  `Promote dev to main (<count> tasks)`.
+  --body-file <report>`, or `Promote dev to main (<count> tasks)` with more than one task.
 - **More than one open:** report them and change neither.
 
 Done when `gh pr view <n> --json headRefOid,body` shows the pinned SHA and the report, and the PR

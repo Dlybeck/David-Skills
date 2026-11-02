@@ -147,6 +147,7 @@ def check_promotion_pr(errors: list[str]) -> None:
             "None found is a failure.",
             "gh pr list --base main --head dev --state open",
             "**One open:** update it.",
+            '`--title "Promote dev to main (<count> tasks)"` once the report holds more than one task',
             "**More than one open:** report them and change neither.",
             "- **Asked for:**", "- **Changed:**", "- **Tested:**", "- **Left open:**",
             "## Also on dev",

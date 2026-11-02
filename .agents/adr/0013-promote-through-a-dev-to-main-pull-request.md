@@ -48,6 +48,7 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
 - The hook is a guardrail against mistakes, not deliberate evasion; any analysis error blocks.
   Text inspection cannot see commands built at runtime, scripts, or other interpreters. Known
   gaps left open: a branch switch inside a `bash -c` script, `$((1<<n))` read as a heredoc, and
-  a heredoc piped to a shell on a later line.
+  a heredoc piped to a shell on a later line. A GraphQL query built by a command substitution is
+  treated as unreadable and blocked; pass it inline or with `-F query=@file`.
   Branch protection that allows only merge commits on `main` is a GitHub setting, which David
   configures himself.

@@ -43,12 +43,6 @@ import sys
 
 from _shared import read_hook_input
 
-# `main` as the push target: preceded by start/whitespace/colon/plus (so it
-# doesn't false-positive on a branch like "feature/main-page"), followed by
-# whitespace/quote/shell-separator/end (so "main-ish" doesn't match either).
-PUSH_TO_MAIN = re.compile(
-    r'git\s+push\b[^|&;\n]*?(?:^|[\s:+])((?:refs/)?(?:heads/)?(?:main|master))(?=[\s"\'&|;<>()]|$)'
-)
 PROTECTED_BRANCHES = {"main", "master"}
 # The agent-owned integration branch: the only head a PR into a protected
 # branch may come from, and never force-pushed or deleted by an agent.
@@ -116,7 +110,13 @@ def is_option_prefix(flag, *options, minimum=3):
     return len(flag) >= minimum and any(option.startswith(flag) for option in options)
 
 
-HEREDOC_AT = re.compile(r"<<(-?)[ \t]*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+# A heredoc operator and its delimiter word: quoted ('END', "END"),
+# backslash-escaped (\END) or bare, including hyphens (END-OF-BODY).
+HEREDOC_AT = re.compile(r"""<<(-?)[ \t]*(?:'([^'\n]+)'|"([^"\n]+)"|\\?([^\s;&|()<>'"]+))""")
+
+
+def heredoc_delimiter(match):
+    return next(group for group in match.groups()[1:] if group is not None)
 SHELLS = {"bash", "sh", "zsh", "dash"}
 # A shell reading stdin, by bare name or path (/bin/bash, /usr/bin/env bash).
 SHELL_READER = re.compile(r"(?:^|[\s;&|(/])(?:bash|sh|zsh|dash)(?=\s|$)")
@@ -172,7 +172,7 @@ def substitution_end(command, start, closer):
         elif command.startswith("<<", index) and not command.startswith("<<<", index):
             match = HEREDOC_AT.match(command, index)
             if match:
-                pending.append((match.group(1) == "-", match.group(3)))
+                pending.append((match.group(1) == "-", heredoc_delimiter(match)))
                 index = match.end()
                 continue
         elif char == "\n" and pending:
@@ -250,7 +250,7 @@ def without_heredoc_bodies_and_comments(command):
         if command.startswith("<<", index) and not command.startswith("<<<", index):
             match = HEREDOC_AT.match(command, index)
             if match:
-                pending.append((match.group(1) == "-", match.group(3)))
+                pending.append((match.group(1) == "-", heredoc_delimiter(match)))
                 emit(match.group(0))
                 index = match.end()
                 continue
@@ -336,12 +336,15 @@ def uses_current_branch(tokens):
 
 
 def possible_branches(command, switched):
-    """Every branch some part of the command may run on: each branch-switch
-    target, with None for a switch that cannot be read (gh pr checkout, git
-    worktree, a path), plus the hook's current branch. The starting branch is
-    left out only when a switch is joined by `&&` to everything after it, up
-    to the first command that acts on the current branch: a failed switch
-    then stops the chain. A push is checked against all of these."""
+    """The branches the command's pushes and PR commands may run on, with
+    None for a switch that cannot be read (gh pr checkout, git worktree, a
+    path).
+
+    When every operator from the first switch to the last command that acts
+    on the current branch is `&&`, a failed switch stops the chain, so each
+    such command runs on the branch of the last switch before it (or the
+    starting branch, before any switch): only those branches count. Any
+    other shape counts the starting branch and every switch target."""
     start = current_branch()
     if not switched:
         return {start}
@@ -354,8 +357,9 @@ def possible_branches(command, switched):
             current.append(token)
     segments.append((current, ""))
 
-    branches = set()
-    first_switch = first_user = None
+    every, used = {start}, set()
+    branch = start
+    first_switch = last_user = None
     for position, (tokens, _) in enumerate(segments):
         for index, token in enumerate(tokens[:-1]):
             target = NOT_A_SWITCH
@@ -366,19 +370,17 @@ def possible_branches(command, switched):
             elif os.path.basename(token) == "git" and tokens[index + 1] in {"checkout", "switch"}:
                 target = switch_target(tokens[index + 2:])
             if target is not NOT_A_SWITCH:
-                branches.add(target)
+                every.add(target)
+                branch = target
                 if first_switch is None:
                     first_switch = position
-        if first_user is None and uses_current_branch(tokens):
-            first_user = position
-    chained = (
-        first_switch is not None
-        and (first_user is None or first_switch < first_user)
-        and all(operator == "&&" for _, operator in segments[first_switch:first_user])
-    )
-    if not chained:
-        branches.add(start)
-    return branches
+        if uses_current_branch(tokens):
+            used.add(branch)
+            last_user = position
+    if first_switch is None or last_user is None:
+        return every
+    chained = all(operator == "&&" for _, operator in segments[first_switch:last_user])
+    return used if chained else every
 
 
 def simple_commands(command):
@@ -413,15 +415,9 @@ def gh_calls(command):
         return
     for tokens in commands:
         for index, token in enumerate(tokens):
-            if os.path.basename(token) in SHELLS:
-                # `bash [-o opt ...] -c '<script>'`: the script is commands too.
-                position = index + 1
-                while position < len(tokens) and tokens[position][:1] in {"-", "+"}:
-                    if re.fullmatch(r"-[a-z]*c[a-z]*", tokens[position]):
-                        if position + 1 < len(tokens):
-                            yield from gh_calls(tokens[position + 1])
-                        break
-                    position += 2 if tokens[position] in {"-o", "+o"} else 1
+            script = shell_script_argument(tokens, index)
+            if script is not None:
+                yield from gh_calls(script)
                 continue
             if os.path.basename(token) != "gh":
                 continue
@@ -606,9 +602,19 @@ def pr_merge_problem(arguments, context_changed, command, switched):
         return "merges a PR in a way that cannot be read from the command text."
     base = pr_merge_base(arguments, context_changed, command, switched)
     if base is None:
+        selector = positionals(arguments, PR_MERGE_OPTIONS_WITH_VALUE)[:1]
+        if GH_HOST_VARIABLE.search(command):
+            fix = "drop GH_HOST from the command and run the merge on its own"
+        elif context_changed or GH_TARGET_VARIABLES.search(command):
+            fix = ("pass --repo owner/name, since the command changes the directory or gh's "
+                   "target repository")
+        elif switched and not selector:
+            fix = "name the PR number, since the command switches branch first"
+        else:
+            fix = "name the PR explicitly"
         return ("merges a PR (or enables auto-merge) whose base branch could not be "
                 "determined with gh pr view. Merges into main/master are the owner's; "
-                "name the PR explicitly so its base can be checked.")
+                f"{fix} so its base can be checked.")
     if base in PROTECTED_BRANCHES:
         return (f"merges a PR (or enables auto-merge) into {base}. Only the repository "
                 f"owner merges into {base}.")
@@ -617,11 +623,19 @@ def pr_merge_problem(arguments, context_changed, command, switched):
 
 def graphql_text(arguments):
     """The GraphQL document(s) a `gh api graphql` call would send, or None
-    when part of it comes from somewhere this hook cannot read."""
+    when part of it comes from somewhere this hook cannot read. A query
+    built by a command substitution ("$(cat <<'EOF' ...)") reaches this
+    check empty, since the substitution is lifted out as its own command,
+    so a missing or empty query is unreadable too."""
     texts = []
+    has_query = bool(option_values(arguments, "--input"))
     for name, short in (("--raw-field", "-f"), ("--field", "-F")):
         for value in option_values(arguments, name, short):
-            _, _, field = value.partition("=")
+            key, _, field = value.partition("=")
+            if key == "query":
+                if not field.strip():
+                    return None
+                has_query = True
             if field.startswith("@"):
                 try:
                     with open(field[1:], encoding="utf-8") as stream:
@@ -636,7 +650,7 @@ def graphql_text(arguments):
                 texts.append(stream.read())
         except Exception:
             return None
-    return "\n".join(texts)
+    return "\n".join(texts) if has_query else None
 
 
 def api_problem(arguments):
@@ -708,17 +722,65 @@ def push_flags_and_refspecs(arguments):
     return flags, (found if repository_from_option else found[1:])
 
 
+def shell_script_argument(tokens, index):
+    """The script of `bash [-o opt ...] -c '<script>'` when tokens[index] is
+    a shell, else None."""
+    if os.path.basename(tokens[index]) not in SHELLS:
+        return None
+    position = index + 1
+    while position < len(tokens) and tokens[position][:1] in {"-", "+"}:
+        if re.fullmatch(r"-[a-z]*c[a-z]*", tokens[position]):
+            return tokens[position + 1] if position + 1 < len(tokens) else None
+        position += 2 if tokens[position] in {"-o", "+o"} else 1
+    return None
+
+
+def push_invocations(command):
+    """Yield the argument list of each `git push` the shell would run: from
+    the tokenized commands, so a quoted argument that only mentions
+    `git push ... main` (a PR body, a commit message) is not a push, and
+    from `bash -c` scripts. Yields None for a push whose arguments cannot be
+    read; only text that cannot be tokenized falls back to a raw scan."""
+    commands = simple_commands(command)
+    if commands is None:
+        for match in PUSH_COMMAND.finditer(command):
+            try:
+                yield shlex.split(match.group("arguments"))
+            except ValueError:
+                yield None
+        return
+    for tokens in commands:
+        for index, token in enumerate(tokens):
+            script = shell_script_argument(tokens, index)
+            if script is not None:
+                yield from push_invocations(script)
+            elif os.path.basename(token) == "git" and tokens[index + 1:index + 2] == ["push"]:
+                yield tokens[index + 2:]
+
+
+def push_names_protected(command):
+    """Whether a push names main/master as a destination (or source-only
+    refspec, which pushes to the same name)."""
+    for arguments in push_invocations(command):
+        if arguments is None:
+            return True
+        _, refspecs = push_flags_and_refspecs(arguments)
+        for refspec in refspecs:
+            source, colon, destination = refspec.partition(":")
+            if short_branch(destination if colon else source) in PROTECTED_BRANCHES:
+                return True
+    return False
+
+
 def push_rewrites_dev(command, branches):
     """Whether a push force-updates or deletes the shared `dev` branch.
     `branches` are the branches the command may be on; an unknown one may
     be dev."""
     on_dev = INTEGRATION_BRANCH in branches or None in branches
     branch = INTEGRATION_BRANCH if on_dev else next(iter(branches), "")
-    for match in PUSH_COMMAND.finditer(command):
-        try:
-            arguments = shlex.split(match.group("arguments"))
-        except ValueError:
-            return INTEGRATION_BRANCH in match.group("arguments")
+    for arguments in push_invocations(command):
+        if arguments is None:
+            return True
         flags, refspecs = push_flags_and_refspecs(arguments)
         short_flags = "".join(f[1:] for f in flags if not f.startswith("--"))
         long_flags = [f.split("=", 1)[0] for f in flags if f.startswith("--")]
@@ -816,10 +878,8 @@ def push_uses_implicit_ref(command):
     This remains deliberately conservative. If shell tokenization fails, or
     the command supplies no explicit refspec, treat it as implicit.
     """
-    for match in PUSH_COMMAND.finditer(command):
-        try:
-            arguments = shlex.split(match.group("arguments"))
-        except ValueError:
+    for arguments in push_invocations(command):
+        if arguments is None:
             return True
 
         positionals = []
@@ -874,10 +934,8 @@ def push_can_update_main_broadly(command):
     all include `main` from a checkout on some other branch. Block them
     unconditionally; there is no reliable textual proof that main is absent.
     """
-    for match in PUSH_COMMAND.finditer(command):
-        try:
-            arguments = shlex.split(match.group("arguments"))
-        except ValueError:
+    for arguments in push_invocations(command):
+        if arguments is None:
             return True
 
         for argument in arguments:
@@ -895,10 +953,10 @@ def push_can_update_main_broadly(command):
     return False
 
 
-def push_problem(command, normalized, context_changed, branches):
+def push_problem(command, context_changed, branches):
     """`branches` are the branches the command may be on, with None for a
     branch switch that cannot be read."""
-    if PUSH_TO_MAIN.search(normalized):
+    if push_names_protected(command):
         return (
             "pushes directly to main/master. It is human-gated, full stop -- an agent "
             "never pushes to it or merges into it. Work reaches main only through the "
@@ -1001,7 +1059,7 @@ def command_problem(command):
     branches = possible_branches(command, switched)
 
     return (
-        push_problem(command, normalized, context_changed, branches)
+        push_problem(command, context_changed, branches)
         or gh_problem(command, context_changed, switched, branches)
         or destructive_problem(normalized)
     )
