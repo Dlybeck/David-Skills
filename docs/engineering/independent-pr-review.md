@@ -33,9 +33,9 @@ evidence, while scope or approval blockers surface earlier.
 Where `main` is human-owned and `dev` is agent-owned, finished work reaches you as one open PR
 from `dev` into `main`. The agent opens or updates it only when you or the TPM paste a ready
 signal, after it checks one pinned `dev` SHA: pushed, tests passing, CI green, the task merged in,
-no open findings. The report gives each task what you asked for, what changed, how it was tested,
-and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
-a fresh cloud review session. Your comments come back as a pasted review fix. The agent fixes
+no open findings. The report gives each task what you asked for, the plan you okayed, your calls along the way,
+what changed, how that differs from the plan, how it was tested, and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
+a fresh cloud review session that checks each task against your plan. Your comments come back as a pasted review fix. The agent fixes
 them through `dev`, which updates the same PR, and replies on each thread with `🤖 Agent:`. You
 merge with **Create a merge commit**. The steps live in
 [promotion PR](../../skills/engineering/independent-pr-review/references/promotion-pr.md).

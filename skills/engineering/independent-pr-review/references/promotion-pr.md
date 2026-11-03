@@ -16,11 +16,21 @@ PR only from one of them; finishing a task is not a ready signal.
 Ready for <owner>: <task>
 Agreed: dev chat, TPM, chief of staff (<date>)
 Owner's original request (verbatim): <what the owner asked for>
+Plan he okayed: <outcome, in scope, out of scope, done when, in a few lines>
+His calls along the way: <one dated line each>
 Owner decision for this PR: <committed repository policy | relayed by <who> on <date>>
 ```
 
 "Committed repository policy" means a grant already on `main`, where only the owner puts it. A
 grant that exists only on `dev` or a feature branch needs the relayed decision.
+
+The TPM fills **Plan he okayed** and **His calls along the way**; the agent copies them into the
+report and does not invent either.
+
+Public-repo rule: this repository's PRs can be public. The TPM writes the story in plain terms,
+quotes only what the owner would say in public, and leaves out personal and work details. The
+owner's exact words are never posted as PR comments; his feedback is turned into a fleshed-out
+comment instead.
 
 Run every readiness check on one pinned `dev` SHA and record its result. Any failure ends the step:
 report the failing check with its evidence and open nothing.
@@ -55,8 +65,11 @@ ready task, and everything else under **Also on dev**
 Head: `dev` @ <sha> · Tests: `<command>` passed · CI: <run url> green
 
 ## <task>
-- **Asked for:** <owner's original request, verbatim>
+- **Asked for:** <owner's original request, in plain terms>
+- **Plan he okayed:** <outcome, in scope, out of scope, done when>
+- **His calls along the way:** <one dated line each>
 - **Changed:** <what changed, in the owner's terms; key files>
+- **Changed from plan:** <what differs from the plan and which call covers it, or "nothing">
 - **Tested:** <commands and results, CI, independent review receipt>
 - **Left open:** <known gaps, deferred items, or "nothing">
 
@@ -69,9 +82,10 @@ Merge with **Create a merge commit**. A squash or rebase merge makes the release
 For a fresh cloud review, paste into a new Claude session with access to this repository:
 
 ```text
-Review PR <url> (base main, head dev @ <sha>) for actionable defects. Read the full main...dev
-diff and the repository guidance, using /independent-pr-review if it is installed. Post each
-finding as a PR review comment on the line it concerns, in one review submitted as a comment.
+Review PR <url> (base main, head dev @ <sha>). Read the full main...dev diff and the repository
+guidance. The owner judges whether each task matches the plan he okayed in its section and is up
+to his standard for main; say where it does not. Post each point as a PR review comment on the
+line it concerns, in one review submitted as a comment.
 Report only; do not push, merge, approve, or change code.
 ```
 ````
