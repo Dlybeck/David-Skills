@@ -1,5 +1,30 @@
 # david-skills
 
+## 1.8.0
+
+### Minor Changes
+
+- [#4](https://github.com/Dlybeck/David-Skills/pull/4) [`e030129`](https://github.com/Dlybeck/David-Skills/commit/e0301295eccd884c2533cd6e1bfc9a1162223499) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Autopilot can be started by an authorized stand-in, such as a TPM, whose grant arrives in the
+  starting message. The stand-in answers the grill and confirms the goal contract on the owner's
+  behalf and relays big or out-of-contract decisions to the owner. Yolopilot and every other skill
+  stay owner-only; hooks and the human-only `main` boundary are unchanged.
+
+- [#4](https://github.com/Dlybeck/David-Skills/pull/4) [`79aab82`](https://github.com/Dlybeck/David-Skills/commit/79aab827e8a49a77ff71b3f7c594c4808ce058e7) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Finished work now reaches David as one `dev` -> `main` promotion PR. Agents open or update it on a
+  pasted ready signal, after checking tests and CI on one pinned `dev` SHA. Its report covers what
+  was asked for, what changed, how it was tested, and what is left open. Review comments are fixed on
+  the same PR and answered with a `🤖 Agent:` reply. The hook allows opening that PR only from `dev`
+  and blocks every agent merge into `main`/`master`: `gh pr merge` and auto-merge, `gh api` merge
+  and ref writes, and force-pushes of `dev`. The release accepts GitHub's "Create a merge commit"
+  promotion and refuses squash or rebase with a clear message.
+
+### Patch Changes
+
+- [#4](https://github.com/Dlybeck/David-Skills/pull/4) [`7bb6d5b`](https://github.com/Dlybeck/David-Skills/commit/7bb6d5b1c1dd12e0807c3f2ee97aaf7f387cf64a) Thanks [@Dlybeck](https://github.com/Dlybeck)! - The promotion PR report now tells each task as a story: what David asked for, the plan he okayed,
+  his calls along the way, what changed, and what differs from the plan. The TPM supplies the plan and
+  calls in the ready signal and writes them in plain terms for the public repository, without his exact words or personal details. The cloud-review
+  prompt asks whether each task matches that plan and meets his standard for `main`, instead of
+  hunting defects.
+
 ## 1.7.0
 
 ### Minor Changes
