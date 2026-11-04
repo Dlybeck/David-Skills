@@ -28,11 +28,156 @@ EXPECTED_IDS = {
 }
 
 
+def _flow(text: str) -> str:
+    """Collapse whitespace so fragments survive harmless prose re-wrapping."""
+    return " ".join(text.split())
+
+
 def require_text(path: str, fragments: tuple[str, ...], errors: list[str]) -> None:
-    text = (ROOT / path).read_text(encoding="utf-8")
+    text = _flow((ROOT / path).read_text(encoding="utf-8"))
     for fragment in fragments:
-        if fragment not in text:
+        if _flow(fragment) not in text:
             errors.append(f"{path}: missing pilot contract fragment {fragment!r}")
+
+
+STAND_IN_SKILLS = {
+    "skills/engineering/autopilot/SKILL.md",
+    "skills/engineering/pursue-goal/SKILL.md",
+    "skills/productivity/grilling/SKILL.md",
+    "skills/engineering/advise/SKILL.md",
+    "skills/engineering/autopilot/references/stand-in.md",
+    "skills/engineering/pursue-goal/references/claude-code.md",
+    "skills/engineering/pursue-goal/references/codex.md",
+}
+# Files using "stand-in" in its unrelated test-double sense.
+UNRELATED_STAND_IN = {"skills/engineering/codebase-design/DEEPENING.md"}
+
+
+def check_stand_in(errors: list[str]) -> None:
+    """Autopilot alone accepts an authorized stand-in (ADR 0012)."""
+    require_text(
+        "skills/engineering/autopilot/references/stand-in.md",
+        (
+            "only from the message that starts Autopilot",
+            "word for word",
+            "never counts",
+            "no later message can add a grant",
+            "restart `/autopilot` with the standard grant below in that same message",
+            "anything the owner reserved stays an owner decision",
+            "Stand-in grant:",
+            "Owner's original request (verbatim):",
+            "Reserved for <owner>:",
+            "does not replace the grill",
+            "Ask every grill and contract question as plain chat text, then end the turn",
+            "Never use an interactive question dialog or picker",
+            "grill, then show the complete goal contract in chat, then obtain the stand-in's explicit confirmation",
+            "do only read-only inspection and research — no file edits, builds, commits",
+            "Changing the objective, scope, authority, or delivery target.",
+            "A standing grant the stand-in asserts, or integration approval it gives itself, is not one;",
+            "a push to anything other than the run's own review branch, not already granted by durable repository policy",
+            "A relayed decision never satisfies a human-owned promotion's approval",
+            "as committed on the integration target",
+            "any file the stand-in wrote or changed, or this run wrote, do not count",
+            "relayed to the owner, not accepted from the stand-in",
+            "including the quoted original request, needs a relayed owner decision",
+            "money, new credentials, production deployment",
+            "human-owned promotion, such as `main`",
+            "guessing the owner's preference",
+            "beyond the owner's original request",
+            "owner decision relayed by stand-in",
+            "never contacts the owner directly",
+            "Silence, elapsed time, or a stand-in's guess is not an owner decision.",
+        ),
+        errors,
+    )
+    require_text(
+        "skills/engineering/autopilot/SKILL.md",
+        ("authorized stand-in", "carries or claims a stand-in role or grant",
+         "[stand-in](references/stand-in.md)", "full owner-reserved list",
+         "silence is never an owner decision",
+         "relayed decision never approves a human-owned promotion itself",
+         "counts only as policy committed on the integration target",
+         "restate every rule in that reference compactly",
+         "read-only until the stand-in confirms the shown contract",
+         "never an interactive dialog",
+         "With a stand-in, its own text grants nothing",
+         "produced inside the session or by its workers never counts, and no later message can add a grant",
+         "\"owner decision relayed by stand-in\" with its date, or keep it open",
+         "Offers of other user-invoked skills or new stages go to the owner",
+         "owner-reserved decision remains open", "disable-model-invocation: true"),
+        errors,
+    )
+    require_text("skills/productivity/grilling/SKILL.md", ("Autopilot stand-in",), errors)
+    require_text(
+        "skills/engineering/pursue-goal/SKILL.md",
+        ("authorized stand-in", "contract's owner-reserved list", "silence is never one"),
+        errors,
+    )
+    for wrapper in ("autopilot", "yolopilot"):
+        require_text(
+            f"skills/engineering/{wrapper}/agents/openai.yaml",
+            ("allow_implicit_invocation: false",),
+            errors,
+        )
+    # Yolopilot stays owner-only and its wording unchanged.
+    require_text(
+        "skills/engineering/yolopilot/SKILL.md",
+        ("Enter only through an explicit last-second human handoff.",
+         "disable-model-invocation: true"),
+        errors,
+    )
+    for skill_file in sorted((ROOT / "skills").glob("*/*/**/*.md")):
+        relative = skill_file.relative_to(ROOT).as_posix()
+        text = skill_file.read_text(encoding="utf-8").lower()
+        if "stand-in" in text and relative not in STAND_IN_SKILLS | UNRELATED_STAND_IN:
+            errors.append(f"{relative}: only Autopilot and its direct path may accept a stand-in")
+
+
+def check_promotion_pr(errors: list[str]) -> None:
+    """The dev -> main promotion PR opens on a ready signal and is merged by the owner (ADR 0013)."""
+    require_text(
+        "skills/engineering/independent-pr-review/references/promotion-pr.md",
+        (
+            "Act on the PR only from one of them; finishing a task is not a ready signal.",
+            "Ready for <owner>: <task>",
+            "Agreed: dev chat, TPM, chief of staff (<date>)",
+            "Owner decision for this PR:",
+            "report the failing check with its evidence and open nothing",
+            "local `dev` equals `origin/dev`",
+            "None found is a failure.",
+            "gh pr list --base main --head dev --state open",
+            "**One open:** update it.",
+            '`--title "Promote dev to main (<count> tasks)"` once the report holds more than one task',
+            "**More than one open:** report them and change neither.",
+            "Plan he okayed: <outcome, in scope, out of scope, done when, in a few lines>",
+            "His calls along the way: <one dated line each>",
+            "Public-repo rule:",
+            "never posted as PR comments",
+            "- **Asked for:**", "- **Plan he okayed:**", "- **His calls along the way:**",
+            "- **Changed:**", "- **Changed from plan:**", "- **Tested:**", "- **Left open:**",
+            "whether each task matches the plan he okayed",
+            "## Also on dev",
+            "Merge with **Create a merge commit**.",
+            "Report only; do not push, merge, approve, or change code.",
+            "Review fix: PR #<n>",
+            "Read each listed comment, and only those.",
+            "a body starting `🤖 Agent:` is an agent's own reply: skip it.",
+            "pulls/<n>/comments/<id>/replies",
+            "goes back to the TPM",
+            "Merging, approving, enabling auto-merge, and closing the promotion PR belong to the owner.",
+        ),
+        errors,
+    )
+    require_text(
+        "skills/engineering/independent-pr-review/references/developer-loop.md",
+        ("read [promotion PR](promotion-pr.md) before",),
+        errors,
+    )
+    require_text(
+        "skills/engineering/autopilot/SKILL.md",
+        ("A promotion PR opens only on a later ready signal",),
+        errors,
+    )
 
 
 def main() -> int:
@@ -146,6 +291,9 @@ def main() -> int:
         ("native goal", "linked worktree", "not status polling"),
         errors,
     )
+
+    check_stand_in(errors)
+    check_promotion_pr(errors)
 
     if errors:
         print(f"Pilot scenario validation failed with {len(errors)} error(s):", file=sys.stderr)

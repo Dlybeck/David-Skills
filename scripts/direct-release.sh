@@ -143,8 +143,28 @@ if (( ${#changesets[@]} == 0 )); then
   exit 0
 fi
 
-[[ "$dev_sha" == "$main_sha" ]] ||
-  fail "origin/main and origin/dev must be aligned before release"
+# Two promotions are accepted: a fast-forward of main to dev, or GitHub's
+# "Create a merge commit" on a dev -> main pull request. The merge must merge
+# exactly the current dev tip and leave its tree unchanged, so the release is
+# still a release of tested dev.
+read -r -a main_parents < <(git rev-list --parents -n 1 "$main_sha")
+merged_sha=""
+(( ${#main_parents[@]} == 3 )) && merged_sha="${main_parents[2]}"
+
+if [[ "$dev_sha" == "$main_sha" ]]; then
+  :
+elif [[ "$merged_sha" == "$dev_sha" ]]; then
+  [[ "$(git rev-parse "$main_sha^{tree}")" == "$(git rev-parse "$dev_sha^{tree}")" ]] ||
+    fail "the merge commit on main ($main_sha) changes files that are not on origin/dev ($dev_sha). Main must contain exactly the tested dev tree; bring the extra change through dev and promote again."
+elif git merge-base --is-ancestor "$main_sha" "$dev_sha"; then
+  fail "origin/main and origin/dev must be aligned before release: origin/dev ($dev_sha) has commits the promotion of $main_sha did not include. A newer promotion will release them."
+elif [[ -n "$merged_sha" ]] && git merge-base --is-ancestor "$merged_sha" "$dev_sha"; then
+  fail "origin/main and origin/dev must be aligned before release: main merged $merged_sha, but origin/dev has since moved to $dev_sha. A newer promotion will release them."
+elif ! git merge-base --is-ancestor "$dev_sha" "$main_sha"; then
+  fail "origin/main ($main_sha) is not origin/dev ($dev_sha) or a merge commit of it. A squash or rebase merge rewrites dev's commits, so the release cannot advance dev. Promote dev -> main with GitHub's \"Create a merge commit\" (or a fast-forward push of dev)."
+else
+  fail "origin/main ($main_sha) has commits that are not on origin/dev ($dev_sha). Bring every change through dev, then promote with GitHub's \"Create a merge commit\"."
+fi
 
 old_version="$version"
 npm run version
@@ -208,12 +228,14 @@ git fetch --no-tags origin \
   "+refs/heads/dev:refs/remotes/origin/dev"
 [[ "$(git rev-parse refs/remotes/origin/main)" == "$main_sha" ]] ||
   fail "origin/main moved during release"
-[[ "$(git rev-parse refs/remotes/origin/dev)" == "$main_sha" ]] ||
+[[ "$(git rev-parse refs/remotes/origin/dev)" == "$dev_sha" ]] ||
   fail "origin/dev moved during release"
 
+# dev is main itself or main's merged second parent, so the release commit is a
+# fast-forward for both branches.
 git push --atomic \
   "--force-with-lease=refs/heads/main:$main_sha" \
-  "--force-with-lease=refs/heads/dev:$main_sha" \
+  "--force-with-lease=refs/heads/dev:$dev_sha" \
   origin \
   "$release_sha:refs/heads/main" \
   "$release_sha:refs/heads/dev" \

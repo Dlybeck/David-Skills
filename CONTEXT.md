@@ -20,11 +20,11 @@ A `wayfinder` unit — a child **Issue** of a `wayfinder:map` holding a *questio
 A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-agent`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
 
 **Autopilot**:
-An understanding-first authority wrapper for long-horizon autonomous work, entered by an explicit human handoff. A pre-departure grilling session locks a **Goal contract** before **Pursue Goal** adapts the plan from evidence. It may integrate into an agent-owned target when repository policy and the contract, including applicable standing grants, authorize it and every gate passes.
+An understanding-first authority wrapper for long-horizon autonomous work, entered by an explicit handoff from the human owner or an authorized **Stand-in**. A pre-departure grilling session locks a **Goal contract** before **Pursue Goal** adapts the plan from evidence. It may integrate into an agent-owned target when repository policy and the contract, including applicable standing grants, authorize it and every gate passes.
 _Avoid_: night mode, away mode (the trigger isn't time-of-day)
 
 **Goal contract**:
-The stable boundary for a long-horizon run: objective, observable proof, scope, authority, safety boundary, and delivery target. The plan may change freely inside it; changing the contract requires the human. A clear mid-run correction from that human can change it without restarting the understanding session.
+The stable boundary for a long-horizon run: objective, observable proof, scope, authority, safety boundary, and delivery target. The plan may change freely inside it; changing the contract requires the human. A clear mid-run correction from that human can change it without restarting the understanding session. With a **Stand-in**, the contract records its grant verbatim, and owner-reserved changes need an owner decision it relays.
 
 **Human steering**:
 Ordinary conversation that questions, suggests, corrects, or stops an active run. Clear corrections
@@ -52,6 +52,22 @@ can revise the scope; model confidence alone cannot.
 **Yolopilot**:
 The provisional-interpretation authority wrapper for long-horizon autonomous work, entered for a loose, last-second handoff with no grilling round. It states its assumptions, then **Pursue Goal** refines the plan from evidence. Its default delivery is a review branch; applicable standing grants can authorize agent-owned integration under repository policy after every gate passes.
 _Avoid_: yolo mode (the name is `yolopilot`, said in full)
+
+**Stand-in**:
+A person or controller, such as a TPM, whom the human owner authorizes in the message that starts
+**Autopilot** to answer its grilling and confirm its **Goal contract** on the owner's behalf. It
+settles routine and delegated choices and relays owner-reserved decisions — contract changes,
+anything outside the personal-practice envelope, human-owned promotion, guessed product intent, or
+going beyond the owner's original request — to the owner. Only Autopilot accepts one; Yolopilot
+and every other user-invoked skill stay owner-only.
+_Avoid_: requester, proxy, delegate (a **Delegate** is a dispatch run)
+
+**Promotion PR**:
+The one open pull request from the agent-owned `dev` into the human-owned `main`. Agents open or
+update it only on a pasted **ready signal** (the dev chat, the TPM, and the chief of staff agree
+and the readiness checks pass on one `dev` SHA). They fix the owner's review comments on it
+through `dev`, replying with a `🤖 Agent:` prefix. Only the owner merges it, with a merge commit.
+_Avoid_: release PR, version PR (the repository has neither)
 
 ## Relationships
 

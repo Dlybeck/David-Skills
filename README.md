@@ -27,11 +27,10 @@ Pick the plugin for the agent you use. Installing an editable file copy as well 
 <summary><strong>Claude Code</strong></summary>
 
 ```bash
-claude plugin marketplace add Dlybeck/David-Skills
-claude plugin install david-skills@david-skills
+claude plugin install david-skills --marketplace Dlybeck/David-Skills
 ```
 
-Not in Claude Code's official marketplace — that listing (`mattpocock-skills`) is Matt's unmodified original. This is a private single-plugin marketplace baked into this repo; add it once, then install from it.
+Not in Claude Code's official marketplace — that listing (`mattpocock-skills`) is Matt's unmodified original. This is a private single-plugin marketplace baked into this repo; the install command adds it for you.
 
 To update later:
 
@@ -243,7 +242,7 @@ Skills for daily code work.
 - **[re-architect](./skills/engineering/re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present a visual review in chat or a useful page, then grill through whichever one you pick.
 - **[setup](./skills/engineering/setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[delegate](./skills/engineering/delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
-- **[autopilot](./skills/engineering/autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
+- **[autopilot](./skills/engineering/autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met. You or an authorized stand-in can start it.
 - **[yolopilot](./skills/engineering/yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended within existing authority and repository integration policy.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of decision tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
 

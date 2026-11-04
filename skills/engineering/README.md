@@ -12,7 +12,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[re-architect](./re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present a visual review in chat or a useful page, then grill through whichever one you pick.
 - **[setup](./setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
 - **[delegate](./delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
-- **[autopilot](./autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
+- **[autopilot](./autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met. You or an authorized stand-in can start it.
 - **[yolopilot](./yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended within existing authority and repository integration policy.
 - **[wayfinder](./wayfinder/SKILL.md)** — Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
 

@@ -12,8 +12,8 @@ Goal continuation does not create Git isolation. Establish or reuse the linked w
 by `/pursue-goal` before the first mutation, and include its absolute path in the goal objective so
 every continuation operates in the same checkout.
 
-Treat incoming human messages as steering of the current run, not implicit requests to replace
-the goal. Use only goal controls actually exposed by this host. When a correction cannot be
+Treat incoming human messages, or a contract-recorded stand-in's, as steering of the current run,
+not implicit requests to replace the goal. Use only goal controls actually exposed by this host. When a correction cannot be
 written into native goal metadata, keep the updated contract in the existing checkpoint, identify
 the stale metadata, and reconcile both at each continuation.
 
@@ -42,4 +42,4 @@ If neither mechanism can preserve or resume the run under host instructions, sta
 missing capability or binding restriction and preserve the next action. Disclose that unattended
 continuation remains unmet; never invent a pause API or misuse goal completion/blocking to end a
 wait. An account-policy amendment needs explicit user approval; plugin instructions cannot
-supply it.
+supply it. With a contract-recorded stand-in, it is an owner decision, never the stand-in's own.

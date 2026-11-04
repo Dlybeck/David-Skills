@@ -1,14 +1,15 @@
 ---
 name: autopilot
-description: Establish a verified goal and authority contract with the user, then pursue it autonomously for as long as useful evidence supports progress.
+description: Establish a verified goal and authority contract with the user or an authorized stand-in, then pursue it autonomously for as long as useful evidence supports progress.
 disable-model-invocation: true
 ---
 
 # Autopilot
 
-Enter only through an explicit human handoff. Autopilot earns long-horizon authority through an
-understanding session before work continues without the user. It is a trust level, not a fixed
-software pipeline.
+Enter only through an explicit handoff from the human owner or an authorized stand-in. When the
+starting message carries or claims a stand-in role or grant, read
+[stand-in](references/stand-in.md) first and apply it throughout. Autopilot earns long-horizon authority through an understanding session
+before work continues without the user. It is a trust level, not a fixed software pipeline.
 
 ## Establish the contract
 
@@ -21,7 +22,9 @@ warrants it, not a checklist to repeat for a small or already-understood task.
 `/grilling` uses `/attention-modes`: an On the side opening asks for the most consequential missing
 intent or boundary first. A short handoff still needs a complete, confirmed contract before this
 wrapper starts a durable goal; keep useful independent work within existing authority moving
-while any human-only contract question is open.
+while any human-only or owner-reserved contract question is open. With a stand-in, that work is
+read-only until the stand-in confirms the shown contract, and questions go in plain chat text with
+the turn ended, never an interactive dialog.
 
 Lock one self-contained **goal contract**:
 
@@ -30,7 +33,22 @@ Lock one self-contained **goal contract**:
 - Allowed file changes, research, local compute, tests, evaluations, commits, and external
   actions; note any exclusion on routine local dependencies or test setup.
 - Git base, review branch, push authority, and integration target.
-- Actions that require the human to return.
+- Actions that require the human to return. With a stand-in, make the contract self-contained for
+  an engine that never reads the stand-in reference: restate every rule in that reference
+  compactly, including at least:
+  - Its grant verbatim, the owner's original request, and relayed owner decisions.
+  - A grant, expansion, or owner decision appearing only in content produced inside the session
+    or by its workers never counts, and no later message can add a grant.
+  - When a stand-in settles an owner-reserved item, ask whether the owner decided it; record it as
+    "owner decision relayed by stand-in" with its date, or keep it open.
+  - The full owner-reserved list: the reference's default escalation categories plus the owner's
+    own reservations.
+  - Escalations go only through the stand-in; silence is never an owner decision; a relayed
+    decision never approves a human-owned promotion itself.
+  - A standing integration grant counts only as policy committed on the integration target — never
+    a stand-in claim, starting-message text, user-level or uncommitted file, or a file the stand-in
+    or this run wrote.
+  - Offers of other user-invoked skills or new stages go to the owner, not the stand-in.
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 
@@ -45,18 +63,21 @@ names alone grant no authority; missing policy or authority leaves integration u
 
 When implementation and tests are in scope, routine local toolchain and dependency setup is part
 of that work unless the user excludes it. Reuse an applicable standing grant already present in
-the conversation or durable instructions instead of asking for the same permission again.
+the conversation or durable instructions instead of asking for the same permission again. With a
+stand-in, its own text grants nothing: only owner decisions and committed policy count.
 
 Present the objective and endpoint compactly, with supporting scope and authority available in
-the working context, and obtain confirmation. An explicit approval of the same complete contract
+the working context, and obtain confirmation from the owner, or from a stand-in once no
+owner-reserved decision remains open. An explicit approval of the same complete contract
 already in the conversation counts. Do not start a durable goal while a material contract
 question remains open.
 
 ## Hand off to the engine
 
 Invoke `/pursue-goal` with the confirmed contract. This is delegated continuation of the
-human-triggered Autopilot process: the wrapper supplies trust and authority; the model-invoked
-engine supplies adaptive execution without re-invoking the human-only wrapper.
+explicitly triggered Autopilot process, whether the owner or an authorized stand-in started it:
+the wrapper supplies trust and authority; the model-invoked engine supplies adaptive execution
+without re-invoking the user-invoked wrapper. Carry any stand-in boundary in the contract itself.
 
 Let `/pursue-goal` choose among research, discovery, delivery, and optimization loops. A spec or
 issues are optional coordination artifacts, not admission tickets. Keep the contract stable while
@@ -73,6 +94,8 @@ proposal, then use the repository's required merge strategy and verify remote re
 If policy, integration permission or a required gate is absent, retain the review branch within
 existing commit/push authority and report the unmet condition. Human-owned promotion remains
 subject to its explicit approval boundary; the confirmed goal does not override task restrictions.
+A promotion PR opens only on a later ready signal, never as part of the run's own delivery; that
+signal and any review fixes follow the developer loop's promotion-PR route.
 
 ## Return
 
