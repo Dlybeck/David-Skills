@@ -81,7 +81,12 @@ API_WRITE_ENDPOINTS = re.compile(
 )
 # The exception to the above: `POST repos/OWNER/REPO/git/refs` creating
 # main/master at a literal commit. See creates_protected_branch().
-CREATE_REF_ENDPOINT = re.compile(r'/?repos/(?:[\w.-]+|\{owner\})/(?:[\w.-]+|\{repo\})/git/refs')
+# Shell constructs whose output the hook cannot see, and text that names a
+# `gh api` write endpoint. Together in one command they could hide the method
+# or the path (`"$(true)"` mid-word, a backtick, `$'..'`), so that is blocked.
+SUBSTITUTION = re.compile(r'\$[(\'"]|`|<\(')
+API_WRITE_TEXT = re.compile(r'git/refs|/merges?\b|merge-upstream|/contents\b')
+CREATE_REF_ENDPOINT =re.compile(r'/?repos/(?:[\w.-]+|\{owner\})/(?:[\w.-]+|\{repo\})/git/refs')
 FULL_SHA = re.compile(r'[0-9a-fA-F]{40}')
 GRAPHQL_WRITE_MUTATIONS = re.compile(
     r'\b(mergePullRequest|enablePullRequestAutoMerge|enqueuePullRequest|mergeBranch'
@@ -744,6 +749,8 @@ def creates_protected_branch(arguments):
     (--input, -H, --hostname, a redirect word), an extra or duplicate field, a
     variable or substitution left in a value, or an unreadable shape is not
     the exception, so the call stays blocked."""
+    if not all(arguments):  # an empty word is a quoted substitution that vanished
+        return False
     endpoints, fields, methods = [], [], []
     index = 0
     while index < len(arguments):
@@ -1093,9 +1100,11 @@ def push_problem(command, context_changed, branches):
     return None
 
 
-def gh_problem(command, context_changed, switched, branches):
+def gh_problem(command, context_changed, switched, branches, raw=None):
     """The first blocked `gh` call in the command. The merge check runs last
-    because it is the only one that makes a network call."""
+    because it is the only one that makes a network call. `raw` is the command
+    exactly as typed, before any normalization."""
+    raw = command if raw is None else raw
     calls = list(gh_calls(command))
     if not calls:
         return None
@@ -1104,6 +1113,13 @@ def gh_problem(command, context_changed, switched, branches):
     problem = gh_alias_problem(calls)
     if problem:
         return problem
+    # The raw text: normalization and tokenizing lift substitutions out, which is
+    # exactly what this check must still see.
+    if any(words[:1] == ["api"] for words, *_ in calls) \
+            and SUBSTITUTION.search(raw) and API_WRITE_TEXT.search(raw):
+        return ("runs gh api with a shell substitution, backtick or $'..' string next to a "
+                "merge, ref or contents endpoint. The substitution can hide the method or the "
+                "path from this check. Write the whole command out as plain text.")
     checks = (
         (("pr", "create"), lambda arguments, _: pr_create_problem(arguments, context_changed, branches)),
         (("pr", "edit"), lambda arguments, _: pr_edit_problem(arguments)),
@@ -1164,6 +1180,7 @@ def main():
 
 
 def command_problem(command):
+    raw = command
     command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
     switched = branch_switched(command)
@@ -1171,7 +1188,7 @@ def command_problem(command):
 
     return (
         push_problem(command, context_changed, branches)
-        or gh_problem(command, context_changed, switched, branches)
+        or gh_problem(command, context_changed, switched, branches, raw)
         or destructive_problem(normalized)
     )
 

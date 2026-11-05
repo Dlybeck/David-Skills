@@ -278,6 +278,10 @@ ALLOW_CREATE_MAIN = [
     f'git rev-parse HEAD && gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
     f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} && echo created',
     f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}; git status',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} | jq .ref',
+    # Substitutions elsewhere stay fine: a reply body is not a write endpoint.
+    'gh api repos/o/r/pulls/12/comments/345/replies -f body="$(cat reply.txt)"',
+    'gh api repos/o/r/issues/12/comments -f body="cost is $5"',
 ]
 
 for cmd in ALLOW_CREATE_MAIN:
@@ -310,6 +314,25 @@ BLOCK_NEAR_CREATE_MAIN = [
     'gh api repos/o/r/pulls/$(echo 12)/merge -X PUT',
     'gh api repos/o/r/pulls/12/merge $(echo -X PUT)',
     'gh api repos/o/r/git/refs/heads/main $(echo -X PATCH) -f sha=abc',
+    # Substitutions that split or empty the tokens and hide the method or path.
+    f'gh api repos/o/r/git/refs/heads/main"$(true)" -X PATCH -f sha={SHA} -F force=true',
+    f'gh api "$(true)"repos/o/r/git/refs/heads/main -X PATCH -f sha={SHA} -F force=true',
+    f'gh api repos/o/r/git/refs/heads/main"`true`" -X PATCH -f sha={SHA}',
+    'gh api repos/o/r/pulls/1/merge"$(true)" -X PUT',
+    'gh api repos/o/r/pulls/1/merge -X "$(echo PUT)"',
+    'gh api repos/o/r/pulls/1/merge -X `echo PUT`',
+    'gh api repos/o/r/pulls/1/merge --method "$(echo PUT)"',
+    'gh api repos/o/r/pulls/1/merge -X"$(echo PUT)"',
+    'gh api repos/o/r/git/refs/heads/main -X "$(echo DELETE)"',
+    'gh api repos/o/r/git/refs/heads/main -X "$(true)DELETE"',
+    'gh api repos/o/r/merges"$(true)" -f base=main -f head=dev',
+    'gh api "$(echo repos/o/r/pulls/1)/merge" -X PUT',
+    "gh api $'-X' PUT repos/o/r/pulls/1/merge",
+    'gh api $"-X" PUT repos/o/r/pulls/1/merge',
+    f'{CREATE} `echo -X PATCH`',
+    f'{CREATE} "$(echo -X DELETE)"',
+    f'{CREATE} "$(echo)"',
+    f'{CREATE} $(echo --input f)',
     # Merges through the API.
     'gh api -X PUT repos/o/r/pulls/12/merge',
     'gh api -X PUT repos/o/r/pulls/12/merge -f merge_method=merge',
