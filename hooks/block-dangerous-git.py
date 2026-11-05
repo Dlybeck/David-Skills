@@ -8,7 +8,13 @@ remember correctly every time:
    keyboard: `git push` targeting it (any form), `gh pr merge` and
    `--auto` for a PR based on it (or whose base cannot be determined),
    `gh api` writes that merge PRs or move refs or contents,
-   `gh repo sync` of its remote, and gh aliases, which could hide any of these. Also force-pushes and deletions of the
+   `gh repo sync` of its remote, and gh aliases, which could hide any of these.
+   The one exception is creating a main/master that does not exist yet: a
+   bare `gh api repos/OWNER/REPO/git/refs -f ref=refs/heads/main -f
+   sha=<40-hex>`. That POST can only create a ref, so GitHub itself rejects
+   it with 422 when the branch already exists; every other shape of that
+   call stays blocked, and `git push` to main never gets an exception.
+   Also force-pushes and deletions of the
    shared `dev` integration branch, which is the head of the dev -> main
    promotion PR. Opening that PR is allowed: `gh pr create` into a
    protected branch only from head `dev`; retargeting a PR there with
@@ -73,6 +79,20 @@ DISCARD_ALL = re.compile(r'git\s+(checkout|restore)\s+\.(?:\s|$)')
 API_WRITE_ENDPOINTS = re.compile(
     r'(?:^|/)(?:pulls/[^/]+/merge|merges|merge-upstream|git/refs(?:/.*)?|contents(?:/.*)?)$'
 )
+# Shell constructs whose output the hook cannot see: `$(..)`, a backtick,
+# `$'..'`, `$".."`, `<(..)`. Inside a `gh api` call they can supply or split
+# the method or the path (`"$(true)"` mid-word), so such a call is blocked --
+# except inside a quoted -f/-F field value, which stays one word.
+SUBSTITUTION = re.compile(r'\$[(\'"]|`|<\(')
+QUOTED_FIELD_VALUE = re.compile(
+    r'''(?<=\s)(?:--raw-field|--field|-f|-F)(?:=|\s*)[^\s=$`"'()<>|&;]*=?'''
+    r'''(?:"(?:[^"\\]|\\.)*"|'[^']*'|[^\s$`"'()<>|&;]*)'''
+)
+GH_API_TEXT = re.compile(r'\bgh\b[^\n;&|]*?\bapi\b')
+# The exception to the above: `POST repos/OWNER/REPO/git/refs` creating
+# main/master at a literal commit. See creates_protected_branch().
+CREATE_REF_ENDPOINT = re.compile(r'/?repos/(?:[\w.-]+|\{owner\})/(?:[\w.-]+|\{repo\})/git/refs')
+FULL_SHA = re.compile(r'[0-9a-fA-F]{40}')
 GRAPHQL_WRITE_MUTATIONS = re.compile(
     r'\b(mergePullRequest|enablePullRequestAutoMerge|enqueuePullRequest|mergeBranch'
     r'|updateRefs?|deleteRef|createCommitOnBranch)\b'
@@ -81,6 +101,9 @@ API_OPTIONS_WITH_VALUE = {
     "-X", "--method", "-f", "--raw-field", "-F", "--field", "--input",
     "-H", "--header", "-q", "--jq", "-t", "--template", "--cache",
     "--hostname", "-p", "--preview",
+    # gh's own flag, carried ahead of the api arguments (`gh -R o/r api ...`):
+    # without it the repo name would be mistaken for the endpoint.
+    "-R", "--repo",
 }
 API_FIELD_OPTIONS = {"-f", "--raw-field", "-F", "--field"}
 PR_MERGE_OPTIONS_WITH_VALUE = {
@@ -425,7 +448,9 @@ def simple_commands(command):
 
 def gh_calls(command):
     """Yield (words, flags) for each `gh` call: its subcommand words in order,
-    and the flags given between them (gh accepts `gh pr -R x merge`). Flags
+    the flags given between them (gh accepts `gh pr -R x merge`), the
+    arguments after the subcommand, and whether gh is the first word of its
+    command (not behind xargs, env, sudo or a variable assignment). Flags
     that take a value carry it. Yields None once if the command cannot be
     tokenized but mentions gh."""
     commands = simple_commands(command)
@@ -458,20 +483,21 @@ def gh_calls(command):
                     position += 1
                     if len(words) == 2 or words[0] in GH_SINGLE_WORD_COMMANDS:
                         break
-            yield words, flags, rest[position:]
+            yield words, flags, rest[position:], index == 0
 
 
 def gh_invocations(command, *subcommand):
-    """Yield the argument list of each `gh <subcommand...>` call, with any
-    flags given before the subcommand included. Yields None once if the
-    command is not tokenizable but mentions gh."""
+    """Yield (arguments, leading) for each `gh <subcommand...>` call: the
+    argument list with any flags given before the subcommand included, and
+    whether gh is the first word of its command. Yields (None, False) once
+    if the command is not tokenizable but mentions gh."""
     for call in gh_calls(command):
         if call is None:
-            yield None
+            yield None, False
             return
-        words, flags, arguments = call
+        words, flags, arguments, leading = call
         if tuple(words[:len(subcommand)]) == subcommand:
-            yield flags + list(words[len(subcommand):]) + arguments
+            yield flags + list(words[len(subcommand):]) + arguments, leading
 
 
 def option_values(arguments, long_name, short_name=None):
@@ -537,7 +563,7 @@ def gh_alias_problem(calls):
     """gh aliases can expand to any command, so defining one is blocked and
     using one is blocked; the full command is always available instead."""
     unknown = set()
-    for words, _, _ in calls:
+    for words, *_ in calls:
         if words[:1] == ["alias"] and words[1:2] and words[1] in {"set", "import"}:
             return ("defines a gh alias. An alias can hide a merge into main from this "
                     "check; run the full gh command instead.")
@@ -674,7 +700,7 @@ def graphql_text(arguments):
     return "\n".join(texts) if has_query else None
 
 
-def api_problem(arguments):
+def api_problem(arguments, leading=False):
     if arguments is None:
         return "calls gh api in a way that cannot be read from the command text."
     endpoints = positionals(arguments, API_OPTIONS_WITH_VALUE)
@@ -697,11 +723,69 @@ def api_problem(arguments):
                      (("--raw-field", "-f"), ("--field", "-F"))) \
         or bool(option_values(arguments, "--input"))
     method = methods[-1] if methods else ("POST" if has_fields else "GET")
+    # A `$(...)` is lifted out of the call as its own command, so what follows it
+    # (-X PUT, the rest of the endpoint) is invisible here. An endpoint the shell
+    # builds, or a write endpoint with a substitution beside it, cannot be judged.
+    expands = bool(re.search(r'[$`]', endpoint))
+    substituted = any(argument.endswith("$") for argument in arguments)
+    if (expands and method != "GET") or \
+            (substituted and (expands or API_WRITE_ENDPOINTS.search(endpoint))):
+        return (f"calls gh api with an endpoint ({endpoint}) the shell would expand or "
+                f"extend, so this check cannot tell whether it merges a PR or moves main. "
+                f"Write the endpoint out.")
     if method != "GET" and API_WRITE_ENDPOINTS.search(endpoint):
+        if leading and creates_protected_branch(arguments):
+            return None
         return (f"writes {endpoint} through gh api ({method}), which can merge a PR, move "
                 f"a branch, or commit to main. Use git and gh pr commands for non-main "
-                f"branches instead.")
+                f"branches instead. The one allowed write is creating a main/master that "
+                f"does not exist yet: gh api repos/OWNER/REPO/git/refs -f "
+                f"ref=refs/heads/main -f sha=<40-hex commit>, on its own, with no other "
+                f"options, redirects or wrappers.")
     return None
+
+
+def creates_protected_branch(arguments):
+    """Whether a `gh api` call is exactly a POST to the create-ref endpoint
+    with a `ref` field of refs/heads/main (or master) and a literal 40-hex
+    `sha` field, and nothing else. POST there cannot move or delete a ref:
+    GitHub answers 422 when the ref already exists, and when the sha is not
+    a commit in the repository. The match is strict -- any other option
+    (--input, -H, --hostname, a redirect word), an extra or duplicate field, a
+    variable or substitution left in a value, or an unreadable shape is not
+    the exception, so the call stays blocked."""
+    if not all(arguments):  # an empty word is a quoted substitution that vanished
+        return False
+    endpoints, fields, methods = [], [], []
+    index = 0
+    while index < len(arguments):
+        argument = arguments[index]
+        index += 1
+        if argument in {"-X", "--method", "-f", "-F", "--field", "--raw-field"}:
+            if index >= len(arguments):
+                return False
+            option, value = argument, arguments[index]
+            index += 1
+        elif argument.startswith(("--method=", "--field=", "--raw-field=")):
+            option, _, value = argument.partition("=")
+        elif argument[:2] in {"-X", "-f", "-F"} and len(argument) > 2 and argument[1] != "-":
+            option, value = argument[:2], argument[2:]
+        elif argument.startswith("-"):
+            return False
+        else:
+            endpoints.append(argument)
+            continue
+        (methods if option in {"-X", "--method"} else fields).append(value)
+    if len(endpoints) != 1 or not CREATE_REF_ENDPOINT.fullmatch(endpoints[0]):
+        return False
+    if any(method.upper() != "POST" for method in methods):
+        return False
+    pairs = [field.partition("=") for field in fields]
+    if sorted(key for key, _, _ in pairs) != ["ref", "sha"]:
+        return False
+    values = {key: value for key, _, value in pairs}
+    return (values["ref"] in {f"refs/heads/{name}" for name in PROTECTED_BRANCHES}
+            and FULL_SHA.fullmatch(values["sha"]) is not None)
 
 
 def repo_sync_problem(arguments):
@@ -1021,9 +1105,27 @@ def push_problem(command, context_changed, branches):
     return None
 
 
-def gh_problem(command, context_changed, switched, branches):
+def api_substitution_hidden(raw):
+    """Whether a `gh api` call in the raw command text has a shell substitution
+    outside a quoted field value. Normalization and tokenizing lift
+    substitutions out of the call and split or empty the words around them,
+    so this reads the text as typed. A quoted -f/-F value is one word and
+    cannot add options; an unquoted one with a substitution can (word
+    splitting), so it is not exempt. Each call's text ends at the next shell
+    operator or unescaped newline, found after those values are set aside."""
+    text = QUOTED_FIELD_VALUE.sub(" ", raw.replace("\\\n", " "))
+    for match in GH_API_TEXT.finditer(text):
+        call = re.split(r'&&|\|\||[;|&\n]', text[match.start():], maxsplit=1)[0]
+        if SUBSTITUTION.search(call):
+            return True
+    return False
+
+
+def gh_problem(command, context_changed, switched, branches, raw=None):
     """The first blocked `gh` call in the command. The merge check runs last
-    because it is the only one that makes a network call."""
+    because it is the only one that makes a network call. `raw` is the command
+    exactly as typed, before any normalization."""
+    raw = command if raw is None else raw
     calls = list(gh_calls(command))
     if not calls:
         return None
@@ -1032,16 +1134,21 @@ def gh_problem(command, context_changed, switched, branches):
     problem = gh_alias_problem(calls)
     if problem:
         return problem
+    if any(words[:1] == ["api"] for words, *_ in calls) and api_substitution_hidden(raw):
+        return ("runs gh api with a shell substitution, backtick or $'..' string outside a "
+                "quoted -f/-F value. The substitution can supply or split the method or the "
+                "path, which this check cannot see. Write the endpoint and options out as "
+                "plain text.")
     checks = (
-        (("pr", "create"), lambda arguments: pr_create_problem(arguments, context_changed, branches)),
-        (("pr", "edit"), pr_edit_problem),
+        (("pr", "create"), lambda arguments, _: pr_create_problem(arguments, context_changed, branches)),
+        (("pr", "edit"), lambda arguments, _: pr_edit_problem(arguments)),
         (("api",), api_problem),
-        (("repo", "sync"), repo_sync_problem),
-        (("pr", "merge"), lambda arguments: pr_merge_problem(arguments, context_changed, command, switched)),
+        (("repo", "sync"), lambda arguments, _: repo_sync_problem(arguments)),
+        (("pr", "merge"), lambda arguments, _: pr_merge_problem(arguments, context_changed, command, switched)),
     )
     for subcommand, check in checks:
-        for arguments in gh_invocations(command, *subcommand):
-            problem = check(arguments)
+        for arguments, leading in gh_invocations(command, *subcommand):
+            problem = check(arguments, leading)
             if problem:
                 return problem
     return None
@@ -1092,6 +1199,7 @@ def main():
 
 
 def command_problem(command):
+    raw = command
     command, context_changed = normalize_git_options(command)
     normalized = normalize_quoting(command)
     switched = branch_switched(command)
@@ -1099,7 +1207,7 @@ def command_problem(command):
 
     return (
         push_problem(command, context_changed, branches)
-        or gh_problem(command, context_changed, switched, branches)
+        or gh_problem(command, context_changed, switched, branches, raw)
         or destructive_problem(normalized)
     )
 

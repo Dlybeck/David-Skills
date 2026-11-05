@@ -65,6 +65,8 @@ does not prove an active installed skill changed.
 Not through any command the plugin hook can read. It lets agents open the PR only from head `dev`.
 It blocks `gh pr merge` and auto-merge into `main` (and blocks them too when the base can't be
 checked), along with `gh api` merges and ref writes, gh aliases, and force-pushes of `dev`. The
+one write it lets through is creating a `main` that does not exist yet, with a plain `gh api`
+call that GitHub itself rejects if the branch is already there. The
 hook reads command text, so a command built at runtime or run from a script is outside what it
 sees. For a hard guarantee, use branch protection on `main`, which you set on GitHub. Squash or
 rebase merges make the release refuse, so use **Create a merge commit**.

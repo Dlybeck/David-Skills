@@ -33,6 +33,11 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
   force-pushes or deletions of `dev`. Defining or running a gh alias is blocked too, since an
   alias can hide any of these. Merges into `dev` and feature branches stay allowed: dev
   chats in David's other repositories merge their PRs with `gh pr merge`.
+- One narrow exception lets a repository get its first `main`: a bare `gh api
+  repos/<o>/<r>/git/refs -f ref=refs/heads/main -f sha=<40-hex>` (or `master`). That POST can
+  only create a ref, so GitHub rejects it with 422 when the branch already exists, and the hook
+  needs no live lookup. Any other option, field, wrapper, redirect, or shell-built value keeps
+  it blocked, and `git push` never gets an equivalent exception.
 - The release accepts a merge commit on `main` whose second parent is exactly the `dev` tip with
   an unchanged tree. The release commit then fast-forwards both branches, and the lease on `dev`
   is that tip. A squash or rebase promotion fails with a message naming "Create a merge commit".
