@@ -79,14 +79,19 @@ DISCARD_ALL = re.compile(r'git\s+(checkout|restore)\s+\.(?:\s|$)')
 API_WRITE_ENDPOINTS = re.compile(
     r'(?:^|/)(?:pulls/[^/]+/merge|merges|merge-upstream|git/refs(?:/.*)?|contents(?:/.*)?)$'
 )
+# Shell constructs whose output the hook cannot see: `$(..)`, a backtick,
+# `$'..'`, `$".."`, `<(..)`. Inside a `gh api` call they can supply or split
+# the method or the path (`"$(true)"` mid-word), so such a call is blocked --
+# except inside a quoted -f/-F field value, which stays one word.
+SUBSTITUTION = re.compile(r'\$[(\'"]|`|<\(')
+QUOTED_FIELD_VALUE = re.compile(
+    r'''(?<=\s)(?:--raw-field|--field|-f|-F)(?:=|\s*)[^\s=$`"'()<>|&;]*=?'''
+    r'''(?:"(?:[^"\\]|\\.)*"|'[^']*'|[^\s$`"'()<>|&;]*)'''
+)
+GH_API_TEXT = re.compile(r'\bgh\b[^\n;&|]*?\bapi\b')
 # The exception to the above: `POST repos/OWNER/REPO/git/refs` creating
 # main/master at a literal commit. See creates_protected_branch().
-# Shell constructs whose output the hook cannot see, and text that names a
-# `gh api` write endpoint. Together in one command they could hide the method
-# or the path (`"$(true)"` mid-word, a backtick, `$'..'`), so that is blocked.
-SUBSTITUTION = re.compile(r'\$[(\'"]|`|<\(')
-API_WRITE_TEXT = re.compile(r'git/refs|/merges?\b|merge-upstream|/contents\b')
-CREATE_REF_ENDPOINT =re.compile(r'/?repos/(?:[\w.-]+|\{owner\})/(?:[\w.-]+|\{repo\})/git/refs')
+CREATE_REF_ENDPOINT = re.compile(r'/?repos/(?:[\w.-]+|\{owner\})/(?:[\w.-]+|\{repo\})/git/refs')
 FULL_SHA = re.compile(r'[0-9a-fA-F]{40}')
 GRAPHQL_WRITE_MUTATIONS = re.compile(
     r'\b(mergePullRequest|enablePullRequestAutoMerge|enqueuePullRequest|mergeBranch'
@@ -1100,6 +1105,22 @@ def push_problem(command, context_changed, branches):
     return None
 
 
+def api_substitution_hidden(raw):
+    """Whether a `gh api` call in the raw command text has a shell substitution
+    outside a quoted field value. Normalization and tokenizing lift
+    substitutions out of the call and split or empty the words around them,
+    so this reads the text as typed. A quoted -f/-F value is one word and
+    cannot add options; an unquoted one with a substitution can (word
+    splitting), so it is not exempt. Each call's text ends at the next shell
+    operator or unescaped newline, found after those values are set aside."""
+    text = QUOTED_FIELD_VALUE.sub(" ", raw.replace("\\\n", " "))
+    for match in GH_API_TEXT.finditer(text):
+        call = re.split(r'&&|\|\||[;|&\n]', text[match.start():], maxsplit=1)[0]
+        if SUBSTITUTION.search(call):
+            return True
+    return False
+
+
 def gh_problem(command, context_changed, switched, branches, raw=None):
     """The first blocked `gh` call in the command. The merge check runs last
     because it is the only one that makes a network call. `raw` is the command
@@ -1113,13 +1134,11 @@ def gh_problem(command, context_changed, switched, branches, raw=None):
     problem = gh_alias_problem(calls)
     if problem:
         return problem
-    # The raw text: normalization and tokenizing lift substitutions out, which is
-    # exactly what this check must still see.
-    if any(words[:1] == ["api"] for words, *_ in calls) \
-            and SUBSTITUTION.search(raw) and API_WRITE_TEXT.search(raw):
-        return ("runs gh api with a shell substitution, backtick or $'..' string next to a "
-                "merge, ref or contents endpoint. The substitution can hide the method or the "
-                "path from this check. Write the whole command out as plain text.")
+    if any(words[:1] == ["api"] for words, *_ in calls) and api_substitution_hidden(raw):
+        return ("runs gh api with a shell substitution, backtick or $'..' string outside a "
+                "quoted -f/-F value. The substitution can supply or split the method or the "
+                "path, which this check cannot see. Write the endpoint and options out as "
+                "plain text.")
     checks = (
         (("pr", "create"), lambda arguments, _: pr_create_problem(arguments, context_changed, branches)),
         (("pr", "edit"), lambda arguments, _: pr_edit_problem(arguments)),
