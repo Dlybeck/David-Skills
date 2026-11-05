@@ -282,6 +282,12 @@ ALLOW_CREATE_MAIN = [
     # Substitutions elsewhere stay fine: a reply body is not a write endpoint.
     'gh api repos/o/r/pulls/12/comments/345/replies -f body="$(cat reply.txt)"',
     'gh api repos/o/r/issues/12/comments -f body="cost is $5"',
+    'gh api repos/o/r/pulls/12/comments/345/replies -f body="fixed `foo` in /contents and /merge, see git/refs"',
+    'gh api repos/o/r/pulls/12/comments/345/replies -fbody="$(cat reply.txt)"',
+    'gh api repos/o/r/pulls/12/comments/345/replies --field body="$(cat reply.txt)"',
+    "gh api repos/o/r/pulls/12/comments/345/replies -f body=\"$(cat <<'EOF'\nSee /merge handling and git/refs.\nEOF\n)\"",
+    'gh api repos/o/r/issues/12/comments -f body=x && git commit -m "$(cat msg.txt)"',
+    'git commit -m "$(cat msg.txt)" && gh api repos/o/r/issues/12/comments -f body=x',
 ]
 
 for cmd in ALLOW_CREATE_MAIN:
@@ -329,6 +335,16 @@ BLOCK_NEAR_CREATE_MAIN = [
     'gh api "$(echo repos/o/r/pulls/1)/merge" -X PUT',
     "gh api $'-X' PUT repos/o/r/pulls/1/merge",
     'gh api $"-X" PUT repos/o/r/pulls/1/merge',
+    # A substitution that supplies part of the path or the method.
+    'gh api "repos/o/r/pulls/3/$(echo merge)" -X PUT',
+    'gh api "repos/o/r/pulls/3/$(echo merge)" -X PUT -f merge_method=squash',
+    'gh api "repos/o/r/pulls/3/$(echo merge)" --method PUT',
+    'gh api repos/o/r/pulls/3/"$(echo merge)" -X PUT',
+    'gh api repos/o/r/pulls/3/`echo merge` -X PUT',
+    'gh api "repos/o/r/merg$(echo es)" -X POST -f base=main -f head=dev',
+    'gh api -f a=b "repos/o/r/pulls/3/$(echo merge)" -X PUT',
+    'gh api repos/o/r/pulls/3/merge -f a=b -X "$(echo PUT)"',
+    'gh api repos/o/r/issues/1/comments -f body=$(echo x -X PUT) repos/o/r/pulls/3/merge',
     f'{CREATE} `echo -X PATCH`',
     f'{CREATE} "$(echo -X DELETE)"',
     f'{CREATE} "$(echo)"',
