@@ -251,6 +251,201 @@ with tempfile.TemporaryDirectory() as temp_dir:
         check(f"block-dangerous-git reads GraphQL file {name}",
               code == (2 if blocked else 0), f"(code={code}, err={err!r})")
 
+# Creating a main/master that does not exist yet is the one allowed ref write:
+# a bare POST to the create-ref endpoint, which GitHub rejects with 422 when
+# the branch already exists. Anything else near that endpoint stays blocked.
+SHA = "0000f07" + "a" * 33
+ALLOW_CREATE_MAIN = [
+    f'gh api repos/Dlybeck/arr/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f sha={SHA} -f ref=refs/heads/main',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/master -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -F ref=refs/heads/main -F sha={SHA}',
+    f'gh api repos/o/r/git/refs --field ref=refs/heads/main --raw-field sha={SHA}',
+    f'gh api repos/o/r/git/refs --field=ref=refs/heads/main --raw-field=sha={SHA}',
+    f'gh api repos/o/r/git/refs -fref=refs/heads/main -fsha={SHA}',
+    f'gh api repos/o/r/git/refs -f "ref=refs/heads/main" -f \'sha={SHA}\'',
+    f'gh api -X POST repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api --method POST repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api --method=post repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api -XPOST repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api /repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/{{owner}}/{{repo}}/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA.upper()}',
+    f'gh api \\\n  --method POST \\\n  repos/o/r/git/refs \\\n  -f ref=refs/heads/main \\\n  -f sha={SHA}',
+    f'cd /tmp && gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'bash -c \'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}\'',
+    # Chained with harmless commands: each part is judged on its own.
+    f'git rev-parse HEAD && gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} && echo created',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}; git status',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} | jq .ref',
+    # Substitutions elsewhere stay fine: a reply body is not a write endpoint.
+    'gh api repos/o/r/pulls/12/comments/345/replies -f body="$(cat reply.txt)"',
+    'gh api repos/o/r/issues/12/comments -f body="cost is $5"',
+]
+
+for cmd in ALLOW_CREATE_MAIN:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git allows creating main: {cmd!r}",
+          code == 0 and err == "", f"(code={code}, err={err!r})")
+
+CREATE = f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}'
+BLOCK_NEAR_CREATE_MAIN = [
+    # Moving or deleting an existing main/master, whatever the spelling.
+    f'gh api -X PATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh api -X PATCH repos/o/r/git/refs/heads/master -f sha={SHA} -F force=true',
+    f'gh api --method PATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh api --method=PATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh api -XPATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh api -X patch repos/o/r/git/refs/heads/main -f sha={SHA}',
+    'gh api -XDELETE repos/o/r/git/refs/heads/main',
+    'gh api -X DELETE repos/o/r/git/refs/heads/master',
+    'gh api --method=DELETE /repos/o/r/git/refs/heads/main',
+    f'gh api -X POST repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh api -X PATCH https://api.github.com/repos/o/r/git/refs/heads/main -f sha={SHA}',
+    # A gh-level repo flag ahead of `api`, or an endpoint built by the shell, must not hide the write.
+    f'gh -R o/r api -X PATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'gh --repo o/r api --method PATCH repos/o/r/git/refs/heads/master -f sha={SHA}',
+    'gh -R o/r api -X PUT repos/o/r/pulls/12/merge',
+    'gh api $EP -X PATCH -f sha=abc',
+    'gh api "$EP" -X DELETE',
+    'gh api repos/o/r/git/refs/heads/$BRANCH -X PATCH -f sha=abc',
+    'gh api $(echo repos/o/r/git/refs/heads/main) -X PATCH -f sha=abc',
+    'gh api repos/o/r/pulls/$(echo 12)/merge -X PUT',
+    'gh api repos/o/r/pulls/12/merge $(echo -X PUT)',
+    'gh api repos/o/r/git/refs/heads/main $(echo -X PATCH) -f sha=abc',
+    # Substitutions that split or empty the tokens and hide the method or path.
+    f'gh api repos/o/r/git/refs/heads/main"$(true)" -X PATCH -f sha={SHA} -F force=true',
+    f'gh api "$(true)"repos/o/r/git/refs/heads/main -X PATCH -f sha={SHA} -F force=true',
+    f'gh api repos/o/r/git/refs/heads/main"`true`" -X PATCH -f sha={SHA}',
+    'gh api repos/o/r/pulls/1/merge"$(true)" -X PUT',
+    'gh api repos/o/r/pulls/1/merge -X "$(echo PUT)"',
+    'gh api repos/o/r/pulls/1/merge -X `echo PUT`',
+    'gh api repos/o/r/pulls/1/merge --method "$(echo PUT)"',
+    'gh api repos/o/r/pulls/1/merge -X"$(echo PUT)"',
+    'gh api repos/o/r/git/refs/heads/main -X "$(echo DELETE)"',
+    'gh api repos/o/r/git/refs/heads/main -X "$(true)DELETE"',
+    'gh api repos/o/r/merges"$(true)" -f base=main -f head=dev',
+    'gh api "$(echo repos/o/r/pulls/1)/merge" -X PUT',
+    "gh api $'-X' PUT repos/o/r/pulls/1/merge",
+    'gh api $"-X" PUT repos/o/r/pulls/1/merge',
+    f'{CREATE} `echo -X PATCH`',
+    f'{CREATE} "$(echo -X DELETE)"',
+    f'{CREATE} "$(echo)"',
+    f'{CREATE} $(echo --input f)',
+    # Merges through the API.
+    'gh api -X PUT repos/o/r/pulls/12/merge',
+    'gh api -X PUT repos/o/r/pulls/12/merge -f merge_method=merge',
+    'gh api repos/o/r/merges -f base=main -f head=dev',
+    'gh api repos/o/r/merges -f base=master -f head=dev',
+    'gh api --method POST repos/o/r/merges -F base=main -F head=dev',
+    # The create form, but not exactly the allowed shape.
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/dev -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/tags/v1 -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/Main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main/x -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main-2 -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f ref=refs/heads/dev -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/dev -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} -f force=true',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main',
+    f'gh api repos/o/r/git/refs -f sha={SHA}',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=0000f07',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA[:39]}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}0',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=g{SHA[1:]}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=@{SHA}',
+    f'gh api repos/o/r/git/refs -F ref=refs/heads/main -F sha=@sha.txt',
+    f'gh api repos/o/r/git/refs -F ref=@ref.txt -F sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} --input body.json',
+    'gh api repos/o/r/git/refs --input body.json',
+    'gh api repos/o/r/git/refs --input -',
+    f'gh api repos/o/r/git/refs -X PUT -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -X PATCH -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -X POST -X PATCH -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -H "X-HTTP-Method-Override: PATCH" -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs --hostname ghe.example.com -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs --paginate -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs --jq .ref -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA} --',
+    f'gh api https://api.github.com/repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs/ -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api "repos/o/r/git/refs?x=1" -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs/heads -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/git/refs repos/o/r/git/refs/heads/main -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api repos/o/r/other/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    # Values the shell would expand: the hook sees them as text and cannot trust them.
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=$SHA',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha="$SHA"',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=${SHA}',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=$(git rev-parse HEAD)',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha="$(git rev-parse HEAD)"',
+    'gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha=`git rev-parse HEAD`',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/$BRANCH -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref="$REF" -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=$(echo refs/heads/main) -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -F ref=refs/heads/{{branch}} -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/ma{{in,in}} -f sha={SHA}',
+    f'gh api repos/o/r/git/refs -f ref=refs/heads/ma*n -f sha={SHA}',
+    f'gh api repos/o/$OWNER/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh api $ENDPOINT -f ref=refs/heads/main -f sha={SHA}',
+    # Not the bare command: a wrapper, prefix, or redirect can change what runs.
+    f'xargs gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'echo -X PATCH | xargs gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'env GH_TOKEN=x gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'GH_HOST=ghe.example.com gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'command gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'time gh api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'{CREATE} > out.txt',
+    f'{CREATE} < in.txt',
+    f'{CREATE} 2>&1',
+    f'gh -R o/r api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    f'gh --repo o/r api repos/o/r/git/refs -f ref=refs/heads/main -f sha={SHA}',
+    # Chained or piped: the exception cannot carry a second command through.
+    f'{CREATE} && git push origin main',
+    f'{CREATE}; git push origin HEAD:master',
+    f'{CREATE} | git push origin dev:main',
+    f'{CREATE} && gh api -X PATCH repos/o/r/git/refs/heads/main -f sha={SHA}',
+    f'{CREATE}; gh api -X DELETE repos/o/r/git/refs/heads/main',
+    f'{CREATE} && gh api -X PUT repos/o/r/pulls/12/merge',
+    f'{CREATE} && gh api repos/o/r/merges -f base=main -f head=dev',
+    f'{CREATE} && gh api repos/o/r/git/refs -f ref=refs/heads/dev -f sha={SHA}',
+    f'gh api -X PATCH repos/o/r/git/refs/heads/main -f sha={SHA} && {CREATE}',
+    f'{CREATE} && gh pr merge 12 --squash --repo o/r',
+    f'{CREATE} && git reset --hard',
+    f'bash -c "{CREATE} && git push origin main"',
+    f'bash -c "{CREATE}; gh api -X PATCH repos/o/r/git/refs/heads/main -f sha={SHA}"',
+    f'eval \'{CREATE}; git push origin main\'',
+    f'{CREATE} \\\n  && git push origin HEAD:main',
+    # git push never gets an exception, even to a branch that might not exist.
+    f'git push origin {SHA}:refs/heads/main',
+    f'git push origin {SHA}:main',
+    f'git push origin {SHA}:refs/heads/master',
+    f'git push origin {SHA}:refs/heads/main --force-with-lease=main:',
+    'git push origin dev:main',
+    'git push --force origin dev:main',
+    'git push origin :main',
+    'git push origin --delete main',
+    'git push origin --delete master',
+    # Merging.
+    'gh pr merge 12 --squash --repo o/r',
+    'gh pr merge 12 --merge --auto --repo o/r',
+]
+
+for cmd in BLOCK_NEAR_CREATE_MAIN:
+    code, err = run_hook_bash("block-dangerous-git.py", cmd)
+    check(f"block-dangerous-git still blocks near the create-main exception: {cmd!r}",
+          code == 2 and err.startswith("DANGEROUS GIT COMMAND blocked"),
+          f"(code={code}, err={err!r})")
+
+# The block message names the one allowed form, so a refused agent can adjust.
+code, err = run_hook_bash("block-dangerous-git.py", 'gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc')
+check("block-dangerous-git ref-write message names the allowed create form",
+      code == 2 and "ref=refs/heads/main" in err, f"(code={code}, err={err!r})")
+
 # Force-pushing or deleting dev rewrites the promotion PR's head.
 BLOCK_DEV_REWRITE = [
     'git push --force origin dev',
