@@ -21,7 +21,7 @@ requires. This additional loop preserves ordinary defect findings independent of
    user to approve its wording first. Review alone grants no posting authority; absent it, keep
    findings private and continue authorized local repairs. No actionable findings means no comment.
 4. The **developer** addresses actionable findings inside the settled scope, adds justified
-   regressions, runs affected and required full checks, and commits within authority. Then repeat
+   regressions, runs affected checks (the full suite only when warranted), and commits within authority. Then repeat
    the full-base review with a fresh reviewer on the new exact head; no incremental-only review
    or reuse of a previous clean result. Reconcile other required review gates if fixes affect them.
 5. Escalate material scope, security, permission, or approval blockers as soon as they arise. If a
@@ -30,7 +30,7 @@ requires. This additional loop preserves ordinary defect findings independent of
    ordinary findings or run an endless identical review loop. User interruption takes effect
    immediately under the calling workflow's stop/steering rules.
 6. Settle only when the exact final head has complete fresh coverage, no unresolved actionable
-   findings, and the required checks pass. Push the feature branch and create/update its PR only
+   findings, and the checks the change warrants pass. Push the feature branch and create/update its PR only
    within delivery authority; verify the remote head and exact-head CI before delivery. If a push or base update
    changes the proposal, re-pin and re-review. If CI is unavailable,
    disclose the unmet gate instead of claiming it passed.

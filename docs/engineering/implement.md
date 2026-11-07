@@ -13,8 +13,10 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
-Do not use the test suite casually. Select checks for changed behavior and risk, preserve passing
-evidence while it remains relevant, and run required full checks before delivery.
+Do not use the test suite casually. During development, run the tests for what changed plus a quick
+smoke check; run the full suite only when warranted (the PR to `main`, shared code, test setup or
+dependencies, or risk targeted tests cannot cover). Tests should not be a significant time blocker:
+run a slow full suite in the background and keep working.
 
 [Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
 
