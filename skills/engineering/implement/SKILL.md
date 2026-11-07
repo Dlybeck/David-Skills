@@ -24,9 +24,12 @@ or an in-chat visual would materially improve implementation or review.
 
 Use /tdd where possible, at agreed seams or with explicitly delegated seam selection.
 
-Do not use the test suite casually. Choose checks for the behavior changed and the risks involved;
-run the required full suite before delivery. Reuse passing results until a relevant change,
-failure, or unresolved concern justifies another run.
+Do not use the test suite casually. During development, run only the tests for what changed plus a
+quick smoke check (app starts, main page loads). Run the full suite only when warranted: the PR to
+`main`, a change to shared code, test setup, or dependencies, or when targeted tests cannot cover
+the risk. Reuse passing results until a relevant change, failure, or unresolved concern justifies
+another run. Tests should not be a significant time blocker; if the full suite is slow, run it in
+the background and keep working rather than wait on it.
 
 Once done, use /code-review over the whole change, including relevant uncommitted and new files,
 against the originating request and latest corrections. Respect the active delegation budget;
