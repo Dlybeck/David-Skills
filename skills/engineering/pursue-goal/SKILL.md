@@ -83,6 +83,12 @@ the agent chooses its approach from the conversation. Deliver `/status-report` a
 milestones and within the agreed maximum gap. A brief unchanged-progress report still counts;
 reset the reporting clock only after delivery. Reports continue the run without requiring a reply.
 
+A report is delivered only when it reaches the user where they are. When the user has left the
+conversation, or the environment gives a channel for reaching them (a notification tool, a
+messaging connector, a companion app), send milestone, blocker, and final reports through it as
+well as writing them in the conversation. A report that exists only in a window nobody is
+watching has not been delivered.
+
 For work that must survive sessions, maintain one compact checkpoint in the project's existing
 notes location: stable contract, current evidence and revision, decisions/failed approaches worth
 retaining, consequential user corrections and what they supersede, unresolved questions, and next
