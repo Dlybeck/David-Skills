@@ -13,8 +13,9 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
-Do not use the test suite casually. If the repo has a delivery gate (a release script, a
-`make check`-style target, or the CI job), that gate is the full check. The agent runs targeted
+Do not use the test suite casually. If the repo has a delivery gate (a local release script or
+`make check`-style target; with only CI, its test command run locally), that gate is the full
+check. The agent runs targeted
 tests while working and the gate once on the head it delivers, not the raw suite as well. A
 later behavior change, such as a review fix, means one more gate run on the new head. Later steps
 such as a deploy trust the gate's result instead of rerunning it.

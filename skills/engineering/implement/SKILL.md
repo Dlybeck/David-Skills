@@ -28,7 +28,8 @@ Do not use the test suite casually. Every check costs time, and repeated identic
 nothing new.
 
 - Find the repo's **delivery gate** first: the one check delivery depends on, such as a release or
-  validation script, a `make check`-style target, or the CI job. If one exists, it is "the
+  validation script or a `make check`-style target you can run locally. A CI workflow is not
+  this gate; when only CI exists, run its test command locally as the gate. If one exists, it is "the
   required full suite". While working, run only the targeted tests for the change; run the gate
   once on the head you will deliver. Do not also run the raw suite before the gate, since the gate
   already runs it. A later behavior change, such as a review fix, makes that result stale: rerun
