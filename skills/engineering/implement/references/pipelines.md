@@ -16,7 +16,8 @@ release runs each expensive check once, and nothing reruns it by accident.
    that a parallel job already runs.
 3. **Name one authoritative check per release.** Later steps verify its result (a receipt, a
    digest, a commit status) and never rerun its checks. If a later step must run a check, the gate
-   should not also run it.
+   should not also run it. Required CI on the pushed head is the remote copy of the same check,
+   not a duplicate to remove.
 4. **Test the speed contract as well as the safety contract.** Add a cheap test that fails if,
    for example, the deploy runs tests, the shipped stage moves below a test stage, or the deploy
    drops its explicit target.

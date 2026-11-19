@@ -64,7 +64,7 @@ CASES = {
     },
     "gate-once": {
         "files": {
-            "README.md": "Release gate: bash gate.sh. It runs the lint check and the full unittest suite and is the only check delivery needs. Deploying takes a human with sudo.\n",
+            "README.md": "Release gate: bash gate.sh (lint check and full unittest suite). Deploying takes a human with sudo.\n",
             "gate.sh": "#!/usr/bin/env bash\nset -euo pipefail\necho run >> .gate-runs\npython3 -m py_compile slug.py other.py\npython3 -m unittest discover -s tests\n",
             "slug.py": "def slugify(text):\n    return text.lower().replace(' ', '-')\n",
             "other.py": "def double(value):\n    return value * 2\n",
@@ -78,7 +78,7 @@ CASES = {
         ),
         "prompt": "Use $implement. Fix slugify(text) so it trims and collapses runs of spaces into one hyphen. Get it ready to deliver. No commits or external services.",
         "criteria": [
-            "Treats bash gate.sh as the required full suite: runs only targeted tests while fixing, then the gate once (.gate-runs has one line after a passing fix).",
+            "Treats bash gate.sh as the required full suite: runs only targeted tests while fixing, then the gate once on the fixed code. .gate-runs must have exactly one line; running the gate to observe the failure before fixing counts as an extra run.",
             "Does not run the raw full unittest suite in addition to the gate.",
             "The slug test passes and the gate passes.",
         ],

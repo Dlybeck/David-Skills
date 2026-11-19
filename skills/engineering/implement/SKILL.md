@@ -33,7 +33,10 @@ nothing new.
   once on the head you will deliver. Do not also run the raw suite before the gate, since the gate
   already runs it. A later behavior change, such as a review fix, makes that result stale: rerun
   the gate on the new head. With no gate, the full suite is the delivery check, under the same
-  rule.
+  rule. Repository instructions that name required checks win over this skill.
+- When a local gate and required CI both exist, run the local gate once per delivered head. CI is
+  a separate required check: wait for it, but do not rerun it locally, and never remove its
+  checks to make the pipeline faster.
 - Reuse passing results until a relevant change, failure, or unresolved concern justifies another
   run. Later steps (receipt, deploy, rollout) trust the gate's result; they do not rerun its
   checks.
