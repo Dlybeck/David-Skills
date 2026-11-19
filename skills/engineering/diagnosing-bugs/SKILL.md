@@ -126,6 +126,12 @@ Tool preference:
 
 ## Phase 5 — Fix + regression test
 
+**If the fix needs a deploy or another step that needs the human,** first run the Phase 1 loop,
+read-only, against every reported live failure and every live case of the same kind (every stuck
+download, not just the first). Fix everything it finds in one change, so the human step happens
+once. Then run targeted tests while fixing, and the repo's delivery gate once; do not also run the
+raw full suite before the gate.
+
 Write the regression test **before the fix** — but only if there is a **correct seam** for it.
 
 A correct seam is one where the test exercises the **real bug pattern** as it occurs at the call site. If the only available seam is too shallow (single-caller test when the bug needs multiple callers, unit test that can't replicate the chain that triggered the bug), a regression test there gives false confidence.

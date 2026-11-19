@@ -24,9 +24,23 @@ or an in-chat visual would materially improve implementation or review.
 
 Use /tdd where possible, at agreed seams or with explicitly delegated seam selection.
 
-Do not use the test suite casually. Choose checks for the behavior changed and the risks involved;
-run the required full suite before delivery. Reuse passing results until a relevant change,
-failure, or unresolved concern justifies another run.
+Do not use the test suite casually. Every check costs time, and repeated identical runs prove
+nothing new.
+
+- Find the repo's **delivery gate** first: the one check delivery depends on, such as a release or
+  validation script, a `make check`-style target, or the CI job. If one exists, it is "the
+  required full suite". While working, run only the targeted tests for the change; before
+  delivery, run the gate once. Do not also run the raw suite before the gate, since the gate
+  already runs it. With no gate, the full suite is the delivery check; run it once.
+- Reuse passing results until a relevant change, failure, or unresolved concern justifies another
+  run. Later steps (receipt, deploy, rollout) trust the gate's result; they do not rerun its
+  checks.
+- Steps that need the human, such as a sudo deploy, a password, or an approval, are the most
+  expensive steps. Before a fix that needs one, reproduce every known live failure in the same
+  area, read-only against live data, and fix them in one change. Say up front how many such
+  steps you will ask for, and do not ship one live failure at a time.
+- When you create or change a build, CI, release, or deploy pipeline, follow
+  [pipeline checks](references/pipelines.md).
 
 Once done, use /code-review over the whole change, including relevant uncommitted and new files,
 against the originating request and latest corrections. Respect the active delegation budget;

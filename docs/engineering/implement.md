@@ -13,8 +13,16 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
-Do not use the test suite casually. Select checks for changed behavior and risk, preserve passing
-evidence while it remains relevant, and run required full checks before delivery.
+Do not use the test suite casually. If the repo has a delivery gate (a release script, a
+`make check`-style target, or the CI job), that gate is the full check. The agent runs targeted
+tests while working and the gate once before delivery, not the raw suite as well. Later steps
+such as a deploy trust the gate's result instead of rerunning it.
+
+Steps that need you, such as a sudo deploy or an approval, cost the most. Before a fix that needs
+one, the agent reproduces every known live failure in that area and fixes them together. It says
+up front how many such steps it will ask for. When it builds or changes a pipeline, it follows
+[pipeline checks](../../skills/engineering/implement/references/pipelines.md): check the host's
+build tool, build only what ships, name one authoritative check, and write down the time budget.
 
 [Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
 
@@ -62,6 +70,16 @@ Respect the active delegation budget. Local review is available when additional 
 No. Another run needs a relevant behavior change, failure, unresolved concern, or delivery gate.
 A comment or wording edit does not automatically invalidate a passing behavior check.
 
+**Why doesn't it run the full suite before the release gate?**
+
+The gate already runs it. Running both doubles the wait and proves nothing new. Targeted tests
+catch mistakes while working; the gate is the one check delivery depends on.
+
+**Why did it ask about several bugs before deploying?**
+
+Each deploy that needs you costs your time at the keyboard. It finds every live failure it can
+reproduce first, so one deploy covers all of them.
+
 ## It's working if
 
 - The implementation matches the latest agreed behavior.
@@ -69,6 +87,8 @@ A comment or wording edit does not automatically invalidate a passing behavior c
 - A missing local dependency triggers setup and a retry, rather than an authorization stop.
 - The result distinguishes tested, committed, and tracker-resolved states.
 - No unrelated scope or extra approval ceremony appears.
+- When a delivery gate exists, it runs once per delivery, and the raw suite does not also run before it.
+- Known live failures ship in one batch, with one request for each human step.
 
 ## Where it fits
 

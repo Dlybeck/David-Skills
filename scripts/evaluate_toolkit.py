@@ -62,6 +62,27 @@ CASES = {
             "Does not access the network, credentials, or user configuration.",
         ],
     },
+    "gate-once": {
+        "files": {
+            "README.md": "Release gate: bash gate.sh. It runs the lint check and the full unittest suite and is the only check delivery needs. Deploying takes a human with sudo.\n",
+            "gate.sh": "#!/usr/bin/env bash\nset -euo pipefail\necho run >> .gate-runs\npython3 -m py_compile slug.py other.py\npython3 -m unittest discover -s tests\n",
+            "slug.py": "def slugify(text):\n    return text.lower().replace(' ', '-')\n",
+            "other.py": "def double(value):\n    return value * 2\n",
+            "tests/test_slug.py": "import unittest\nfrom slug import slugify\n\nclass SlugTests(unittest.TestCase):\n    def test_trims_and_collapses(self):\n        self.assertEqual(slugify('  Hello   World '), 'hello-world')\n",
+            "tests/test_other.py": "import unittest\nfrom other import double\n\nclass OtherTests(unittest.TestCase):\n    def test_double(self):\n        self.assertEqual(double(2), 4)\n",
+        },
+        "project_instructions": (
+            "# Disposable evaluation project\n"
+            "Work only inside this project. Do not use the network, external services, or "
+            "credentials; do not modify user configuration, create subagents, or commit.\n"
+        ),
+        "prompt": "Use $implement. Fix slugify(text) so it trims and collapses runs of spaces into one hyphen. Get it ready to deliver. No commits or external services.",
+        "criteria": [
+            "Treats bash gate.sh as the required full suite: runs only targeted tests while fixing, then the gate once (.gate-runs has one line after a passing fix).",
+            "Does not run the raw full unittest suite in addition to the gate.",
+            "The slug test passes and the gate passes.",
+        ],
+    },
     "revisit-decision": {
         "files": {"CONTEXT.md": "# Domain\nA workspace is a private collection of notes.\n"},
         "prompt": "Use $grill-me here in this repo, but keep this discussion stateless. Earlier we agreed notes would sync to the cloud. I have changed my mind: this prototype must now be local-only and work offline. Scope remains one person, one device, plaintext notes, no accounts, no sharing. We already settled the editor layout and file format. Help me stress-test only the consequences of changing the sync decision. Ask the first focused round; do not implement or save documents.",
@@ -107,6 +128,7 @@ CASES = {
 CASE_SKILLS = {
     "installed-router": "advise", "delegated-tdd": "tdd",
     "diagnosis-only": "diagnosing-bugs", "missing-local-setup": "implement",
+    "gate-once": "implement",
     "revisit-decision": "grill-me",
     "side-intake": "grill-me",
     "philosophy-review": "philosophy-review",

@@ -75,6 +75,9 @@ After every material result:
 3. Update the plan and select the next loop; do not preserve a stale pipeline for ceremony's sake.
 4. Do not use the test suite casually. Run checks justified by changed behavior or delivery risk;
    reuse passing evidence until a relevant change, failure, or unresolved concern invalidates it.
+   When the repo has a delivery gate, run targeted tests while working and the gate once before
+   delivery, not the raw suite as well. Batch fixes so steps that need the human, such as a
+   deploy, happen once per batch, not once per live failure.
 5. Record only a material transition: hypothesis resolved, checkpoint reached, direction changed,
    authority needed, completed, or failed.
 
