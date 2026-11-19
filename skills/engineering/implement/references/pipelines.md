@@ -24,5 +24,6 @@ release runs each expensive check once, and nothing reruns it by accident.
    for example, the deploy runs tests, the shipped stage moves below a test stage, or the deploy
    drops its explicit target, or any other build of the Dockerfile has no target.
 5. **Write down the release's time budget.** Make a short table next to the pipeline: each step,
-   its expected time, what it runs, and whether it needs the human. If a check appears in two
-   rows, remove one. If you cannot fill in the table, the pipeline is not designed yet.
+   its expected time, what it runs, and whether it needs the human. If a check runs twice in one
+   release on the same host, remove one; required CI on the pushed head is the exception from
+   step 3. If you cannot fill in the table, the pipeline is not designed yet.
