@@ -33,9 +33,9 @@ evidence, while scope or approval blockers surface earlier.
 Where `main` is human-owned and `dev` is agent-owned, finished work reaches you as one open PR
 from `dev` into `main`. The agent opens or updates it only when you or the TPM paste a ready
 signal, after it checks one pinned `dev` SHA: pushed, tests passing, CI green, the task merged in,
-no open findings. The report gives each task what you asked for, what changed, how it was tested,
-and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
-a fresh cloud review session. Your comments come back as a pasted review fix. The agent fixes
+no open findings. The report gives each task what you asked for, the plan you okayed, your calls along the way,
+what changed, how that differs from the plan, how it was tested, and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
+a fresh cloud review session that checks each task against your plan. Your comments come back as a pasted review fix. The agent fixes
 them through `dev`, which updates the same PR, and replies on each thread with `🤖 Agent:`. You
 merge with **Create a merge commit**. The steps live in
 [promotion PR](../../skills/engineering/independent-pr-review/references/promotion-pr.md).
@@ -65,6 +65,8 @@ does not prove an active installed skill changed.
 Not through any command the plugin hook can read. It lets agents open the PR only from head `dev`.
 It blocks `gh pr merge` and auto-merge into `main` (and blocks them too when the base can't be
 checked), along with `gh api` merges and ref writes, gh aliases, and force-pushes of `dev`. The
+one write it lets through is creating a `main` that does not exist yet, with a plain `gh api`
+call that GitHub itself rejects if the branch is already there. The
 hook reads command text, so a command built at runtime or run from a script is outside what it
 sees. For a hard guarantee, use branch protection on `main`, which you set on GitHub. Squash or
 rebase merges make the release refuse, so use **Create a merge commit**.

@@ -13,12 +13,16 @@ Type `/implement`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/ag
 
 Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. Review the entire change against the current request, including corrections, through [code-review](./code-review.md). When delegation is unavailable or unauthorized, perform the same review axes locally and disclose the lack of independence.
 
-Do not use the test suite casually. If the repo has a delivery gate (a local release script or
+Do not use the test suite casually. During development, run the tests for what changed plus a quick
+smoke check; run a full check only when warranted (the PR to `main`, shared code, test setup or
+dependencies, risk targeted tests cannot cover, or a check the repo requires). Tests should not be
+a significant time blocker: run a slow full check in the background and keep working.
+
+When a full check is warranted and the repo has a delivery gate (a local release script or
 `make check`-style target; with only CI, its test command run locally), that gate is the full
-check. The agent runs targeted
-tests while working and the gate once on the head it delivers, not the raw suite as well. A
-later behavior change, such as a review fix, means one more gate run on the new head. Later steps
-such as a deploy trust the gate's result instead of rerunning it.
+check. The agent runs it once on the head it delivers, not the raw suite as well. A later
+behavior change, such as a review fix, means one more run on the new head. Later steps such as a
+deploy trust the gate's result instead of rerunning it.
 
 Steps that need you, such as a sudo deploy or an approval, cost the most. Before a fix that needs
 one, the agent reproduces every known live failure in that area and fixes them together. It says
@@ -90,7 +94,7 @@ reproduce first, so one deploy covers all of them.
 - A missing local dependency triggers setup and a retry, rather than an authorization stop.
 - The result distinguishes tested, committed, and tracker-resolved states.
 - No unrelated scope or extra approval ceremony appears.
-- When a delivery gate exists, it runs once on the delivered head, and the raw suite does not also run before it.
+- When a full check is warranted and a delivery gate exists, the gate runs once on the delivered head, and the raw suite does not also run before it.
 - Known live failures ship in one batch, with one request for each human step.
 
 ## Where it fits

@@ -27,17 +27,20 @@ Use /tdd where possible, at agreed seams or with explicitly delegated seam selec
 Do not use the test suite casually. Every check costs time, and repeated identical runs prove
 nothing new.
 
-- Find the repo's **delivery gate** first: the one check delivery depends on, such as a release or
-  validation script or a `make check`-style target you can run locally. A CI workflow is not
-  this gate; when only CI exists, run its test command locally as the gate. If one exists, it is "the
-  required full suite". While working, run only the targeted tests for the change; run the gate
-  once on the head you will deliver. Do not also run the raw suite before the gate, since the gate
-  already runs it. A later behavior change, such as a review fix, makes that result stale: rerun
-  the gate on the new head. With no gate, the full suite is the delivery check, under the same
-  rule. Repository instructions that name required checks win over this skill.
-- When a local gate and required CI both exist, run the local gate once per delivered head. CI is
-  a separate required check: wait for it, but do not rerun it locally, and never remove its
-  checks to make the pipeline faster.
+- During development, run only the tests for what changed plus a quick smoke check (app starts,
+  main page loads). Run a full check only when warranted: the PR to `main`, a change to shared
+  code, test setup, or dependencies, risk targeted tests cannot cover, or a check that repository
+  instructions require. Repository instructions that name required checks win over this skill.
+- When a full check is warranted, find the repo's **delivery gate** first: a release or
+  validation script or a `make check`-style target you can run locally. A CI workflow is not this
+  gate; when only CI exists, run its test command locally as the gate. With no gate, the full
+  suite is the full check. Run it once on the head you will deliver, and do not also run the raw
+  suite before the gate, since the gate already runs it. A later behavior change, such as a
+  review fix, makes that result stale: rerun on the new head. If it is slow, run it in the
+  background and keep working rather than wait on it.
+- When a local gate and required CI both exist, run the local gate at most once per delivered
+  head. CI is a separate required check: wait for it, but do not rerun it locally, and never
+  remove its checks to make the pipeline faster.
 - Reuse passing results until a relevant change, failure, or unresolved concern justifies another
   run. Later steps (receipt, deploy, rollout) trust the gate's result; they do not rerun its
   checks.
