@@ -15,14 +15,16 @@ Use [tdd](./tdd.md) where appropriate, with agreed or delegated testing seams. R
 
 Do not use the test suite casually. If the repo has a delivery gate (a release script, a
 `make check`-style target, or the CI job), that gate is the full check. The agent runs targeted
-tests while working and the gate once before delivery, not the raw suite as well. Later steps
+tests while working and the gate once on the head it delivers, not the raw suite as well. A
+later behavior change, such as a review fix, means one more gate run on the new head. Later steps
 such as a deploy trust the gate's result instead of rerunning it.
 
 Steps that need you, such as a sudo deploy or an approval, cost the most. Before a fix that needs
 one, the agent reproduces every known live failure in that area and fixes them together. It says
-up front how many such steps it will ask for. When it builds or changes a pipeline, it follows
-[pipeline checks](../../skills/engineering/implement/references/pipelines.md): check the host's
-build tool, build only what ships, name one authoritative check, and write down the time budget.
+up front how many such steps it will ask for. When it builds or changes a pipeline, it checks
+which build tool the host really uses, builds only what ships with an explicit target, names one
+authoritative check that later steps trust, tests that the deploy does not rerun it, and writes
+down each step's expected time.
 
 [Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
 
@@ -87,7 +89,7 @@ reproduce first, so one deploy covers all of them.
 - A missing local dependency triggers setup and a retry, rather than an authorization stop.
 - The result distinguishes tested, committed, and tracker-resolved states.
 - No unrelated scope or extra approval ceremony appears.
-- When a delivery gate exists, it runs once per delivery, and the raw suite does not also run before it.
+- When a delivery gate exists, it runs once on the delivered head, and the raw suite does not also run before it.
 - Known live failures ship in one batch, with one request for each human step.
 
 ## Where it fits

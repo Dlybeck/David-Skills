@@ -129,7 +129,8 @@ Tool preference:
 **If the fix needs a deploy or another step that needs the human,** first run the Phase 1 loop,
 read-only, against every reported live failure and every live case of the same kind (every stuck
 download, not just the first). Fix everything it finds in one change, so the human step happens
-once. Then run targeted tests while fixing, and the repo's delivery gate once; do not also run the
+once. Treat a human step as the most expensive step in the fix, and say up front how many you
+will ask for. Then run targeted tests while fixing, and the repo's delivery gate once; do not also run the
 raw full suite before the gate.
 
 Write the regression test **before the fix** — but only if there is a **correct seam** for it.

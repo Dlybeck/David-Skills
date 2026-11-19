@@ -6,8 +6,10 @@ release runs each expensive check once, and nothing reruns it by accident.
 1. **Check the host's build tool before writing build files.** A pattern that is correct on one
    tool can be slow or wrong on another. For Docker, run `docker buildx version`: if it fails, the
    host uses the legacy builder, which runs every stage from the top of the Dockerfile down to the
-   target and does not skip stages the target does not need. Record what you found in the repo,
-   next to the build files or in their docs.
+   target and does not skip stages the target does not need. If it succeeds, still confirm what
+   plain `docker build` uses: Docker Engine before 23 and `DOCKER_BUILDKIT=0` use the legacy
+   builder even with buildx installed. When unsure, treat the host as legacy. Record what you
+   found in the repo, next to the build files or in their docs.
 2. **Build exactly what ships.** In a multi-stage Dockerfile, put the shipped stage before any
    test or lint stage, and always build it with an explicit `--target`. That is correct under
    both BuildKit and the legacy builder. Do not let one test target pull in another test stage

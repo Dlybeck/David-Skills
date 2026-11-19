@@ -29,9 +29,11 @@ nothing new.
 
 - Find the repo's **delivery gate** first: the one check delivery depends on, such as a release or
   validation script, a `make check`-style target, or the CI job. If one exists, it is "the
-  required full suite". While working, run only the targeted tests for the change; before
-  delivery, run the gate once. Do not also run the raw suite before the gate, since the gate
-  already runs it. With no gate, the full suite is the delivery check; run it once.
+  required full suite". While working, run only the targeted tests for the change; run the gate
+  once on the head you will deliver. Do not also run the raw suite before the gate, since the gate
+  already runs it. A later behavior change, such as a review fix, makes that result stale: rerun
+  the gate on the new head. With no gate, the full suite is the delivery check, under the same
+  rule.
 - Reuse passing results until a relevant change, failure, or unresolved concern justifies another
   run. Later steps (receipt, deploy, rollout) trust the gate's result; they do not rerun its
   checks.

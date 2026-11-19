@@ -89,7 +89,8 @@ A shipped shell template and instructions to run local commands can trigger capa
 
 No. When the fix needs a deploy or another step that needs you, it first runs its repro read-only
 against every reported live failure and every live case of the same kind, then fixes everything it
-found in one change. It runs the repo's delivery gate once, not the raw suite as well.
+found in one change. It tells you up front how many deploys or other steps it will need from
+you. It runs the repo's delivery gate once, not the raw suite as well.
 
 **What happened to `/diagnose`?**
 Renamed to `/diagnosing-bugs` in v1.0.0. The old name no longer exists. Anything of yours that chains `/diagnose` — a wrapper skill, a saved prompt — needs updating.
