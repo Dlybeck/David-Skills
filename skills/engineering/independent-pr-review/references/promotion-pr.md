@@ -4,7 +4,9 @@ A **promotion PR** is the one open pull request from the agent-owned integration
 into the human-owned branch (`main` or `master`). Agents open it, keep its report current, and fix
 review comments on it; only the owner merges it, and the plugin hook enforces that. Use this
 reference when repository policy routes human-owned promotion through that PR. Commands below say
-`main`; use `master` where that is the human-owned branch.
+`main`; use `master` where that is the human-owned branch. In a fork with an `upstream` remote,
+plain `gh` can resolve to the upstream repository: give every `gh` command below
+`--repo <owner>/<repo>` for `origin` unless `gh repo set-default` already names it.
 
 Two pasted handoffs drive it: a **ready signal** opens or updates the PR, and a **review fix**
 returns the owner's comments. They come from the owner or from the TPM relaying for them. Act on the

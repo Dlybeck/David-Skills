@@ -1352,6 +1352,102 @@ with tempfile.TemporaryDirectory() as directory:
           start.returncode == result.returncode == 0
           and json.loads(result.stdout)["reason"] == "report_due" and 0.5 <= elapsed < 4)
 
+
+# ---------------------------------------------------------------- usage-log.py
+# The usage log reads what Claude Code already records in its transcripts. Its
+# contract: silent and harmless as a hook, and the report answers which skills
+# ran, in what order, where David stepped in and how the work ended.
+
+def usage(config, *args, stdin=None):
+    return subprocess.run([sys.executable, str(HOOKS_DIR / "usage-log.py"), *args],
+                          input=stdin or "", capture_output=True, text=True, timeout=30,
+                          env={**os.environ, "DAVID_SKILLS_USAGE_CONFIG": str(config)})
+
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory)
+    config = root / "config.json"
+    silent = usage(config, stdin='{"hook_event_name": "SessionStart"}')
+    check("usage log hook does nothing before setup",
+          silent.returncode == 0 and not silent.stdout and not silent.stderr and not config.exists())
+
+    transcripts = root / "projects" / "-work-Proj"
+    (transcripts / "s1" / "subagents").mkdir(parents=True)
+
+    def line(**record):
+        return json.dumps({"cwd": "/work/Proj/.claude/worktrees/x", "gitBranch": "feat/thing",
+                           **record}) + "\n"
+
+    def tool(name, t, **given):
+        return line(type="assistant", timestamp=t, message={"model": "claude-opus-5-5", "content": [
+            {"type": "tool_use", "name": name, "input": given}]})
+
+    human = {"origin": {"kind": "human"}, "turnOrigin": "human", "entrypoint": "claude-desktop"}
+    (transcripts / "s1.jsonl").write_text(
+        line(type="user", timestamp="2026-11-22T10:00:00Z", message={"content": "Build the thing"}, **human)
+        + line(type="custom-title", customTitle="Thing")
+        + tool("Skill", "2026-11-22T10:01:00Z", skill="david-skills:implement")
+        + tool("Agent", "2026-11-22T10:05:00Z", description="Independent review of feat/thing",
+               subagent_type="general-purpose")
+        + line(type="user", timestamp="2026-11-22T10:06:00Z", message={"content": "<task-notification>done"},
+               origin={"kind": "task-notification"}, turnOrigin="task_notification")
+        + line(type="user", timestamp="2026-11-22T10:07:00Z", message={"content":
+               "<command-message>x</command-message> <command-name>/david-skills:handoff</command-name>"}, **human))
+    (transcripts / "s1" / "subagents" / "agent-a.jsonl").write_text(
+        tool("Skill", "2026-11-22T10:05:30Z", skill="david-skills:independent-pr-review"))
+
+    made = usage(config, "setup", "--log-dir", str(root / "logs"))
+    data = json.loads(config.read_text())
+    data["transcripts"] = str(root / "projects")
+    config.write_text(json.dumps(data))
+    updated = usage(config, "update")
+    record = json.loads((root / "logs" / "sessions" / "claude-s1.json").read_text())
+    check("usage log setup records the start date and update summarises a chat",
+          made.returncode == updated.returncode == 0 and (root / "logs" / "started").is_file()
+          and record["project"] == "Proj" and record["work"] == "Proj:feat/thing"
+          and record["counts"] == {"skills": 3, "david_prompts": 2, "agents": 1, "reviews": 2},
+          updated.stderr + json.dumps(record.get("counts")))
+    told = usage(config, "outcome", "Proj:feat/thing", "redone", "--note", "wrong approach")
+    shown = usage(config, "report").stdout
+    check("usage report gives skill order, step-ins, reviews and David's outcome",
+          told.returncode == 0
+          and "implement → independent-pr-review → handoff" in shown
+          and "David stepped in 2 time(s)" in shown
+          and "Reviews or checks: 2" in shown
+          and "How it ended: redone" in shown, shown)
+    again = usage(config, "update")
+    check("usage log update skips chats that have not changed",
+          again.returncode == 0 and json.loads(
+              (root / "logs" / "runs.jsonl").read_text().splitlines()[-1])["changed"] == 0)
+
+
+with tempfile.TemporaryDirectory() as directory:
+    # A GitHub lookup that fails (offline, no access) must not break later updates.
+    root = Path(directory)
+    config = root / "config.json"
+    (root / "projects" / "-p").mkdir(parents=True)
+    (root / "projects" / "-p" / "s2.jsonl").write_text(
+        json.dumps({"type": "pr-link", "prUrl": "https://github.com/o/r/pull/1",
+                    "timestamp": "2026-11-22T10:00:00Z"}) + "\n"
+        + json.dumps({"type": "user", "timestamp": "2026-11-22T10:01:00Z", "cwd": "/p",
+                      "origin": {"kind": "human"}, "message": {"content": "hi"}}) + "\n")
+    fake = root / "bin"
+    fake.mkdir()
+    (fake / "gh").write_text("#!/bin/sh\nexit 1\n")
+    (fake / "gh").chmod(0o755)
+    usage(config, "setup", "--log-dir", str(root / "logs"))
+    config.write_text(json.dumps({"log_dir": str(root / "logs"), "transcripts": str(root / "projects")}))
+    env = {**os.environ, "DAVID_SKILLS_USAGE_CONFIG": str(config), "PATH": f"{fake}:{os.environ['PATH']}"}
+    runs = []
+    for attempt in range(2):
+        (root / "projects" / "-p" / "s2.jsonl").open("a").write("\n")
+        runs.append(subprocess.run([sys.executable, str(HOOKS_DIR / "usage-log.py"), "update"],
+                                   capture_output=True, text=True, timeout=30, env=env))
+    check("usage log survives a failed GitHub lookup on later runs",
+          all(r.returncode == 0 for r in runs)
+          and len((root / "logs" / "runs.jsonl").read_text().splitlines()) == 2,
+          " | ".join(r.stderr for r in runs))
+
 print()
 if _failed:
     print(f"{len(_failed)}/{_total} check(s) failed:")

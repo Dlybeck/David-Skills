@@ -10,7 +10,7 @@ Type `/handoff`, or the [agent](https://www.aihero.dev/ai-coding-dictionary/agen
 
 The document retains the objective, authority, consequential corrections, superseded assumptions, evidence, open questions, and next action. Existing plans, decisions, commits, and receipts are linked rather than copied. Sensitive information is redacted.
 
-By default the file goes into the operating system's temporary directory, not the project. Supply an intended recipient or next task to focus it. The recipient must reconcile the export with live state before acting.
+By default the file goes into `~/.local/state/handoffs/<project>/`, outside the project, where it outlasts a reboot and the next session can find it; the agent gives you its full path. Supply an intended recipient or next task to focus it. The recipient must reconcile the export with live state before acting.
 
 ## Common questions
 
