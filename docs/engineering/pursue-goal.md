@@ -96,6 +96,10 @@ next work, and why progress is limited. Milestone reports reset the reporting cl
 existing evidence and do not require your reply before the run continues. Exact delivery during
 a long wait needs verified host support; the timer helper is not a chat-wakeup service.
 
+**Where do reports go if I've walked away?**
+
+To you, wherever you are. When you have left the conversation, or the environment offers a way to reach you (a notification tool, a messaging connector, a companion app), milestone, blocker and final reports go through it as well as into the conversation. A report sitting in a window nobody is watching has not been delivered.
+
 **Will it rerun the whole test suite after every small edit?**
 
 Checks follow changed behavior and delivery risk. Passing evidence is reused until a relevant
