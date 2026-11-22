@@ -3,7 +3,11 @@ name: writing-for-agents
 description: Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
 ---
 
-Reference for writing any document an agent consumes — a skill, an `AGENTS.md` / `CLAUDE.md`, a doc reached by a pointer. The packaging differs; the writing does not: the same levers make each one predictable — the agent taking the same _process_ every run, not producing the same output.
+Reference for writing any document an agent consumes — a skill, an `AGENTS.md` / `CLAUDE.md`, a doc reached by a pointer. The packaging differs; the writing does not.
+
+**Write the reason, not the rule.** Say what a thing is for and why it matters, so the agent can use judgement in situations nobody planned for. A rule covers only the cases its writer thought of; rules pile up, conflict, and break on the next case. Keep the document as simple as what it's for: when it starts needing more steps, clauses, or exceptions, the idea underneath usually isn't clear yet. Steps belong where order really matters, carrying their reason with them. The few things that should happen every time can be a quiet hook, which guides rather than forces. The owner's own thinking is in `~/.claude/CLAUDE.md` ("Philosophy over rules") and, where it exists, `~/Dev Plan/plan/philosophy.md`; start from there, not from a copy of it.
+
+The levers below serve that aim.
 
 When the document you're writing is a skill, read [`SKILL-MECHANICS.md`](SKILL-MECHANICS.md) for frontmatter, invocation choice, and router skills.
 

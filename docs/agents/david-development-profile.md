@@ -1,6 +1,8 @@
 # David's development profile
 
-Confirmed direction as of 2026-09-27. This is a design reference for developing David Skills,
+Confirmed direction as of 2026-09-27. David's current thinking, which comes first where the two
+differ, is in `~/.claude/CLAUDE.md` ("Philosophy over rules") and `~/Dev Plan/plan/philosophy.md`.
+This is a design reference for developing David Skills,
 not a personality assessment, a new skill, or standing authority to act in other projects.
 The [conversation research](../../.reports/research/2026-09-07-personal-autonomy-feedback.md)
 records the evidence and its limits. Its source keys below refer to that note; raw conversations
