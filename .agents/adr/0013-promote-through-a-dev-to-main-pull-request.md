@@ -14,9 +14,9 @@ GitHub merge method also leaves `main` on a commit that `dev` lacks, which the r
 
 ## Decision
 
-- One open **promotion PR**, head `dev` and base `main`. Agents open or update it only on a pasted
-  ready signal from David or the TPM, recording that the dev chat, the TPM, and the chief of staff
-  agree. Its checks, report template, cloud-review prompt, and review-fix loop live in
+- One open **promotion PR**, head `dev` and base `main`. Agents open or update it when David asks
+  for a release (amended 2026-11-22: the ready signal and its TPM and chief-of-staff roles are
+  gone). Its checks, report, and review-fix steps live in
   `skills/engineering/independent-pr-review/references/promotion-pr.md`, reached from the
   developer loop's human-owned-promotion route and from Autopilot's Delivery section. There is no
   new skill, and Yolopilot is unchanged.

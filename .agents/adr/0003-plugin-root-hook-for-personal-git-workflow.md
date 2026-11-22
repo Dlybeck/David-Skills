@@ -18,7 +18,6 @@ the plugin:
   `main`.
 - `require-committed-claim.py` ensures local-markdown work is claimed in a committed state
   before delegate dispatch.
-- `delegate-recommend.py` may recommend the delegate workflow for a matching router model.
 
 Claude Code and Codex auto-discover `hooks/hooks.json` at the plugin root. Do not also declare the
 same hooks file in either plugin manifest; doing both can load it twice. Codex requires the user

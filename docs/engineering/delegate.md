@@ -17,11 +17,11 @@ Each invocation is its own run. Next time a frontier exists, type it again.
 
 ## Prerequisites
 
-The issue tracker needs known "find the frontier" and "claim the ticket" conventions; [setup](./setup.md) can establish them when missing. Separately, `delegate` owns `docs/agents/delegate.md`: the **Worker model**, **Max concurrent workers**, and a `Router model` line used only by the session-start recommendation hook.
+The issue tracker needs known "find the frontier" and "claim the ticket" conventions; [setup](./setup.md) can establish them when missing. Separately, `delegate` owns `docs/agents/delegate.md`: the **Worker model** and **Max concurrent workers**.
 
 ## The Router role
 
-**Router** is the load-bearing word, and the three withheld duties above are why it's safe at both tiers. On a weak model, prior art on cheap-orchestrator/expensive-worker patterns is consistent that real decomposition or recovery duties are a documented failure mode. On a strong model, judging duplicates a review that already happened: each worker runs the full two-axis code review inside its own run, with fresh-context sub-agents, and its brief requires fixing real findings *before* committing. The Router asks one question of a dispatched ticket: has it resolved yet?
+**Router** is the load-bearing word, and the three withheld duties above are why it's safe at both tiers. On a weak model, prior art on cheap-orchestrator/expensive-worker patterns is consistent that real decomposition or recovery duties are a documented failure mode. On a strong model, judging duplicates a review that already happened: each worker checks its own change by judgement, and its brief requires fixing what those checks find *before* committing. The Router asks one question of a dispatched ticket: has it resolved yet?
 
 Safety comes from the layers around the run, not a second code review in the dispatcher. The worker's completion notification identifies the revision whose committed ticket status is checked; a stale copy in the dispatcher's checkout is not sufficient. Without a completion notification, the run yields for later resumption rather than repeatedly polling.
 
@@ -39,9 +39,9 @@ The tooling is mechanism — it runs parallel agents well. The skill is process:
 
 Because that's a judgment call, and judgment calls are exactly what this role withholds. You're present during a run — a stuck worker surfaces straight to you instead.
 
-**Why doesn't it detect my model and recommend itself mid-session?**
+**Does it recommend itself at the start of a chat?**
 
-Claude Code has no reliable way to know which model is running mid-session. The one hook that gets a model field at all (`SessionStart`) isn't guaranteed to have it, so the session-start recommendation is best-effort; manual invocation is the reliable path regardless of what fires.
+Not any more. A start-of-chat hook used to point Fable chats at it, treating Fable as the cheap model; Fable is the expensive one, kept for planning, so the hook was removed on 2026-11-22. You type `/delegate` when you want it.
 
 ## It's working if
 

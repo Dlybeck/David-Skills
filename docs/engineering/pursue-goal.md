@@ -57,17 +57,12 @@ A stop request stops new work and accounts for identified running work safely.
 [Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
 answer while unrelated authorized work continues.
 
-When [autopilot](./autopilot.md) was started by an authorized stand-in, the contract records that
-stand-in's grant. The stand-in can question, correct, or stop the run within it; a correction that
-changes the contract in an owner-reserved way waits for your decision, relayed by the stand-in.
+## Checking before delivery
 
-## Independent delivery review
-
-When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh
-ordinary review and the authorized repair loop. Repository branch ownership and applicable
-standing grants determine delivery, and explicit task restrictions retain their boundaries. The
-shared loop in [independent-pr-review](./independent-pr-review.md) explains each delivery route.
-Research-only reports need no fabricated PR.
+When a goal changes source, the run checks it the way [implement](./implement.md) says: test what
+could break, and bring in one fresh [independent-pr-review](./independent-pr-review.md) only when
+the change could really hurt something. Repository branch ownership and applicable standing grants
+determine delivery. Research-only reports need no PR.
 
 ## Common questions
 

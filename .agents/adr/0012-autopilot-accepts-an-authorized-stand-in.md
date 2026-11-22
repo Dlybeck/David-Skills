@@ -1,5 +1,9 @@
 # Autopilot accepts an authorized stand-in
 
+**Superseded 2026-11-22.** The roles it served (the TPM, the chief of staff) are gone, so the
+stand-in and its reference were removed. What stays is the idea, written once in `implement`: an
+agent can't give itself what is the owner's alone, and decides everything else by judgement.
+
 This amends [ADR 0009](0009-codex-first-adaptive-pilot-engine.md)'s statement that both pilots
 remain human-invoked: `autopilot` may also be started by an authorized stand-in; `yolopilot` is
 unchanged.
