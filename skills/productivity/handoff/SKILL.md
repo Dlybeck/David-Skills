@@ -4,7 +4,7 @@ description: Export portable context for a real transfer to another session, dir
 argument-hint: "What will the next session be used for?"
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save it outside the current workspace, in `${XDG_STATE_HOME:-~/.local/state}/handoffs/<project-folder-name>/<YYYY-MM-DD>-<short-topic>.md`, and give the user its full path. The OS temporary directory is cleared and nothing looks there later.
 
 Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
 
