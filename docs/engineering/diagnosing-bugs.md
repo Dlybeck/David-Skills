@@ -85,6 +85,13 @@ The skill explicitly requires redacting secrets from commands, outputs, and capt
 **My security scanner flagged this skill as high risk.**
 A shipped shell template and instructions to run local commands can trigger capability-based warnings. Inspect the flagged script and intended actions; a scanner warning alone neither proves an exploit nor proves the operation safe. The human-in-the-loop template prompts for manual reproduction steps rather than granting permission to perform unrelated actions.
 
+**Will it ship one fix per live failure?**
+
+No. When the fix needs a deploy or another step that needs you, it first runs its repro read-only
+against every reported live failure and every live case of the same kind, then fixes everything it
+found in one change. It tells you up front how many deploys or other steps it will need from
+you. It runs the repo's delivery gate once, not the raw suite as well.
+
 **What happened to `/diagnose`?**
 Renamed to `/diagnosing-bugs` in v1.0.0. The old name no longer exists. Anything of yours that chains `/diagnose` — a wrapper skill, a saved prompt — needs updating.
 
@@ -98,6 +105,7 @@ Renamed to `/diagnosing-bugs` in v1.0.0. The old name no longer exists. Anything
 - Every debug log it adds carries a tag like `[DEBUG-a4f2]`, and a grep for that tag comes back empty when it declares done.
 - A diagnosis-only request ends with the cause and no application-code changes; an authorized repair records which hypothesis was right.
 - When it cannot lock the bug down with a test, it says so plainly instead of writing a shallow one.
+- A fix that needs a deploy covers every live case it could reproduce, so you are asked for one deploy, not one per failure.
 
 ## Where it fits
 

@@ -118,6 +118,28 @@ class HarnessTests(unittest.TestCase):
                                    capture_output=True, text=True)
             self.assertEqual(fixed.returncode, 0, fixed.stderr)
 
+    def test_gate_once_fixture_counts_gate_runs(self):
+        case = CASES["gate-once"]
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            for relative, content in case["files"].items():
+                target = project / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content)
+
+            buggy = subprocess.run(["bash", "gate.sh"], cwd=project,
+                                   capture_output=True, text=True)
+            self.assertNotEqual(buggy.returncode, 0)
+            self.assertIn("AssertionError", buggy.stderr)
+
+            source = project / "slug.py"
+            source.write_text(source.read_text().replace(
+                "text.lower().replace(' ', '-')", "'-'.join(text.lower().split())"))
+            fixed = subprocess.run(["bash", "gate.sh"], cwd=project,
+                                   capture_output=True, text=True)
+            self.assertEqual(fixed.returncode, 0, fixed.stderr)
+            self.assertEqual((project / ".gate-runs").read_text(), "run\nrun\n")
+
     def test_pivot_budget_cannot_exceed_five_minutes(self):
         with patch("sys.argv", ["evaluate_toolkit.py", "pivot-small", "--timeout", "301"]), redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as error:

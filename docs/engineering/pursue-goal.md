@@ -100,6 +100,8 @@ a long wait needs verified host support; the timer helper is not a chat-wakeup s
 
 Checks follow changed behavior and delivery risk. Passing evidence is reused until a relevant
 change or unresolved concern invalidates it. The full suite runs only when warranted, in the background if slow.
+When it does and the repo has a delivery gate, the gate runs once instead of the raw suite plus
+the gate, and fixes that need a deploy ship in one batch.
 
 **Can it decide to deploy or merge because that would finish the goal?**
 
