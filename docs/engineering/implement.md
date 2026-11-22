@@ -28,8 +28,8 @@ Steps that need you, such as a sudo deploy or an approval, cost the most. Before
 one, the agent reproduces every known live failure in that area and fixes them together. It says
 up front how many such steps it will ask for. When it builds or changes a pipeline, it checks
 which build tool the host really uses, builds only what ships with an explicit target, names one
-authoritative check that later steps trust, tests that the deploy does not rerun it, and writes
-down each step's expected time.
+authoritative check that later steps trust. For a release with slow steps it may also test that
+the deploy does not rerun that check and write down each step's expected time.
 
 [Attention modes](../productivity/attention-modes.md) keeps consequential questions brief when you are On the side. [Tool fit](../productivity/tool-fit.md) brings in connected evidence or a useful UI preview when the host supports it; the tests and whole-change review still determine delivery readiness.
 

@@ -20,10 +20,12 @@ release runs each expensive check once, and nothing reruns it by accident.
    digest, a commit status) and never rerun its checks. If a later step must run a check, the gate
    should not also run it. Required CI on the pushed head is the remote copy of the same check,
    not a duplicate to remove.
-4. **Test the speed contract as well as the safety contract.** Add a cheap test that fails if,
-   for example, the deploy runs tests, the shipped stage moves below a test stage, or the deploy
-   drops its explicit target, or any other build of the Dockerfile has no target.
-5. **Write down the release's time budget.** Make a short table next to the pipeline: each step,
-   its expected time, what it runs, and whether it needs the human. If a check runs twice in one
-   release on the same host, remove one; required CI on the pushed head is the exception from
-   step 3. If you cannot fill in the table, the pipeline is not designed yet.
+Two more are worth it when a release has steps that take minutes, and optional otherwise:
+
+- **Test the speed contract as well as the safety contract.** A cheap test that fails if, for
+  example, the deploy runs tests, the shipped stage moves below a test stage, the deploy drops its
+  explicit target, or another build of the Dockerfile has no target.
+- **Write down the release's time budget.** A short table next to the pipeline: each step, its
+  expected time, what it runs, and whether it needs the human. It makes a check that runs twice
+  in one release on the same host easy to spot and remove; required CI on the pushed head is the
+  exception from step 3.
