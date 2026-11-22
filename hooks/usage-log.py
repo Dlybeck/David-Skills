@@ -226,15 +226,19 @@ def git(repo, *args):
 
 
 def pr_outcome(url, cache):
-    if url in cache and cache[url]["state"] in ("MERGED", "CLOSED"):
-        return cache[url]
+    known = cache.get(url)
+    if isinstance(known, dict) and known.get("state") in ("MERGED", "CLOSED"):
+        return known  # final; no need to ask GitHub again
     try:
         out = subprocess.run(["gh", "pr", "view", url, "--json", "state,baseRefName,mergedAt,closedAt"],
                              capture_output=True, text=True, timeout=30)
-        cache[url] = json.loads(out.stdout) if out.returncode == 0 else cache.get(url)
+        found = json.loads(out.stdout) if out.returncode == 0 else None
+        if isinstance(found, dict) and found.get("state"):
+            cache[url] = found
     except (OSError, ValueError, subprocess.SubprocessError):
-        pass
-    return cache.get(url)
+        pass  # offline or no access: keep what was known, try again next run
+    known = cache.get(url)
+    return known if isinstance(known, dict) and known.get("state") else None
 
 
 def work_outcome(work, sessions, pr_cache):
@@ -314,7 +318,8 @@ def update(config):
                 continue
             try:
                 record = summarise(main_file)
-            except OSError:
+            except Exception as error:  # one odd transcript must not stop the rest
+                print(f"{main_file}: {error!r}", file=sys.stderr)
                 continue
             if record:
                 write_json(log_dir / "sessions" / f"claude-{record['session_id']}.json", record)
@@ -322,10 +327,16 @@ def update(config):
             changed += 1
         write_json(seen_path, seen)
         sessions = load_sessions(log_dir)
-        refresh_outcomes(log_dir, sessions)
+        problem = None
+        try:
+            refresh_outcomes(log_dir, sessions)
+        except Exception as error:  # outcomes are filled in again next run
+            problem = repr(error)
+            print(f"outcomes: {problem}", file=sys.stderr)
         with open(log_dir / "runs.jsonl", "a") as runs:
             runs.write(json.dumps({"at": now_iso(), "seconds": round(time.time() - began, 1),
-                                   "changed": changed, "sessions": len(sessions)}) + "\n")
+                                   "changed": changed, "sessions": len(sessions),
+                                   **({"problem": problem} if problem else {})}) + "\n")
     return 0
 
 
@@ -477,9 +488,12 @@ def hook():
         config = load_config()
         if not config or not config["log_dir"].is_dir():
             return
-        runs = config["log_dir"] / "runs.jsonl"
-        if runs.exists() and time.time() - runs.stat().st_mtime < MIN_INTERVAL:
+        # The marker is touched before each attempt, so a failing or slow update
+        # still waits its turn instead of being restarted by every new chat.
+        marker = config["log_dir"] / ".last-attempt"
+        if marker.exists() and time.time() - marker.stat().st_mtime < MIN_INTERVAL:
             return
+        marker.touch()
         with open(config["log_dir"] / "update-errors.log", "a") as errors:
             subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "update"],
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=errors,

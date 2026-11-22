@@ -1420,6 +1420,34 @@ with tempfile.TemporaryDirectory() as directory:
           again.returncode == 0 and json.loads(
               (root / "logs" / "runs.jsonl").read_text().splitlines()[-1])["changed"] == 0)
 
+
+with tempfile.TemporaryDirectory() as directory:
+    # A GitHub lookup that fails (offline, no access) must not break later updates.
+    root = Path(directory)
+    config = root / "config.json"
+    (root / "projects" / "-p").mkdir(parents=True)
+    (root / "projects" / "-p" / "s2.jsonl").write_text(
+        json.dumps({"type": "pr-link", "prUrl": "https://github.com/o/r/pull/1",
+                    "timestamp": "2026-11-22T10:00:00Z"}) + "\n"
+        + json.dumps({"type": "user", "timestamp": "2026-11-22T10:01:00Z", "cwd": "/p",
+                      "origin": {"kind": "human"}, "message": {"content": "hi"}}) + "\n")
+    fake = root / "bin"
+    fake.mkdir()
+    (fake / "gh").write_text("#!/bin/sh\nexit 1\n")
+    (fake / "gh").chmod(0o755)
+    usage(config, "setup", "--log-dir", str(root / "logs"))
+    config.write_text(json.dumps({"log_dir": str(root / "logs"), "transcripts": str(root / "projects")}))
+    env = {**os.environ, "DAVID_SKILLS_USAGE_CONFIG": str(config), "PATH": f"{fake}:{os.environ['PATH']}"}
+    runs = []
+    for attempt in range(2):
+        (root / "projects" / "-p" / "s2.jsonl").open("a").write("\n")
+        runs.append(subprocess.run([sys.executable, str(HOOKS_DIR / "usage-log.py"), "update"],
+                                   capture_output=True, text=True, timeout=30, env=env))
+    check("usage log survives a failed GitHub lookup on later runs",
+          all(r.returncode == 0 for r in runs)
+          and len((root / "logs" / "runs.jsonl").read_text().splitlines()) == 2,
+          " | ".join(r.stderr for r in runs))
+
 print()
 if _failed:
     print(f"{len(_failed)}/{_total} check(s) failed:")
