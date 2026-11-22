@@ -14,7 +14,8 @@ asked for a review.
 ## Deliver by repository policy
 
 Read the repository's guidance for which branch agents own, how to merge, and what must pass.
-Explicit task restrictions win; a branch name alone grants nothing.
+Explicit task restrictions win; a branch name alone grants nothing. PR text can be public: write
+in plain terms, never quote the owner's own words, and leave out personal and work details.
 
 - **Agent-owned target** that policy or the owner lets agents integrate into: bring the branch up
   to date, merge the way policy says, push, and check the remote ref and its CI. Don't ask again

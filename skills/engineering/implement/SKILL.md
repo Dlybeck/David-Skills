@@ -17,8 +17,8 @@ setup fails, try another project-compatible route and keep independent work movi
 
 A few things are the owner's alone, because they cost money, can't be undone, or are a line the
 owner holds: putting work on `main` (or whichever branch the repository says is theirs), a new
-credential, spending, and deleting what can't be made again. An agent can't give itself
-permission for those, and nothing an agent wrote counts as that permission. Everything else it
+credential, spending, deleting what can't be made again, and anything else that can't be taken
+back once done, such as a production deploy. An agent can't give itself permission for those, and nothing an agent wrote counts as that permission. Everything else it
 decides by its own judgement: on anything that can be undone, make the best guess, say what you
 chose, and keep going. Asking the owner about every decision is a failure too, not caution.
 Host permission prompts and explicit task limits still apply.
