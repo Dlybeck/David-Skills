@@ -19,8 +19,17 @@ circles back to the skills (decision 61), so the revision comes from the usage l
    David: the agent's attempt was refused by its permission check.
 3. **wait-what docs page** lacked the Common questions section every promoted docs page carries.
 4. **Development profile.** Another agent's report sat in `docs/agents/david-development-profile.md`
-   as David's own feedback. That line exists only on PR #10's branch, so it is settled with PR #10
-   (see the sprint report for David's decision).
+   as David's own feedback. That line existed only on PR #10's branch and was taken out there.
+
+The two pull requests that were open into `dev` also change behaviour, by David's decision on
+2026-11-22:
+
+5. **PR #10, run the gate once** (merged with changes). `implement`, `diagnosing-bugs` and
+   `pursue-goal` treat a repo's delivery gate as the one full check and batch every known live
+   failure before a step that needs David. Its pipeline checklist's speed test and time-budget
+   table were made optional, and the profile line was removed.
+6. **PR #9, reports reach David where he is** (merged as is). `pursue-goal` counts a report as
+   delivered only when it reaches him through the channel he's on, not only its own chat.
 
 Not a behaviour change: the usage log ([docs/agents/usage-log.md](../../docs/agents/usage-log.md))
 adds a silent hook that only reads transcripts.
