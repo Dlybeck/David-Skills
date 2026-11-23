@@ -241,7 +241,6 @@ Skills for daily code work.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[re-architect](./skills/engineering/re-architect/SKILL.md)** — Scan a codebase for deepening opportunities, present a visual review in chat or a useful page, then grill through whichever one you pick.
 - **[setup](./skills/engineering/setup/SKILL.md)** — Configure tracker, labels, and domain docs when selected skills need missing project conventions.
-- **[delegate](./skills/engineering/delegate/SKILL.md)** — Dispatch ready tickets whole to worker subagents until the frontier is drained.
 - **[autopilot](./skills/engineering/autopilot/SKILL.md)** — Enter unattended work mode — lock a goal before you leave, then keep working without you until it's met.
 - **[yolopilot](./skills/engineering/yolopilot/SKILL.md)** — Skip the grilling round for a last-second handoff, then work unattended within existing authority and repository integration policy.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of decision tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
@@ -272,7 +271,6 @@ General workflow tools, not code-specific.
 
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — Get relentlessly interviewed about a plan or design until every branch of the design tree is resolved.
 - **[teach](./skills/productivity/teach/SKILL.md)** — Teach the user a new skill or concept over multiple sessions, using the current directory as a stateful teaching workspace.
-- **[to-questionnaire](./skills/productivity/to-questionnaire/SKILL.md)** — Turn a decision you can't answer alone into a Markdown questionnaire for the one person who can — filled in async, or together over a meeting. It grills you about the send (who it's for, what you need back), not the subject.
 - **[wait-what](./skills/productivity/wait-what/SKILL.md)** — Fire this the moment a message doesn't land. The agent re-pitches it with the context you're missing, in plain English, using your `CONTEXT.md` vocabulary.
 
 **Model-invoked**

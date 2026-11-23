@@ -1,5 +1,8 @@
 # Delegate is an on-call dispatch skill, not a mode
 
+**Retired 2026-11-23.** `delegate` was removed: any chat can already hand work to helper agents,
+which was the one thing worth keeping.
+
 `delegate` shipped as a toggled session mode: `/delegate` turned it on, the session "stayed" in
 it, and `/delegate` turned it off. Real use showed the mode framing failing in practice in three
 ways:

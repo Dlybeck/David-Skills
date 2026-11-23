@@ -30,7 +30,6 @@
     "./skills/engineering/to-tickets",
     "./skills/engineering/wayfinder",
     "./skills/engineering/implement",
-    "./skills/engineering/delegate",
     "./skills/engineering/autopilot",
     "./skills/engineering/yolopilot",
     "./skills/engineering/pursue-goal",
@@ -50,7 +49,6 @@
     "./skills/productivity/status-report",
     "./skills/productivity/handoff",
     "./skills/productivity/teach",
-    "./skills/productivity/to-questionnaire",
     "./skills/productivity/wait-what",
     "./skills/productivity/writing-for-agents"
   ],

@@ -35,14 +35,6 @@ silently become requirements; a status check does not withdraw autonomous author
 The model-invoked autonomous engine under **Autopilot** and **Yolopilot**. It selects research, discovery, delivery, or optimization loops from the current uncertainty and stops only when proof passes, new human authority is required, or the evidence plateaus.
 _Avoid_: pipeline (the loops adapt), pilot mode (authority belongs to the wrapper)
 
-**Delegate**:
-A bounded, on-call dispatch run over the **Issue tracker**'s frontier: `/delegate` claims ready **Issues** and hands each one whole to a worker subagent, and the run is over when the frontier is drained — on-call meaning invoked per frontier, with nothing persisting between runs. Pays off at any model tier; a light-model session is the flagship case.
-_Avoid_: delegate mode (nothing stays on), orchestration mode, manager mode
-
-**Router**:
-The role the dispatching session plays during a **Delegate** run: classify a ticket and hand it off whole. A Router never decomposes work into subtasks it invented, never judges a worker's partial result, and never attempts to recover a stuck worker itself — duties withheld at every model tier, and exactly the failure modes that sink a cheap model given real orchestration duties.
-_Avoid_: orchestrator, manager
-
 **Confidence guideline**:
 The shared idea behind unattended work, written once in `implement`: a few things are the owner's
 alone (putting work on `main`, a credential, spending, deleting what can't be made again) and an
@@ -64,7 +56,7 @@ _Avoid_: release PR, version PR (the repository has neither)
 - An **Issue tracker** holds many **Issues**
 - An **Issue** carries one **Triage role** at a time
 - A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
-- **Autopilot** and **Yolopilot** both delegate execution to **Pursue Goal** and answer to the **Confidence guideline**; **Delegate** doesn't need it — the human is present during a run, and anything beyond an issue's spec escalates to them
+- **Autopilot** and **Yolopilot** both delegate execution to **Pursue Goal** and answer to the **Confidence guideline**
 - **Autopilot** earns authority through a confirmed **Goal contract**; **Yolopilot** starts from a provisional one; both honor existing integration grants and human-owned promotion boundaries
 
 ## Flagged ambiguities
