@@ -1,5 +1,34 @@
 # david-skills
 
+## 1.9.0
+
+### Minor Changes
+
+- [#14](https://github.com/Dlybeck/David-Skills/pull/14) [`6eee0ca`](https://github.com/Dlybeck/David-Skills/commit/6eee0ca2286e08010bc8776dd63ce57eb654a9f3) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Removes two skills nothing used in five weeks: `delegate` (any chat can already hand work to helper agents) and `to-questionnaire`. Also removes the seven beta and shelved skills that were never installed: `claude-handoff`, `loop-me`, `setup-ts-deep-modules`, `writing-fragments`, `writing-beats`, `writing-shape` and `migrate-to-shoehorn`. All of them can come back from the public set they came from.
+
+- [#10](https://github.com/Dlybeck/David-Skills/pull/10) [`4874621`](https://github.com/Dlybeck/David-Skills/commit/4874621383a193b576fd87dab6fbad0c679d6e21) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Agents test less and ship in batches. `implement`, `diagnosing-bugs`, and `pursue-goal` now treat
+  a repo's local delivery gate (a release script or check target) as the one full check: targeted
+  tests while working, the gate once, and no raw-suite run before it or rerun after it. Before a fix
+  that needs a deploy or other human step, the agent reproduces every known live failure and fixes
+  them in one change, saying up front how many such steps it will ask for. A new `implement`
+  reference, pipeline checks, covers building pipelines: check the host's build tool, build only
+  the shipped stage with an explicit target, name one authoritative check, and, for slow releases,
+  optionally test the speed contract and write down the time budget. A new opt-in eval case, `gate-once`, checks the gate runs once.
+
+- [#12](https://github.com/Dlybeck/David-Skills/pull/12) [`e93da84`](https://github.com/Dlybeck/David-Skills/commit/e93da84513448587c5fb45e812c9101e33928f09) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Simpler authority and review. The stand-in, TPM and ready-signal machinery built for Duet is gone; what stays is one idea, written once in `implement`: a few things are the owner's alone (putting work on `main`, a credential, spending, deleting what can't be made again) and an agent can't give itself those, while everything else it decides by its own judgement. Review is by judgement too: whoever built a change tests what it could break, a fresh `independent-pr-review` comes in only when the change could really hurt something, and fixes are checked rather than re-reviewed in full. The start-of-chat hook that pointed Fable chats at `/delegate` is removed. The block on `main` and on commands that lose work is unchanged.
+
+  `writing-for-agents` now opens from that same thinking: say what a thing is for and why, so the agent can use judgement, and keep it as simple as what it's for. It points to the owner's own philosophy instead of aiming at the same process every run.
+
+- [#11](https://github.com/Dlybeck/David-Skills/pull/11) [`722df4d`](https://github.com/Dlybeck/David-Skills/commit/722df4d467c596ae56d5cced443779a3c2ae935f) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Usage log: a silent SessionStart hook keeps a compact record of how the skills are used, built from the transcripts Claude Code already writes, with how each piece of work ended from GitHub, git and David, and a report that answers which skills ran, in what order, where David stepped in and how many reviews ran. Light-pass fixes: handoff saves where the next session can find it, `gh` commands in forks name the repository, and the wait-what docs page gains its Common questions section.
+
+### Patch Changes
+
+- [#8](https://github.com/Dlybeck/David-Skills/pull/8) [`f6f315c`](https://github.com/Dlybeck/David-Skills/commit/f6f315c8e7e06c40374efe06ef43d0ae891ec67b) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Run tests casually: during development, targeted tests plus a quick smoke check; the full suite only when warranted (PR to `main`, shared code, test setup, dependencies, or risk targeted tests cannot cover), in the background if slow.
+
+- [#9](https://github.com/Dlybeck/David-Skills/pull/9) [`c4c9f2f`](https://github.com/Dlybeck/David-Skills/commit/c4c9f2f67716cc872e4e59eb3d04cf03b7b230fa) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Deliver pilot reports where the user is: when they have left the conversation or the environment
+  offers a channel for reaching them, send milestone, blocker, and final reports through it as well
+  as in the conversation.
+
 ## 1.8.1
 
 ### Patch Changes
