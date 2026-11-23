@@ -80,7 +80,7 @@ shared review loop. Explicit task restrictions win.
 
 | Review needed | Practice |
 | --- | --- |
-| Fresh defect review and repair loop for a committed proposal | [independent-pr-review](./independent-pr-review.md) |
+| Fresh defect review for a change that could really hurt something | [independent-pr-review](./independent-pr-review.md) |
 | Separate Standards and Spec axes, including local work in progress | [code-review](./code-review.md) |
 
 ## Common questions
@@ -91,12 +91,6 @@ Yes. The pilots carry your chosen timing agreement to [pursue-goal](./pursue-goa
 [status-report](../productivity/status-report.md) at milestones and the agreed maximum gap.
 Time cues are facts; the agent chooses its approach. Host support determines whether reporting
 during long waits and deadline stops can be enforced exactly.
-
-**Can my TPM start an autonomous run for me?**
-
-Yes, through [autopilot](./autopilot.md) only, with your grant in the starting message. The TPM
-answers the grill and relays your reserved decisions. [yolopilot](./yolopilot.md) skips the grill,
-so it stays yours alone.
 
 **Isn't there just a list of the skills in the right order?**
 

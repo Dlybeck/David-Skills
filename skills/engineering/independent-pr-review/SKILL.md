@@ -5,9 +5,10 @@ description: Independently review an exact PR or committed branch snapshot for a
 
 # Independent PR Review
 
-Review the full proposed change in a **fresh context**. This is ordinary actionable defect review;
-`/code-review` continues to provide the separate Standards and Spec axes. Preserve findings from
-both practices; neither a developer self-review nor a clean axis report substitutes for this pass.
+Review the full proposed change in a **fresh context**: a fresh eye catches what the builder
+can't see. This is ordinary actionable defect review, used when the change could really hurt
+something or the owner asks for it (`/implement`'s "Check by judgement"); `/code-review` is the
+separate Standards and Spec check.
 
 ## Inputs and independence
 
@@ -63,9 +64,8 @@ and arrange a fresh review before posting or settling. With no actionable findin
 receipt and **post no PR comment**. A clean review means none found in the inspected scope, not
 universal correctness. No review result authorizes merge or installation.
 
-## Developer continuation
+## Fixing and delivering
 
-When coordinating completed implementation, use
-[references/developer-loop.md](references/developer-loop.md) for the authorized
-developer → fresh reviewer → developer loop. The reviewer itself only reports; the developer
-owns repairs, validation, and delivery.
+The reviewer only reports; whoever built the change fixes and delivers it. See
+[references/developer-loop.md](references/developer-loop.md) for fixing findings without
+re-reviewing in circles, and for delivering by repository policy.

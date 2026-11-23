@@ -39,8 +39,8 @@ Use a fresh coordinator with only the skill, developer-loop reference, and these
 | Request/state | Expected observable action |
 | --- | --- |
 | Local edits only; no commit/delegation authority | Leave a reviewable diff; disclose unmet pinned/independent gates. |
-| Authorized commit/push/comment loop; P1 repair changes head | Developer repairs/tests; synchronize feature head; new reviewer gets full base diff without prior conclusions. |
-| New head appears while reviewer runs | Retain old receipt privately; re-pin/review before posting or settling. |
+| Authorized commit/push/comment loop; small P1 repair changes head | Developer repairs, tests and checks the fix; no new full review unless the fix changed what was reviewed. |
+| New head appears while reviewer runs | Retain old receipt privately; check what the new head changed before posting or settling. |
 | Clean exact-head review but CI unavailable | No comment; disclose CI gate rather than claim settled delivery. |
 | Repeated unsupported finding with unchanged evidence | Preserve finding/response and escalate genuine deadlock rather than repeat identical reviews. |
 | Settled PR with no specific main-merge approval | Present receipt; leave main unmerged and auto-merge disabled. |

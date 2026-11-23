@@ -13,7 +13,8 @@ Type `/independent-pr-review`, or the
 
 | Situation | Review practice |
 | --- | --- |
-| Committed proposal needing fresh actionable defect review, with or without a PR | `independent-pr-review` |
+| A committed change that could really hurt something, or you ask for a review | `independent-pr-review` |
+| A small change | Its tests, run by whoever built it; no reviewer needed |
 | Separate Standards/Spec checks, including uncommitted work | [code-review](./code-review.md) |
 
 ## Prerequisites
@@ -21,35 +22,34 @@ Type `/independent-pr-review`, or the
 A pinned base and head, settled requirements, source access, and an available fresh reviewer within
 the delegation budget. Posting findings requires explicit authority; private review is the default.
 
-## The independent loop
+## Fixing what it finds
 
-The reviewer reports; the developer repairs and validates. Each repair receives another fresh
-full-change review. Authorized intermediate findings go into one consolidated PR comment for the
-reviewed head. A clean review produces no PR comment. The settled result reaches you with exact-head
-evidence, while scope or approval blockers surface earlier.
+The reviewer reports; whoever built the change fixes it and checks the fixes. A second full review
+happens only when the fixes changed what was reviewed, never as a matter of course: each round
+costs time and money, and depth is no substitute for judging what could break. Authorized
+findings go into one consolidated PR comment; a clean review posts nothing.
 
 ## The promotion PR
 
 Where `main` is human-owned and `dev` is agent-owned, finished work reaches you as one open PR
-from `dev` into `main`. The agent opens or updates it only when you or the TPM paste a ready
-signal, after it checks one pinned `dev` SHA: pushed, tests passing, CI green, the task merged in,
-no open findings. The report gives each task what you asked for, the plan you okayed, your calls along the way,
-what changed, how that differs from the plan, how it was tested, and what's left open. It lists anything else on `dev`, and ends with a prompt you can paste into
-a fresh cloud review session that checks each task against your plan. Your comments come back as a pasted review fix. The agent fixes
-them through `dev`, which updates the same PR, and replies on each thread with `🤖 Agent:`. You
-merge with **Create a merge commit**. The steps live in
+from `dev` into `main`. The agent opens or updates it when you ask for a release, after checking
+one pinned `dev` SHA: pushed, tests passing, CI green. The report says, for each piece of work,
+what was asked, what changed, how it was checked, and what's left open, and lists anything else on
+`dev`. When you comment, the agent fixes it through `dev`, which updates the same PR, and replies
+on each thread with `🤖 Agent:`. You merge with **Create a merge commit**. The steps live in
 [promotion PR](../../skills/engineering/independent-pr-review/references/promotion-pr.md).
 
 ## Common questions
 
 **Does this replace Standards and Spec review?**
 
-No. Ordinary defect findings remain separate from those two axes and from developer self-review.
+No. It hunts defects; [code-review](./code-review.md) checks standards and the request. Neither
+runs on every change: the builder judges what the change needs.
 
 **Will it post findings or merge automatically?**
 
 Commenting depends on the active request's explicit authority. Delivery follows repository branch
-ownership and applicable standing grants after all gates pass; explicit task restrictions win.
+ownership and applicable standing grants once its checks pass; explicit task restrictions win.
 
 | Boundary | Settled result |
 | --- | --- |
@@ -73,20 +73,20 @@ rebase merges make the release refuse, so use **Create a merge commit**.
 
 **What if reviewer and developer keep disagreeing?**
 
-The loop preserves the finding and response and brings a genuine deadlock to you. Repeating
-unchanged unsupported advice is not progress. You can interrupt the work at any point.
+The developer keeps the finding beside its answer and brings you a real deadlock. Another round
+of the same review is not progress. You can interrupt the work at any point.
 
 ## It's working if
 
 - Review receipts identify the exact head and full comparison, including coverage limits.
 - Actionable comments state a precise trigger, impact, location, and evidence.
-- Repairs receive a new reviewer; clean passes add no noise to the PR.
+- Small changes ship on their tests; fixes are checked, not re-reviewed in full; clean passes add no noise to the PR.
 - Final delivery states tests, review, and CI separately without claiming universal correctness.
 - There is never more than one open promotion PR, its head matches `dev`, and every review comment
   you sent back has a `🤖 Agent:` reply naming its commit.
 
 ## Where it fits
 
-A standalone review practice and delivery gate for [implement](./implement.md) and the autonomous
-pilots. [Code-review](./code-review.md) retains its distinct two-axis purpose;
+The fresh eye that [implement](./implement.md) and the autonomous pilots bring in when a change
+earns it. [Code-review](./code-review.md) retains its distinct two-axis purpose;
 [advise](./advise.md) maps the flows.

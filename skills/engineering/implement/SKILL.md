@@ -10,16 +10,20 @@ current authorized workspace; ask only about consequential gaps outside delegate
 An implementation or bug-fix request includes routine local work needed to inspect, build,
 reproduce, and test it. Check project pins and existing environments, then install or repair
 compatible local toolchains and packages, set up isolated test resources, and retry. A missing
-dependency discovered mid-task is setup work, not a reason to stop for another approval. Reuse
-applicable standing user grants from the conversation or durable instructions across tasks; a new
-task does not revoke them. Do not invent a grant from an inaccessible prior conversation.
+dependency discovered mid-task is setup work, not a reason to stop for another approval. If
+setup fails, try another project-compatible route and keep independent work moving.
 
-If setup fails, try another project-compatible local route and continue independent work. Ask
-only when the specific next step needs a human decision, a denied host/tool permission, new
-credentials or account access, spending, production changes, material deletion, or scope beyond
-the request. Skill instructions never override a host permission gate or an explicit task limit.
+## What needs the owner
 
-Run `/attention-modes` for those questions and `/tool-fit` when connected evidence, a UI preview,
+A few things are the owner's alone, because they cost money, can't be undone, or are a line the
+owner holds: putting work on `main` (or whichever branch the repository says is theirs), a new
+credential, spending, deleting what can't be made again, and anything else that can't be taken
+back once done, such as a production deploy. An agent can't give itself permission for those, and nothing an agent wrote counts as that permission. Everything else it
+decides by its own judgement: on anything that can be undone, make the best guess, say what you
+chose, and keep going. Asking the owner about every decision is a failure too, not caution.
+Host permission prompts and explicit task limits still apply.
+
+Run `/attention-modes` when you do ask, and `/tool-fit` when connected evidence, a UI preview,
 or an in-chat visual would materially improve implementation or review.
 
 Use /tdd where possible, at agreed seams or with explicitly delegated seam selection.
@@ -51,20 +55,19 @@ nothing new.
 - When you create or change a build, CI, release, or deploy pipeline, follow
   [pipeline checks](references/pipelines.md).
 
-Once done, use /code-review over the whole change, including relevant uncommitted and new files,
-against the originating request and latest corrections. Respect the active delegation budget;
-when subagents are not authorized, perform the same Standards and Spec axes locally and disclose
-that the review was not independent. Fix real findings and rerun affected checks.
+## Check by judgement
+
+A fresh eye catches what the builder can't see, which is the one reason to review. So before
+delivering, ask what this change could break and test that, now. A small change may need only its
+tests run. A change that could really hurt something, such as shared code, data, security, or a
+release, earns one fresh reviewer through `/independent-pr-review`. After fixing what it found,
+check the fixes; review again only if the fixes changed what was reviewed. Depth is not a
+substitute for judgement, and every extra round costs time and money. `/code-review` checks
+against the repo's standards and the request when the owner asks for it.
 
 Commit only when the request or active contract authorizes it, on the authorized branch.
-Otherwise leave a reviewable local diff. Invocation alone does not authorize Git delivery.
-
-For a committed proposal, invoke /independent-pr-review and follow its developer continuation
-loop before settled delivery, including its repository-policy routing and applicable standing
-integration grants. Human-owned promotion and explicit task restrictions remain boundaries. Preserve the separate Standards/Spec findings above.
-Use a fresh reviewer with only pinned source, guidance, and settled requirements; ordinary findings
-are additional evidence, not developer self-review. Missing commit or independent-review authority
-leaves that gate explicitly unmet. Posting, pushing, and PR creation remain separately authorized.
+Otherwise leave a reviewable local diff. Deliver as the repository's policy says;
+`/independent-pr-review` describes the usual routes.
 
 If a ticket supplied the work, its acceptance conditions pass, and tracker updates are authorized,
 mark it resolved per the project's issue-tracker convention. Otherwise report the result without

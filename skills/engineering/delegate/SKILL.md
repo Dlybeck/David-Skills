@@ -27,14 +27,13 @@ this run.
 
 ## Setup
 
-The first time `/delegate` runs in a repo, ask two questions and write the answers — plus a fixed
-`Router model: fable` line, explained below — to `docs/agents/delegate.md` (read that file
-instead of asking again on later runs), using this template:
+The first time `/delegate` runs in a repo, ask two questions and write the answers to
+`docs/agents/delegate.md` (read that file instead of asking again on later runs), using this
+template:
 
 ```markdown
 # Delegate config
 
-Router model: fable
 Worker model: sonnet
 Max concurrent workers: 4
 ```
@@ -43,12 +42,8 @@ Max concurrent workers: 4
    build with.
 2. **Max concurrent workers** — one number with one meaning: tickets in flight at once.
 
-`Router model:` isn't asked, and isn't about the current run — it's the match target for the
-best-effort `SessionStart` hook (`hooks/delegate-recommend.py`), which recommends `/delegate` to
-future sessions whose active model matches it, falling back to `fable` when the file doesn't
-exist yet. The `model` field the hook reads isn't guaranteed present, so the recommendation not
-firing is expected — manual invocation always works regardless. This is a `delegate`-owned config
-file, separate from `/setup`'s issue-tracker/triage/domain scope.
+This is a `delegate`-owned config file, separate from `/setup`'s issue-tracker/triage/domain
+scope.
 
 ## The run
 
@@ -62,13 +57,12 @@ file, separate from `/setup`'s issue-tracker/triage/domain scope.
    workers" at once.
 3. **Dispatch** each claimed ticket whole to a worker subagent on the configured Worker model —
    in its own worktree whenever workers run in parallel. Brief the worker to build it the way
-   `/implement` describes — read the ticket, drive `/tdd` at pre-agreed seams, typecheck, run
-   `/code-review`, commit, then mark the ticket resolved, within the dispatch contract's authority.
+   `/implement` describes — read the ticket, drive `/tdd` at pre-agreed seams, typecheck, check it by
+   judgement, commit, then mark the ticket resolved, within the dispatch contract's authority.
    `/implement` is model-invoked and can be selected directly by that authorized worker. This does
-   not authorize additional workers or broaden the Router's role. The brief retains two requirements:
-   - **Fix any real `/code-review` finding before committing.** `Status: resolved` means
-     "committed," not proof of review quality. `/implement` now requires real findings to be
-     addressed; the Router still does not perform a second review by reading the report.
+   not authorize additional workers or broaden the Router's role. The brief keeps two requirements:
+   - **Fix what its checks find before committing.** `Status: resolved` means "committed," not
+     proof of quality; the Router does not review the work a second time.
    - **Fast-forward the worktree branch to the dispatching branch's tip first.** A fresh
      worktree can spawn stale; starting from the tip is what makes the committed claim visible
      to the worker.

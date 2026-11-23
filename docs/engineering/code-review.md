@@ -62,7 +62,7 @@ That was an upstream bug reproduced in more than one harness, with one report re
 
 **Should I run it in the same [session](https://www.aihero.dev/ai-coding-dictionary/session) that wrote the code?**
 
-Prefer a fresh one. As one reader put it: "Same context reviewing itself isn't review, it's confirmation bias with a slash command." The reviewing agent in the authoring session holds every assumption that shaped the code, which is exactly the context an independent reviewer would not have. This is also why people ask for [implement](./implement.md) without its built-in review step — it runs the review inside the session that just wrote the diff. Invoking `/code-review` yourself from a clean session is the honest version.
+Prefer a fresh one. As one reader put it: "Same context reviewing itself isn't review, it's confirmation bias with a slash command." The reviewing agent in the authoring session holds every assumption that shaped the code, which is exactly the context an independent reviewer would not have. [Implement](./implement.md) no longer runs it on every change; invoking `/code-review` yourself from a clean session is the honest version.
 
 **After every ticket, or once at the end?**
 

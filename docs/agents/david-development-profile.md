@@ -1,6 +1,8 @@
 # David's development profile
 
-Confirmed direction as of 2026-09-27. This is a design reference for developing David Skills,
+Confirmed direction as of 2026-09-27. David's current thinking, which comes first where the two
+differ, is in `~/.claude/CLAUDE.md` ("Philosophy over rules") and `~/Dev Plan/plan/philosophy.md`.
+This is a design reference for developing David Skills,
 not a personality assessment, a new skill, or standing authority to act in other projects.
 The [conversation research](../../.reports/research/2026-09-07-personal-autonomy-feedback.md)
 records the evidence and its limits. Its source keys below refer to that note; raw conversations
@@ -23,7 +25,8 @@ and operational logs are not part of this profile.
 | Attention | Focused discussion can use deep rounds. When David is busy, dictating, or replying briefly, infer On the side and ask the highest-value broad question first; make each reply useful even if he then leaves. A brief "go" lets already-authorized work continue, without inventing authority. [Explicit feedback, 2026-09-27] |
 | Tools | Keep the plugin useful across AI hosts. Check for relevant available search, connected sources, visuals, and previews when they help the task; do not force a capability solely because a host offers it. [Explicit feedback, 2026-09-27] |
 | Timing | Optional deadlines bound a work period. Clock cues supply only time remaining; the agent chooses its approach. Agreed milestone/maximum-gap reports remain visible even when progress is unchanged, briefly explaining current work and the reason. Deadline expiry gets an honest end-of-run report. Preserve the absolute prohibition on rapid AI job-status polling. [Explicit feedback, 2026-09-29] |
-| Boundaries | Preserve protected originals and project invariants. Autonomy preferences do not authorize spending, deployment, deletion, new account access, external writes, or expanding the task. Specific current instructions determine authority. [D1, F5, P2] |
+| Boundaries | A few things are David's alone, because they cost money, can't be undone, or are his line: putting work on `main`, a credential, spending, deleting what can't be made again. An agent can't give itself those. Everything else it decides by judgement, making its best guess on anything that can be undone; gating every decision on him is a failure too. Preserve protected originals and project invariants. [Dev Plan decision 83, 2026-11-22] |
+| Review | Review by judgement: whoever built a change asks what it could break and tests that, now. A small change may need only its tests; one that could really hurt something earns one fresh reviewer. Several reviewers on every change, redone after every fix, waste time and money. [Dev Plan decision 83, 2026-11-22] |
 
 ## Project-specific examples, not global defaults
 

@@ -21,12 +21,12 @@ better than waiting. Whenever you can stay for an understanding round, use
 Yolopilot may research, modify local files, install dependencies, use local compute, run tests and
 evaluations, and make small commits within your stated restrictions. Feature pushes require your authority and an available remote.
 Repository guidance identifies branch ownership; the active request and applicable standing
-grants determine authority. Money, credentials, production, material deletion, safeguards and
-unrelated scope remain boundaries; explicit task restrictions override defaults.
+grants determine authority. What is yours alone (`main`, a credential, spending, deleting what
+can't be made again) stays yours; explicit task restrictions override defaults.
 
 | Boundary | Delivery |
 | --- | --- |
-| Existing grant for an agent-owned target and all gates passing | Complete integration and verify the delivered ref and CI |
+| Existing grant for an agent-owned target and its checks passing | Complete integration and verify the delivered ref and CI |
 | Human-owned promotion | Prepare the exact proposal for its explicit human approval |
 | Missing policy or integration authority | Preserve a review branch within push authority, or keep the result local |
 
@@ -40,10 +40,11 @@ workspace.
 A retrospective spec is exceptional rather than automatic. It pays only when the run exposes a
 lasting product decision, unresolved requirement, or coordination need.
 
-## Independent delivery review
+## Checking before delivery
 
-A review branch completes [independent-pr-review](./independent-pr-review.md) before its settled
-receipt. That loop applies the delivery boundary above.
+The run checks its work the way [implement](./implement.md) says, bringing in a fresh
+[independent-pr-review](./independent-pr-review.md) only when the change could really hurt
+something.
 
 ## Common questions
 
@@ -74,7 +75,7 @@ results, unfinished work, attempted approaches, reasons, and any jobs still runn
 
 - The warning and provisional interpretation appear before mutation, without waiting for a reply.
 - Git history makes each material decision easy to inspect.
-- The final result is validated, independently reviewed, and delivered only to an authorized target.
+- The final result is checked as the change warrants and delivered only to an authorized target.
 - The learning digest says what changed in the agent's understanding.
 
 ## Where it fits
