@@ -29,7 +29,7 @@ Each bucket folder has a `README.md` that lists every skill in the bucket with a
 
 Skills in `engineering/` and `productivity/` also have a human-facing docs page at `docs/<bucket>/<skill-name>.md` (the docs tree mirrors those two bucket folders under `skills/`). This docs tree is internal — it is not published anywhere, and `docs/<bucket>/<skill-name>.md` is repo organisation only (the page format's historical origin is Matt Pocock's `aihero.dev/skills-<name>` template, nothing more). Cross-links between this repo's docs pages are repo-relative; see [.agents/writing-docs.md](./.agents/writing-docs.md) for the exact convention. When you add, rename, or change the behaviour of a skill in `engineering/` or `productivity/`, create or re-sync its docs page following that file. A finished page carries four sections — **What it does**, **When to reach for it**, **Common questions**, **It's working if** — and `writing-docs.md` holds the template, the section order, and where to hunt for the questions. Skills in the non-promoted buckets (`misc/`, `in-progress/`, `deprecated/`) get **no** docs page.
 
-Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, reachable only by the human; `autopilot` alone also accepts an authorized stand-in) or model-invoked (model- or user-reachable). See [.agents/invocation.md](./.agents/invocation.md).
+Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, reachable only by the human) or model-invoked (model- or user-reachable). See [.agents/invocation.md](./.agents/invocation.md).
 
 [`advise`](./skills/engineering/advise/SKILL.md) is the harness-neutral router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `advise`'s `SKILL.md` and update it so the map stays accurate — a new skill it never mentions, or a stale one it still routes to, is a router that lies.
 
@@ -38,16 +38,16 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 ## Release flow
 
 `dev` is the agent-owned integration branch. Agents have a standing grant to integrate scoped
-feature work there after fresh independent review, required tests, and exact-head CI pass; verify
+feature work there after the checks the change earns (`implement`'s "Check by judgement"),
+required tests, and exact-head CI pass; verify
 the delivered ref and integration CI. A dev-target PR is traceability, not a request for David to
 review or approve it. Explicit task restrictions override this grant.
 
 David alone promotes the tested `dev` tip to `main`, by merging the one open **promotion PR**
 (head `dev`, base `main`) with **Create a merge commit**; that merge is the human release approval.
 Agents have a standing grant, in force once this paragraph is on `main`, to open or update that
-PR, and to fix David's review comments on it through `dev`, only on a pasted ready signal or
-review fix from David or the TPM. The ready signal
-records that the dev chat, the TPM, and the chief of staff agree. The steps, checks, and report live in
+PR, and to fix David's review comments on it through `dev`, only when David asks, directly or
+relayed. The steps, checks, and report live in
 [promotion PR](./skills/engineering/independent-pr-review/references/promotion-pr.md). Agents
 never merge, approve, or push to `main`: the plugin hook blocks merges and pushes, and GitHub
 refuses approval of a PR by its own author's account. The repository has no

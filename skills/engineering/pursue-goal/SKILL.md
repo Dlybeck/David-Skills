@@ -37,9 +37,7 @@ has earned.
 The contract may be clarified by new evidence, but changing the objective, authority, safety
 boundary, or delivery target requires the human. A clear mid-run instruction from that human
 can supply the change; the contract is not frozen against its owner. Replanning inside that
-envelope does not require renewed approval. When the contract records an authorized stand-in,
-it steers within that grant; anything on the contract's owner-reserved list needs an owner
-decision relayed through it, and silence is never one.
+envelope does not require renewed approval.
 
 ## Select the next loop
 
@@ -75,6 +73,9 @@ After every material result:
 3. Update the plan and select the next loop; do not preserve a stale pipeline for ceremony's sake.
 4. Do not use the test suite casually. Run checks justified by changed behavior or delivery risk;
    reuse passing evidence until a relevant change, failure, or unresolved concern invalidates it.
+   When a full check is warranted (see `/implement`) and the repo has a delivery gate, run
+   targeted tests while working and the gate once on the delivered head, not the raw suite as well. Batch fixes so steps that need the human, such as a
+   deploy, happen once per batch, not once per live failure.
 5. Record only a material transition: hypothesis resolved, checkpoint reached, direction changed,
    authority needed, completed, or failed.
 
@@ -82,6 +83,12 @@ For an agreed timed run, use [run timing](references/timing.md). The clock suppl
 the agent chooses its approach from the conversation. Deliver `/status-report` at meaningful
 milestones and within the agreed maximum gap. A brief unchanged-progress report still counts;
 reset the reporting clock only after delivery. Reports continue the run without requiring a reply.
+
+A report is delivered only when it reaches the user where they are. When the user has left the
+conversation, or the environment gives a channel for reaching them (a notification tool, a
+messaging connector, a companion app), send milestone, blocker, and final reports through it as
+well as writing them in the conversation. A report that exists only in a window nobody is
+watching has not been delivered.
 
 For work that must survive sessions, maintain one compact checkpoint in the project's existing
 notes location: stable contract, current evidence and revision, decisions/failed approaches worth
@@ -142,31 +149,18 @@ override host instructions. A forced handoff leaves the requested autonomy unmet
 
 ## Apply authority continuously
 
-Treat the wrapper's authority as a capability boundary, not a suggestion. The normal pilot
-envelope may include research, local file changes, tests and evaluations, dependency installation,
-local compute, commits, and an authorized push. It never implies permission to spend money,
-introduce credentials, deploy production, delete material data, weaken safeguards, cross a human-owned promotion boundary,
-or expand into unrelated work.
+The few things that are the owner's alone are in `/implement`'s "What needs the owner"; a run
+never grants them to itself, whatever the contract's wording. Everything else in the contract the
+run decides by judgement, including routine local toolchain, dependency, and test setup, and a
+missing prerequisite is work to do, not a reason to stop. A host or tool denial still needs its
+own permitted path.
 
-When the contract authorizes implementation and validation, routine project-compatible local
-toolchain, dependency, and isolated test setup belongs to that work unless explicitly excluded.
-Reuse applicable standing grants recorded in the active conversation or durable instructions;
-do not stop a run merely because a missing local prerequisite needs repair. A host/tool denial
-still requires its own permitted path.
+## Check before delivery
 
-Before each irreversible or externally visible action, verify that the contract names it. Log a
-useful recommendation when it does not.
-
-## Review implementation before delivery
-
-For completed source changes, retain whole-change /code-review Standards and Spec checks, then
-invoke /independent-pr-review and follow its developer continuation loop on the exact committed
-proposal. It owns fresh reviewer isolation, ordinary findings, authorized actionable comments,
-repairs and fresh full-base re-review, and deadlock escalation. Carry this gate through either
-pilot; research-only reports need no fabricated PR. Route settled delivery by repository policy
-and applicable standing grants through that shared loop, including authorized agent-owned
-integration and human-owned approval boundaries. Report actual delivery after its gates pass,
-while reporting progress and blockers earlier. The loop adds no merge or posting authority.
+Check source changes the way `/implement`'s "Check by judgement" says: test what the change could
+break, and bring in one fresh reviewer only when the change could really hurt something.
+Research-only reports need no PR. Deliver by repository policy, as `/independent-pr-review`
+describes; report actual delivery only after its checks pass, and progress and blockers earlier.
 
 ## Stop deliberately
 

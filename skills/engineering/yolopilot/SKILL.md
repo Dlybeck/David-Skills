@@ -21,11 +21,9 @@ Run these steps straight through without pausing for a reply:
 3. Build the goal contract from that interpretation with this default authority:
    - Allow research, local file changes, tests and evaluations, dependency installation, local
      compute, small feature-branch commits, and a pushed review branch.
-   - Keep money, new credentials, production deployment, material deletion, safeguard weakening,
-     unrelated scope, and human-owned promotions outside the contract. Integration is excluded
-     by default; include an agent-owned target only when repository policy and an applicable
-     standing grant or explicit approval already authorize it. Missing policy or authority
-     leaves integration unresolved; branch names are not grants.
+   - What is the owner's alone (`/implement`'s "What needs the owner") stays outside the
+     contract. Integrate into an agent-owned branch only where repository policy or the owner
+     already allows it; otherwise stop at the review branch.
    - Apply any narrower authority the user supplied; defaults cannot override an explicit
      no-push, no-commit, read-only, or other boundary.
    - Preserve any user-supplied deadline and reporting agreement. Resolve a duration once;
@@ -41,16 +39,10 @@ retain provisional assumptions as history, and do not turn a question into a cha
 
 ## Delivery boundary
 
-Commit in small, intelligible steps. Before delivery, run the relevant full validation surface and
-whole-change `/code-review`, using the provisional contract and subsequent corrections as the spec.
-Fix real findings and complete /independent-pr-review's developer continuation loop on the exact
-committed proposal; ordinary findings supplement the separate Standards/Spec axes.
-
-Invoke /independent-pr-review and follow its shared developer continuation loop to route
-settled work. Without an applicable integration grant, leave a review branch within push authority
-or a local result when push is unavailable. With existing authority for an agent-owned target,
-complete its integration and verification after all gates pass, without another human dev handoff.
-Human-owned promotion still requires its explicit approval. Neither the provisional interpretation
+Commit in small, intelligible steps. Before delivery, check the change the way `/implement`'s
+"Check by judgement" says, using the provisional interpretation and later corrections as the
+request. Route the result as `/independent-pr-review` describes: a review branch by default, or
+the agent-owned target where policy already allows it. Neither the provisional interpretation
 nor the Yolopilot label can widen authority or override an explicit task restriction.
 
 ## Postflight

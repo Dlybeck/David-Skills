@@ -126,6 +126,12 @@ Tool preference:
 
 ## Phase 5 — Fix + regression test
 
+**If the fix needs a deploy or another step that needs the human,** first run the Phase 1 loop,
+read-only, against every reported live failure and every live case of the same kind (every stuck
+download, not just the first). Fix everything it finds in one change, so the human step happens
+once. Treat a human step as the most expensive step in the fix, and say up front how many you
+will ask for.
+
 Write the regression test **before the fix** — but only if there is a **correct seam** for it.
 
 A correct seam is one where the test exercises the **real bug pattern** as it occurs at the call site. If the only available seam is too shallow (single-caller test when the bug needs multiple callers, unit test that can't replicate the chain that triggered the bug), a regression test there gives false confidence.
@@ -148,6 +154,7 @@ Required before declaring done:
 - [ ] Regression test passes (or absence of seam is documented)
 - [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
+- [ ] For an authorized repair that warrants a full check (see `/implement`), the repo's delivery gate passed once, on this cleaned-up head. Use targeted tests while fixing; do not also run the raw full suite before the gate
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns
 
 **Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `/re-architect` skill with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.

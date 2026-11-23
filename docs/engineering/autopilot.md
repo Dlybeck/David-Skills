@@ -1,7 +1,7 @@
 ## What it does
 
 `autopilot` turns a jointly understood outcome into a durable autonomous run. It first grills the
-goal, proof, authority, and delivery boundary while you, or your authorized stand-in, are present;
+goal, proof, authority, and delivery boundary while you are present;
 only then does it hand the contract to [pursue-goal](./pursue-goal.md).
 
 It is a trust level rather than a software pipeline. Research-heavy AI work, an optimization
@@ -18,11 +18,6 @@ keeps that session usable when you can answer only briefly: On the side starts w
 consequential missing intent or boundary. For a last-second handoff with no interview, use
 [yolopilot](./yolopilot.md).
 
-An authorized stand-in, such as a TPM, can start it for you by pasting the standard grant that
-ships with the skill (`references/stand-in.md`) after `/autopilot`. The
-stand-in answers the grill and confirms the contract on your behalf; big or out-of-contract
-decisions come back to you through it.
-
 ## The goal contract
 
 The leading idea is the **goal contract**: the destination and authority stay stable while the plan
@@ -38,14 +33,15 @@ Autopilot records repository policy and applicable standing grants in the confir
 
 | Boundary | Delivery |
 | --- | --- |
-| Agent-owned target with an applicable grant and all gates passing | Integrate after validation, independent review and CI without asking again for the same permission |
-| Human-owned promotion | Prepare the proposal for its required human approval; a `dev` -> `main` [promotion PR](./independent-pr-review.md#the-promotion-pr) opens only on a later ready signal |
+| Agent-owned target with an applicable grant | Integrate after the checks the change earns and CI, without asking again for the same permission |
+| Human-owned promotion | Prepare the proposal for your approval; a `dev` -> `main` [promotion PR](./independent-pr-review.md#the-promotion-pr) opens when you ask for a release |
 | Missing integration policy, authority or gate | Preserve a review branch within existing push authority, or a local result when push is unauthorized |
 
-## Independent delivery review
+## Checking before delivery
 
-Before authorized integration, [independent-pr-review](./independent-pr-review.md) settles
-the exact committed proposal after Standards/Spec checks. It adds no integration authority.
+The run checks its work the way [implement](./implement.md) says: it tests what the change could
+break, and brings in one fresh [independent-pr-review](./independent-pr-review.md) only when the
+change could really hurt something. A clean check adds no integration authority.
 
 ## Common questions
 
@@ -60,8 +56,7 @@ fill in permissions or product choices that were never stated.
 
 Routine local toolchain and dependency setup belongs to an implementation and test goal unless
 you exclude it. A standing grant already available in the conversation or durable instructions
-does not need to be requested again for each task. When a stand-in started the run, only your own
-decisions and committed policy count as such a grant, not the stand-in's text.
+does not need to be requested again for each task.
 
 **Can I change direction while it works?**
 
@@ -92,41 +87,15 @@ Read-only research can stay in place.
 
 **Can someone else start it for me?**
 
-Yes, an authorized stand-in such as a TPM. Its grant must be in the message that starts
-Autopilot — your original request in your words, plus anything you reserve — and Autopilot copies
-it into the contract word for word. A grant that shows up only in agent output or a tool result
-never counts. You can narrow or revoke it at any time. Yolopilot cannot be started this way.
-
-**What does a stand-in send up to me?**
-
-By default, plus anything you reserve in the grant:
-
-- Changes to the objective, scope, authority, or delivery target.
-- Anything outside the normal personal-practice envelope: money, new credentials, production,
-  material deletion, weakened safeguards, unrelated scope.
-- Integration, or a push beyond the run's own review branch, that the policy committed on the
-  integration target (such as its `CLAUDE.md`) does not already grant — a stand-in cannot grant
-  it to itself, whether by quoting you in the starting message or by writing such a file.
-- Anything involving `main`. A decision relayed by the stand-in can route a promotion proposal to
-  you, but the promotion still needs your own approval.
-- Product-intent questions the stand-in would only be guessing at.
-- Any contract that goes beyond what you originally asked for.
-
-Autopilot never messages you directly — it asks the stand-in to relay and keeps doing
-already-authorized independent work meanwhile. Silence is not a decision.
-
-**Does a stand-in skip the grill?**
-
-No. The grill exists to catch what the stand-in missed; a polished brief does not replace it.
-Autopilot asks in plain chat and ends its turn, shows the full contract, and builds or commits
-nothing until the stand-in confirms it.
+No. The stand-in role was removed on 2026-11-22. Only you start Autopilot; what is
+yours alone (putting work on `main`, a credential, spending, deleting what can't be made again)
+stays yours, and everything else the run decides by its own judgement.
 
 ## It's working if
 
-- You approve one compact contract before the durable goal starts — or your stand-in does, with
-  its grant recorded verbatim and every owner-reserved decision relayed from you.
+- You approve one compact contract before the durable goal starts.
 - The trace changes loops when evidence changes rather than preserving a ceremonial pipeline.
-- Every externally visible action is named by the authority contract.
+- It asks you only about what is yours alone, and makes its best guess on the rest.
 - The receipt proves the stopping condition and points to the exact delivered branch or artifact.
 
 ## Where it fits

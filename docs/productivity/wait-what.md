@@ -24,6 +24,16 @@ The body reuses the leading words already in your global `CLAUDE.md` and your pr
 
 If you have no `CONTEXT.md`, the skill still works. You lose only the domain-vocabulary half.
 
+## Common questions
+
+**Why ASD-STE100?**
+
+It is a controlled English for technical writing: short sentences, one meaning per word. Naming it sets the register, so the re-pitch gets plainer rather than only shorter.
+
+**Will the agent use it by itself when it notices I'm lost?**
+
+No. It is user-invoked only, because only you know when you stopped following.
+
 ## It's working if
 
 - The re-pitch is **shorter and clearer**, not shorter and blunter.

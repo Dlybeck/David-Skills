@@ -57,17 +57,12 @@ A stop request stops new work and accounts for identified running work safely.
 [Attention modes](../productivity/attention-modes.md) makes a brief On the side check-in easy to
 answer while unrelated authorized work continues.
 
-When [autopilot](./autopilot.md) was started by an authorized stand-in, the contract records that
-stand-in's grant. The stand-in can question, correct, or stop the run within it; a correction that
-changes the contract in an owner-reserved way waits for your decision, relayed by the stand-in.
+## Checking before delivery
 
-## Independent delivery review
-
-When a goal changes source, [independent-pr-review](./independent-pr-review.md) handles fresh
-ordinary review and the authorized repair loop. Repository branch ownership and applicable
-standing grants determine delivery, and explicit task restrictions retain their boundaries. The
-shared loop in [independent-pr-review](./independent-pr-review.md) explains each delivery route.
-Research-only reports need no fabricated PR.
+When a goal changes source, the run checks it the way [implement](./implement.md) says: test what
+could break, and bring in one fresh [independent-pr-review](./independent-pr-review.md) only when
+the change could really hurt something. Repository branch ownership and applicable standing grants
+determine delivery. Research-only reports need no PR.
 
 ## Common questions
 
@@ -96,10 +91,16 @@ next work, and why progress is limited. Milestone reports reset the reporting cl
 existing evidence and do not require your reply before the run continues. Exact delivery during
 a long wait needs verified host support; the timer helper is not a chat-wakeup service.
 
+**Where do reports go if I've walked away?**
+
+To you, wherever you are. When you have left the conversation, or the environment offers a way to reach you (a notification tool, a messaging connector, a companion app), milestone, blocker and final reports go through it as well as into the conversation. A report sitting in a window nobody is watching has not been delivered.
+
 **Will it rerun the whole test suite after every small edit?**
 
 Checks follow changed behavior and delivery risk. Passing evidence is reused until a relevant
-change or unresolved concern invalidates it. Required delivery checks still run.
+change or unresolved concern invalidates it. The full suite runs only when warranted, in the background if slow.
+When it does and the repo has a delivery gate, the gate runs once instead of the raw suite plus
+the gate, and fixes that need a deploy ship in one batch.
 
 **Can it decide to deploy or merge because that would finish the goal?**
 

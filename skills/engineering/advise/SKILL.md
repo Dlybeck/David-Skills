@@ -49,20 +49,17 @@ implementation, research, review, or any standalone skill.
    them and make delegated technical decisions without another approval round. Keep context while
    useful; neither tickets nor a new session are required merely because the work is long.
 
-   **`/implement`** uses **`/tdd`** where appropriate and **`/code-review`** over the whole change.
+   **`/implement`** uses **`/tdd`** where appropriate.
    A request to implement or fix includes routine local toolchain, dependency, and test-environment
    preparation. Missing local prerequisites do not route through `/setup` or require renewed approval.
    Commits and ticket resolution require authority; without it, leave a tested local diff.
-   Committed proposals also use **`/independent-pr-review`**: a fresh full-base actionable defect
-   review and authorized developer repair/re-review loop before policy-driven settled delivery. It keeps
-   ordinary findings separate from Standards/Spec and does not grant comment or merge authority.
-   Where policy promotes `dev` to a human-owned `main` through a pull request, the
-   `/independent-pr-review` developer loop opens or updates that promotion PR on a pasted ready
-   signal and fixes the owner's review comments on it; the owner merges.
+   It checks by judgement: test what the change could break, and bring in one fresh
+   **`/independent-pr-review`** only when the change could really hurt something. Where policy
+   promotes `dev` to a human-owned `main` through a pull request, agents open or update it when
+   the owner asks and fix the owner's comments on it; the owner merges.
    **`/tdd`**, **`/code-review`**, and **`/independent-pr-review`** also work standalone. A conversation or current goal contract,
    including user corrections, can supply the requirements without a formal spec.
 
-   **`/delegate`** dispatches this same step instead of you driving it: one bounded run claims each frontier ticket, hands it whole to a worker subagent, and tracks only whether it resolved — over when the frontier is drained. Reach for it when several tickets are ready and independent.
 
 ### Context hygiene
 
@@ -76,7 +73,7 @@ decisions. Do not infer a universal safe context size from another model's token
 
 ## Running autonomously
 
-**`/autopilot`** — long-horizon work whose authority is earned through a pre-departure `/grilling` session. It locks a goal contract, then `/pursue-goal` selects research, discovery, delivery, and optimization loops until the evidence proves the goal, new human authority is required, or the evidence plateaus. It records applicable standing integration grants in the locked contract and follows repository branch ownership after every delivery gate passes. The owner or an authorized stand-in (such as a TPM, with the owner's grant in the starting message) may start it; the stand-in answers the grill and relays owner-reserved decisions. `/yolopilot` stays owner-only.
+**`/autopilot`** — long-horizon work whose authority is earned through a pre-departure `/grilling` session. It locks a goal contract, then `/pursue-goal` selects research, discovery, delivery, and optimization loops until the evidence proves the goal, new human authority is required, or the evidence plateaus. It records applicable standing integration grants in the locked contract and follows repository branch ownership after every delivery gate passes.
 
 **`/yolopilot`** — the same long-horizon engine entered without grilling. It states a provisional interpretation and starts immediately, learning and refining inside that interpretation. Its default delivery is a review branch; existing repository policy and applicable integration grants can authorize agent-owned integration after every gate passes. Human-owned promotions still require their approval. Its postflight gives a short account of assumptions, actions, evidence, and lessons, then offers an immediate explanation or the optional `/teach` path for durable learning.
 
@@ -111,8 +108,9 @@ A starting situation that generates work, then merges onto the main flow.
 
 - **`/code-review`** checks Standards and Spec independently, including in-scope uncommitted work.
 - **`/independent-pr-review`** hunts actionable defects at an exact committed head/full base diff,
-  with no implementation conversation or prior reviewer conclusions. After implementation its
-  developer continuation loop repairs and re-reviews within authority; clean passes stay private.
+  with no implementation conversation or prior reviewer conclusions. Use it when a change could
+  really hurt something, not on every change; after fixes, check the fixes rather than reviewing
+  again in full. Clean passes stay private.
 
 ## Codebase health
 
@@ -155,7 +153,6 @@ Off the main flow entirely.
 - **`/research`** — investigate **primary sources** and present cited findings. Small lookups run
   directly; substantial independent reading can use one background agent within the user's
   budget. Findings can settle the request directly or inform any later practice.
-- **`/to-questionnaire`** — when the thing blocking you isn't in your head or the codebase but in **someone else's**, this writes them a questionnaire to fill in. It's the inverse of `/grill-me`: instead of interviewing you about the subject, it interviews you about the **send** — who it's going to, what you need back — and aims the questions at the gap. What comes back is material for `/grill-with-docs` or `/to-spec`.
 - **`/wizard`** — for the steps only a **human** can take: provisioning infrastructure, setting up credentials or CI secrets, clicking through an unfamiliar third-party dashboard, running a one-off migration or cutover. It generates an interactive bash script that opens each URL, captures each value, and writes it into `.env` and GitHub secrets — so the procedure stops being something you re-explain to an agent every time. Model-invoked, so the agent reaches for it the moment it hits a wall only you can pass. If the agent could just do it itself, it should; this is for where a human is genuinely in the loop.
 - **`/wait-what`** — the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `CONTEXT.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
 - **`/teach`** — learn a concept over multiple sessions, using the current directory as a stateful workspace.
