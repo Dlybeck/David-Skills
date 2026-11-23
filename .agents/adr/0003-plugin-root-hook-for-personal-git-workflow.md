@@ -17,7 +17,7 @@ the plugin:
 - `block-dangerous-git.py` blocks destructive commands and agent pushes or pull requests to
   `main`.
 - `require-committed-claim.py` ensures local-markdown work is claimed in a committed state
-  before delegate dispatch.
+  before it is handed to a helper agent.
 
 Claude Code and Codex auto-discover `hooks/hooks.json` at the plugin root. Do not also declare the
 same hooks file in either plugin manifest; doing both can load it twice. Codex requires the user

@@ -1108,7 +1108,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
 
     code, err = run_hook(
         "require-committed-claim.py",
-        dispatch_payload("Bash", "claude --bg /delegate"),
+        dispatch_payload("Bash", "claude --bg /implement"),
         cwd=repo,
     )
     check("require-committed-claim blocks claude --bg with dirty tracker",
@@ -1117,7 +1117,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
 
     code, err = run_hook(
         "require-committed-claim.py",
-        dispatch_payload("Bash", "claude /delegate"),
+        dispatch_payload("Bash", "claude /implement"),
         cwd=repo,
     )
     check("require-committed-claim allows non-background claude command",
@@ -1129,7 +1129,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
     for tool_name, command in (
         ("Agent", None),
         ("spawn_agent", None),
-        ("Bash", "claude --bg /delegate"),
+        ("Bash", "claude --bg /implement"),
     ):
         code, err = run_hook(
             "require-committed-claim.py",
