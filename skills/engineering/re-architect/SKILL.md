@@ -1,6 +1,6 @@
 ---
 name: re-architect
-description: Scan a codebase for deepening opportunities, present a visual review, then grill through whichever one you pick.
+description: Find where messy or hard-to-change code could be simplified, show the options, then talk one through with you.
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: to-spec
-description: Synthesize settled requirements into a proportionate spec. Use when the user requests a spec or authorized work needs a durable requirements reference; not a prerequisite for every implementation.
+description: Write agreed decisions down as a spec before building. Offer it when a plan has been talked through and is big enough that a written reference would help, or when the user asks for a spec; most changes don't need one.
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user — just synthesize what you already know.

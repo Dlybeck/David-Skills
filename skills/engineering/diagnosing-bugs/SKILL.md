@@ -1,6 +1,6 @@
 ---
 name: diagnosing-bugs
-description: Evidence-driven diagnosis for hard bugs and performance regressions, including local repro setup. Use when the user asks to diagnose/debug an unclear failure or slowness; a straightforward known fix need not run the full investigation.
+description: "Careful, evidence-first hunt for a hard bug or a slowdown: reproduce it, find the cause, then fix it. Use when a bug survived a first fix, the cause is unclear, it happens only sometimes, or something got slow. A simple bug with an obvious fix doesn't need it."
 ---
 
 # Diagnosing Bugs

@@ -8,7 +8,7 @@ The second thing that separates it from labelling by hand: it recommends and wai
 
 ## When to reach for it
 
-You invoke this by typing `/triage` and then describing what you want in plain language — the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own. "Show me anything that needs my attention", "let's look at #42", "move #42 to ready-for-agent".
+Type `/triage` and describe what you want in plain language, or let the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) offer it when you mention issues nobody has looked at yet; it starts only when you say yes. "Show me anything that needs my attention", "let's look at #42", "move #42 to ready-for-agent".
 
 | What you have | Where to go |
 | --- | --- |

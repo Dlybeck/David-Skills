@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Decompose understood work into verifiable tracer-bullet tickets with blocking edges. Use when requested or when authorized work benefits from coordination or restartable slices; a formal spec is optional.
+description: Break agreed work into small tickets, in order, each checkable on its own. Offer it when work is too big for one go or will span several chats, or when the user asks for tickets.
 ---
 
 # To Tickets

@@ -1,6 +1,6 @@
 ---
 name: codebase-design
-description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or AI-navigable, or when another skill needs the deep-module vocabulary.
+description: "Shared words for shaping code into deep modules: a simple interface over a lot of hidden work. Use when designing or reshaping a module, deciding where a seam goes, or making code easier to test. When the user says code has got messy, tangled or hard to change, offer `/re-architect`."
 ---
 
 # Codebase Design

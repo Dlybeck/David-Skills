@@ -1,7 +1,6 @@
 ---
 name: triage
-description: Move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs.
-disable-model-invocation: true
+description: "Sort incoming GitHub issues and outside pull requests: label them, check them, and write briefs an agent can pick up. Offer it when the user mentions issues or pull requests that nobody has looked at yet; start it only on a yes."
 ---
 
 # Triage

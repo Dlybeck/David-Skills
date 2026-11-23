@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Export portable context for a real transfer to another session, directory, harness, or collaborator. Use when a transfer is requested or already authorized; not for routine progress notes or ending an active goal.
+description: Pack up this chat's context in a file so another chat, folder, tool or person can carry on. Use when the user wants to pass the work to another chat, pick it up somewhere else, or hand it to someone; not for routine progress notes.
 argument-hint: "What will the next session be used for?"
 ---
 
