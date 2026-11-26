@@ -24,13 +24,11 @@ growing is turning into a rule book.
 
 ## Starting it
 
-Starting is a conversation, every time. Never ask for a philosophy: someone still working out
-what they are doing will answer it wrong or not know what to say. Ask for the story: what is
-this, why do you want it, what's the background, who is it for. Yes or no is fine; rambling is
-better, since the philosophy is in how they talk about it. What the repo and notes already say
-shapes the questions ("your notes call it a self-portrait, not a resume; what's behind that?"),
-never replaces them. Draft only after hearing them, keep their words, mark guesses, and write
-the file once they've seen it.
+Starting is a conversation, every time: get the owner talking about the project the way a
+curious friend would, from what you noticed in it, not a questionnaire. Never ask for a
+philosophy; someone still working out what they're doing can't answer that, but they can talk
+about it, and the philosophy is in how they do. Draft only after hearing them, in their words,
+with guesses marked, and write the file once they've seen it.
 
 ## Hardening it
 

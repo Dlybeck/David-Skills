@@ -18,8 +18,8 @@ fits what the project believes.
 
 **Will it ask me what my philosophy is?**
 
-No. Asking for a philosophy gets a wrong answer or a blank. It asks for the story, takes yes or no,
-and welcomes rambling. What the repo and notes say shapes its questions but never replaces them.
+No. Asking for a philosophy gets a wrong answer or a blank. It gets you talking about the project,
+like a curious friend would, and drafts from what you say.
 
 **Is this a code review?**
 
