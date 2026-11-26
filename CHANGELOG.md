@@ -1,5 +1,11 @@
 # david-skills
 
+## 1.10.0
+
+### Minor Changes
+
+- [#16](https://github.com/Dlybeck/David-Skills/pull/16) [`4c4c151`](https://github.com/Dlybeck/David-Skills/commit/4c4c15168e4d0ccbea1d083f36748b71791f171f) Thanks [@Dlybeck](https://github.com/Dlybeck)! - Each project can have a philosophy file, `PHILOSOPHY.md`, so every chat starts from the same footing on what the project is for. `philosophy-review` now starts the file (from the owner's story, never by asking for a philosophy), hardens it over time as his choices show more, and still does the deeper check against it. The file describes and never binds, and has a soft length limit of about a page. `setup` offers to start one through that skill, as an optional extra.
+
 ## 1.9.0
 
 ### Minor Changes
