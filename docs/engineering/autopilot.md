@@ -47,8 +47,8 @@ change could really hurt something. A clean check adds no integration authority.
 
 **Do I need to answer every technical question before leaving?**
 
-No. The understanding session resolves consequential human decisions, reuses existing answers,
-and leaves delegated technical choices to the agent. Depth follows the ambiguity, not a fixed
+No, but it talks every open choice through with you, reuses existing answers, and leaves
+technical choices you hand over to the agent. Depth follows the ambiguity, not a fixed
 question count. If you leave before the contract is complete, the agent can continue useful work
 within existing authority; Autopilot starts its durable goal only after the compact contract is
 confirmed. A clear "just go" can confirm the concrete contract immediately before it, but cannot
