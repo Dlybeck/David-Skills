@@ -1,5 +1,11 @@
 # david-skills
 
+## 1.10.3
+
+### Patch Changes
+
+- [#18](https://github.com/Dlybeck/David-Skills/pull/18) [`5b717d4`](https://github.com/Dlybeck/David-Skills/commit/5b717d444a7698b718bb09253fbef44244a338fc) Thanks [@Dlybeck](https://github.com/Dlybeck)! - autopilot opens with questions and talks every open choice through with you, instead of settling small ones alone and showing a finished agreement.
+
 ## 1.10.2
 
 ### Patch Changes
