@@ -99,8 +99,8 @@ The README uses `/name` as shorthand in the sections below. In Codex, invoke an 
 Codex is the canonical autonomous-development surface. `advise`, `autopilot`, and `yolopilot` now ship there alongside the model-invoked `pursue-goal` engine; Claude Code uses its own background-goal adapter without constraining the Codex design.
 
 For everyday use, keep a small menu: `advise` for using this plugin, the grilling tools for
-understanding, the pilots for autonomous handoff, `philosophy-review` for checks against founding
-principles, `status-report` for progress, and `wait-what` or `teach` for explanation. Correct a
+understanding, the pilots for autonomous handoff, `philosophy-review` for a project's philosophy
+file and checks against it, `status-report` for progress, and `wait-what` or `teach` for explanation. Correct a
 running task in ordinary conversation. The full collection
 below remains available; model-invoked skills are still human-reachable and do not imply new
 permissions. Long-job continuation depends on verified host support and account policy, not the
@@ -279,7 +279,7 @@ General workflow tools, not code-specific.
 
 - **[attention-modes](./skills/productivity/attention-modes/SKILL.md)** — Adapt collaboration to Focused or On the side attention, including brief or dictated replies.
 - **[tool-fit](./skills/productivity/tool-fit/SKILL.md)** — Use fitting host tools for evidence, visuals, previews, and artifacts.
-- **[philosophy-review](./skills/productivity/philosophy-review/SKILL.md)** — Check a project or proposed change against its owner-adopted founding principles.
+- **[philosophy-review](./skills/productivity/philosophy-review/SKILL.md)** — Start, harden, and check a project's philosophy file (`PHILOSOPHY.md`), told from the owner's story.
 - **[grilling](./skills/productivity/grilling/SKILL.md)** — Resolve material decisions through focused interview rounds, reusing settled context.
 - **[writing-for-agents](./skills/productivity/writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
 - **[status-report](./skills/productivity/status-report/SKILL.md)** — Connect verified progress to long-term project goals directly in chat with useful visuals; export a document or webpage on request.

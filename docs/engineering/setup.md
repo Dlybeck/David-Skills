@@ -36,6 +36,8 @@ It leads each section with the recommended answer and skips whatever exploration
 | **Triage labels** | keep the five canonical names (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) | only if the `triage` skill is installed |
 | **Domain docs** | single-context: one `CONTEXT.md` plus `docs/adr/` at the root | only if it spots monorepo signals, and then it offers a multi-context `CONTEXT-MAP.md` |
 
+Setup can also offer one optional extra: a `PHILOSOPHY.md` for the project. If you want it, setup hands over to [philosophy-review](../productivity/philosophy-review.md), which asks for the story (what this is, why you want it) rather than for a philosophy. Skip it and setup is unchanged.
+
 The tracker options:
 
 | Option | Where issues live | Needs |

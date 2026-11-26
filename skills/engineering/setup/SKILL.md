@@ -62,6 +62,8 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** — a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files — only when exploration found monorepo signals. Then confirm which layout they want.
 
+**Section D — Project philosophy (optional).** A `PHILOSOPHY.md` gives every chat the same footing on what the project is for. Offer it in one line when the repo has none; a repo that doesn't want it loses nothing, and setup is no heavier. If they say yes, hand over to `/philosophy-review`: it starts the file from the user's story (what this is, why they want it, the background, who it's for), never by asking them for a philosophy, drafts it for them to react to, and writes it only after they've seen it. Don't run that conversation inline here.
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
