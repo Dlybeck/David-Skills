@@ -1,5 +1,11 @@
 # david-skills
 
+## 1.10.2
+
+### Patch Changes
+
+- [#19](https://github.com/Dlybeck/David-Skills/pull/19) [`8b5114a`](https://github.com/Dlybeck/David-Skills/commit/8b5114ab06a16bdff94839cb623f699cfccf8fff) Thanks [@Dlybeck](https://github.com/Dlybeck)! - philosophy-review defines a philosophy by one test: would it help decide something nobody planned for.
+
 ## 1.10.1
 
 ### Patch Changes
