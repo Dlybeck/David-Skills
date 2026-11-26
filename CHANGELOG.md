@@ -1,5 +1,11 @@
 # david-skills
 
+## 1.10.1
+
+### Patch Changes
+
+- [#17](https://github.com/Dlybeck/David-Skills/pull/17) [`2ce66ec`](https://github.com/Dlybeck/David-Skills/commit/2ce66ecc84ee115434f3c3df9e35e7ae067033d2) Thanks [@Dlybeck](https://github.com/Dlybeck)! - philosophy-review always starts with a conversation, and keeps design rules out of the philosophy.
+
 ## 1.10.0
 
 ### Minor Changes
