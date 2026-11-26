@@ -13,10 +13,10 @@ level, not a fixed software pipeline.
 ## Establish the contract
 
 Inspect the live workspace first: repository instructions, current branch and worktrees, dirty
-state, relevant artifacts, available tools, and the validation surface. Then run `/grilling` for
-consequential unresolved human choices. Reuse settled answers and distinguish delegated technical
-choices from missing product intent. A rich understanding session is useful when the ambiguity
-warrants it, not a checklist to repeat for a small or already-understood task.
+state, relevant artifacts, available tools, and the validation surface. Then run `/grilling`.
+That conversation is the point of Autopilot: the owner chose it over Yolopilot to shape the work
+before stepping away. So open with questions, not a finished agreement, and raise every open
+choice, small or reversible ones too, each with a recommendation; look up what is already answered.
 
 `/grilling` uses `/attention-modes`: an On the side opening asks for the most consequential missing
 intent or boundary first. A short handoff still needs a complete, confirmed contract before this
@@ -34,7 +34,7 @@ Lock one self-contained **goal contract**:
 - Any requested deadline and milestone/maximum-gap reporting agreement, including a finite
   maximum of timed reports and an explicit stop/pause-at-deadline instruction where supported.
 
-Inside the contract the run decides by judgement and doesn't ask again for what is already
+Once the contract is agreed, the run decides by judgement and doesn't ask again for what is already
 granted, here or in the repository's instructions. What is the owner's alone (`/implement`'s
 "What needs the owner") stays outside it unless the owner names the specific action.
 
