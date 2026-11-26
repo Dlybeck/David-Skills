@@ -11,24 +11,22 @@ same footing when weighing a request.
 
 ## What a philosophy is
 
-A broad conviction with its why, which needn't be proven: "this app is context-based, which we
-believe has real potential." It is never a how. Designs, decisions and rules are evidence of a
-philosophy, not entries in it; when a line says what to do or not do, the belief behind it is
-what belongs here, and only the owner can say what that is. "We don't know where this is going
-yet" is a good entry.
+What you'd lean on to decide something nobody planned for: a broad conviction and its why, which
+needn't be proven ("this app is context-based, which we believe has real potential"). A rule
+says what to do and history says what happened; neither decides anything new, so both stay out.
+"We don't know where this is going yet" is a good entry.
 
-It describes and never binds: a chat holds it up as a mirror, says why once, and follows the
-owner's choice. Each idea is a bolded line and a few sentences, around sixty words, and the
-file about a page. Going over that is the sign to merge or cut, since a philosophy that keeps
-growing is turning into a rule book.
+It describes and never binds: a chat holds it up as a mirror and follows the owner's choice. A
+few short ideas, about a page in all; when it grows, merge or cut.
 
 ## Starting it
 
 Starting is a conversation, every time: get the owner talking about the project the way a
 curious friend would, from what you noticed in it, not a questionnaire. Never ask for a
 philosophy; someone still working out what they're doing can't answer that, but they can talk
-about it, and the philosophy is in how they do. Draft only after hearing them, in their words,
-with guesses marked, and write the file once they've seen it.
+about it, and the philosophy is in how they do. Draft only after hearing them,
+holding every line to that test (their story is how you find the beliefs, not what you write
+down), mark guesses, and write the file once they've seen it.
 
 ## Hardening it
 
