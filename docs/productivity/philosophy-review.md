@@ -1,10 +1,19 @@
 ## What it does
 
-`philosophy-review` checks whether a project or proposed direction still honors its **founding
-principles**. It looks for actual drift from commitments the owner chose to preserve, rather
-than turning every bug or process preference into a philosophical breach.
+`philosophy-review` is the one skill for a project's **philosophy file**, `PHILOSOPHY.md` at the
+project root: what the project is for, what it believes, and where it is going, each idea with its
+reason. It does three jobs. It **starts** the file, asking for the story (what this is, why you
+want it, the background, who it is for) and never for a philosophy, then drafts it for you to
+react to. It **hardens** the file over time: ideas are held more firmly as the project proves
+them, never narrowed into detail, and the agent proposes changes you confirm. And it does the
+occasional deeper **check**, looking for actual drift from commitments the owner chose to
+preserve rather than turning every bug or process preference into a breach.
 
-The review uses the owner's stated rules and relevant project or original-source evidence. It
+The file describes and never binds: a chat shows it as a mirror and follows your choice. It has a
+soft length limit, an idea and its why in about sixty words and the whole file about a page; going
+over is the sign to merge or compress, not a refusal.
+
+The check uses the owner's stated rules and relevant project or original-source evidence. It
 keeps confirmed commitments separate from plausible interpretations. The result appears in chat;
 the skill does not change the project or declare new permanent rules on its own.
 
@@ -31,6 +40,12 @@ recommendation binding on a fork.
 
 ## Common questions
 
+**Will it ask me what my philosophy is?**
+
+No. Asking for a philosophy gets a wrong answer or a blank. It asks for the story, accepts yes or
+no, and welcomes rambling. It can also start from what the repo and past notes already say, and
+ask only what is missing. "We don't know where this is going yet" is a fine entry.
+
 **Is this a code review?**
 
 No. [Code review](../engineering/code-review.md) checks a change against requirements and coding
@@ -50,6 +65,7 @@ specification, implementation, or release.
 
 ## It's working if
 
+- A new project's `PHILOSOPHY.md` reads like your own story, with guesses marked, and fits about a page.
 - You can identify the exact principle behind each verdict and where it came from.
 - A strict step inside an optional practice is not mistaken for a mandatory global workflow.
 - You can see concrete evidence of fidelity or drift, with uncertainty labelled.

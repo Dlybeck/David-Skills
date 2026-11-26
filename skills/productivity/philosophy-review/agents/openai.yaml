@@ -1,3 +1,3 @@
 interface:
   display_name: "Philosophy Review"
-  short_description: "Check project decisions against founding principles"
+  short_description: "Start, harden, and check a project philosophy"

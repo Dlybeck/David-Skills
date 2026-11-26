@@ -142,7 +142,7 @@ Read [PHASE-BOUNDARIES.md](PHASE-BOUNDARIES.md) for the ordered tree — the fiv
 Off the main flow entirely.
 
 - **`/status-report`** — a model- or user-invoked progress snapshot connecting current evidence to milestones and long-term project outcomes. Use for a project overview or a substantial pilot review update: the report and useful visuals appear in chat by default; saved documents and webpages are opt-in. It reports existing state without changing plans or starting monitoring.
-- **`/philosophy-review`** — check a project or proposed direction against the founding principles its owner chose to preserve. It is a standalone review, not a required stage or a general quality audit; the verdict stays in chat unless a saved artifact is requested.
+- **`/philosophy-review`** — start a project's `PHILOSOPHY.md` from the owner's story (never by asking for a philosophy), harden it as his choices show more, or check a direction against it. It is not a required stage or a general quality audit; a check's verdict stays in chat unless a saved artifact is requested.
 - **`/grill-me`** — a **stateless** interview: no local files or `CONTEXT.md`. Use it to sharpen
   a plan, design, or piece of writing whenever you want discussion without documentation.
 - **`/grilling`** — the interview primitive itself: rounds, the frontier, facts are the agent's job and decisions are yours. `/grill-me` and `/grill-with-docs` are the two named ways in, and `/triage`, `/wayfinder` and `/re-architect` all run it internally. Reach for it directly only when you want the interview with no wrapper around it.
